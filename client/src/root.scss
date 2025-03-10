@@ -1,0 +1,136 @@
+$color-red: #cb0b06;
+
+// font-family: "Merriweather", serif;
+// font-family: "Lato", sans-serif;
+// font-family: "Noto Serif", serif;
+// font-family: "Crimson Text", serif;
+// font-family: "Railway", sans-serif;
+//  font-family: "Chau Philomene One", sans-serif;
+#root {
+    font-family: Avenir, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    font-weight: 400;
+
+    color: rgba(255, 255, 255, 0.87);
+    background-color: #242424;
+
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+
+    height: 100%;
+}
+
+a {
+    font-weight: 500;
+    color: #646cff;
+    text-decoration: inherit;
+}
+a:hover {
+    color: #535bf2;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+h1 {
+    font-family: "Smokum", serif;
+}
+
+.container {
+    display: flex;
+    height: 100%;
+    width: 100%;
+
+    .hud {
+        display: flex;
+        position: absolute;
+        width: 100%;
+        justify-content: space-between;
+        // height: 75px;
+        // background: transparent;
+        // align-items: center;
+
+        &__left {
+        }
+
+        &__center {
+            font-family: "Chau Philomene One", sans-serif;
+            font-size: 1.5em;
+            color: $color-red;
+        }
+
+        &__right {
+            // display: flex;
+            text-align: right;
+            width: 250px;
+            background-color: #00000099;
+            padding: 0.8em;
+            padding-right: 25px;
+            justify-content: right;
+            margin-top: 20px;
+            background: linear-gradient(260deg,  rgba(0,0,0,0.85) 23%,rgba(0,0,0,0.65) 35%,rgba(0,0,0,0) 66%,rgba(0,0,0,0) 100%);
+
+            .cash {
+                display: inline;
+                font-family: "Chau Philomene One", sans-serif;
+                color: $color-red;
+                font-size: 2em;
+                text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff,
+                1px 1px 0 #fff;
+                margin-right: 20px;
+            }
+
+            .weather {
+                display: inline;
+            }
+
+            .county {
+              font-weight: 500;
+              text-transform: uppercase;
+            }
+
+            .town {
+                font-family: "Corinthia";
+                font-size: 60px;
+                font-weight: bolder;
+                text-align: left;
+                margin-top: -20px;
+                margin-left: 50px;
+                text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000,
+                1px 1px 0 #000;
+            }
+        }
+    }
+
+    .info {
+        top: 200px;
+        right: 5px;
+        position: absolute;
+        width: 250px;
+        background-color: #00000099;
+        height: 500px;
+        width: 250px;
+        margin: 1em;
+        padding: 1em;
+        font-family: "Railway", sans-serif;
+        border-radius: 8px;
+
+        h1 {
+            color: #fff;
+            font-family: "Chau Philomene One", sans-serif;
+            font-size: 2em;
+            text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000,
+                1px 1px 0 #000;
+            margin: 0px;
+            text-align: center;
+            border: solid 1px #ccc;
+        }
+    }
+}

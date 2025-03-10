@@ -1,0 +1,33 @@
+{
+    "name": "grim-frontier",
+    "description": "",
+    "version": "0.0.1",
+    "type": "module",
+    "license": "MIT",
+    "licenseUrl": "http://www.opensource.org/licenses/mit-license.php",
+    "scripts": {
+        "dev": "node log.js dev & vite --config vite/config.dev.mjs",
+        "build": "node log.js build & vite build --config vite/config.prod.mjs",
+        "dev-nolog": "vite --config vite/config.dev.mjs",
+        "build-nolog": "vite build --config vite/config.prod.mjs",
+        "test": "npx vitest"
+    },
+    "dependencies": {
+        "phaser": "^3.87.0",
+        "react": "^18.3.1",
+        "react-dom": "^18.3.1",
+        "vitest": "^3.0.7"
+    },
+    "devDependencies": {
+        "@types/react": "^18.3.3",
+        "@types/react-dom": "^18.3.0",
+        "@vitejs/plugin-react": "^4.3.1",
+        "eslint": "^8.57.0",
+        "eslint-plugin-react": "^7.34.2",
+        "eslint-plugin-react-hooks": "^4.6.2",
+        "eslint-plugin-react-refresh": "^0.4.7",
+        "sass-embedded": "^1.85.1",
+        "terser": "^5.28.1",
+        "vite": "^5.3.1"
+    }
+}

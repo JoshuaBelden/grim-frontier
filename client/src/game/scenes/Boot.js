@@ -1,0 +1,16 @@
+import { Scene } from "phaser"
+
+export class Boot extends Scene {
+    constructor() {
+        super("Boot")
+    }
+
+    preload() {
+        this.load.image("background", "assets/bg.png")
+        this.load.image("tile", "assets/tile.png")
+    }
+
+    create() {
+        this.scene.start("Preloader")
+    }
+}
