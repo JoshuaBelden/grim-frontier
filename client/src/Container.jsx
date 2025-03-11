@@ -26,7 +26,7 @@ function Container() {
                     <div className="location-info">
                         <div className="time">
                             <div className="cash">$7.77</div>
-                            <div className="weather"> 7:59ami | 15&deg;C</div>
+                            <div className="weather"> 7:59am | 15&deg;C</div>
                         </div>
                         <hr></hr>
                         <div>
