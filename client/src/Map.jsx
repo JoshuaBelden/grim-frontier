@@ -1,20 +1,37 @@
 import { forwardRef, useEffect, useLayoutEffect, useRef } from "react"
 import PropTypes from "prop-types"
-import { EVENT_TYPES, EventBus } from "../lib/events"
-import StartGame from "./setup"
+import Phaser from "phaser"
+import { EVENT_TYPES, EventBus } from "./lib/constants.js"
+import DefaultScene from "./scenes/DefaultScene.jsx"
 
-export const WorldMap = forwardRef(function PhaserGame(
+export const Map = forwardRef(function PhaserGame(
     { currentActiveScene, onTileSelected, onUnitSelected },
     ref
 ) {
     const game = useRef()
 
     useLayoutEffect(() => {
-        // Create the game inside a useLayoutEffect hook to avoid the game being created outside the DOM
+        const config = {
+            type: Phaser.AUTO,
+            width: "100%",
+            height: "100%",
+            parent: "game-container",
+            backgroundColor: "#028af8",
+            scale: {
+                mode: Phaser.Scale.RESIZE,
+                autoCenter: Phaser.Scale.CENTER_BOTH,
+            },
+            scene: [DefaultScene],
+        }
+
         if (game.current === undefined) {
-            game.current = StartGame("game-container")
-            if (ref !== null) {
-                ref.current = { game: game.current, scene: null }
+            try {
+                game.current = new Phaser.Game(config)
+                if (ref !== null) {
+                    ref.current = { game: game.current, scene: null }
+                }
+            } catch (error) {
+                console.error("Error while creating the game", error)
             }
         }
 
@@ -51,10 +68,14 @@ export const WorldMap = forwardRef(function PhaserGame(
         }
     }, [currentActiveScene, onTileSelected, onUnitSelected, ref])
 
-    return <div id="game-container"></div>
+    return (
+        <div className="map">
+            <div id="game-container"></div>
+        </div>
+    )
 })
 
-WorldMap.propTypes = {
+Map.propTypes = {
     currentActiveScene: PropTypes.func,
     onTileSelected: PropTypes.func,
     onUnitSelected: PropTypes.func,
