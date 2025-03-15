@@ -5,6 +5,7 @@ import {
     MAX_ZOOM,
     EVENT_TYPES,
     EventBus,
+    RETICULE_COLOR_PASSIVE,
 } from "../lib/constants"
 import { getWorldCoordinates, getReticulePoints } from "../lib/hex"
 import gameState from "../lib/gameState"
@@ -58,7 +59,7 @@ export default class DefaultScene extends Scene {
 
     setupHighlight() {
         const reticule = this.add.graphics({
-            lineStyle: { width: 2, color: 0xcb0b06 },
+            lineStyle: { width: 2, color: RETICULE_COLOR_PASSIVE, alpha: 0.15 },
         })
 
         this.input.on("pointermove", pointer => {
@@ -80,9 +81,13 @@ export default class DefaultScene extends Scene {
             .setOrigin(0.5, 0.5)
             .setInteractive()
 
-        unitObj.on("pointerdown", (pointer, x, y, event) => {
+        unitObj.on("pointerup", (pointer, x, y, event) => {
             this.selectedUnit = unit
-            EventBus.emit(EVENT_TYPES.UNIT_SELECTED, unit)
+            const screenCoords = { x: pointer.x, y: pointer.y }
+            EventBus.emit(EVENT_TYPES.UNIT_SELECTED, {
+                unit,
+                screenCoords,
+            })
             event.stopPropagation()
         })
     }
@@ -105,8 +110,7 @@ export default class DefaultScene extends Scene {
         // Also accepts(pointer, currentlyOver)
         this.input.on("pointerdown", () => {
             this.selectedUnit = null
-            EventBus.emit(EVENT_TYPES.TILE_SELECTED, null)
-            EventBus.emit(EVENT_TYPES.UNIT_SELECTED, null)
+            EventBus.emit(EVENT_TYPES.UNIT_DESELECTED, null)
         })
 
         EventBus.emit(EVENT_TYPES.CURRENT_SCENE_READY, this)

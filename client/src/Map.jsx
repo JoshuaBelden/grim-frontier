@@ -5,7 +5,7 @@ import { EVENT_TYPES, EventBus } from "./lib/constants.js"
 import DefaultScene from "./scenes/DefaultScene.jsx"
 
 export const Map = forwardRef(function PhaserGame(
-    { currentActiveScene, onTileSelected, onUnitSelected },
+    { currentActiveScene, onTileSelected, onUnitSelected, onUnitDeselected },
     ref
 ) {
     const game = useRef()
@@ -63,10 +63,17 @@ export const Map = forwardRef(function PhaserGame(
             }
         })
 
+        EventBus.on(EVENT_TYPES.UNIT_DESELECTED, () => {
+            if (onUnitSelected instanceof Function) {
+                onUnitDeselected(null)
+            }
+        })
+
+
         return () => {
             EventBus.removeListener("current-scene-ready")
         }
-    }, [currentActiveScene, onTileSelected, onUnitSelected, ref])
+    }, [currentActiveScene, onTileSelected, onUnitSelected, onUnitDeselected, ref])
 
     return (
         <div className="map">
@@ -79,4 +86,5 @@ Map.propTypes = {
     currentActiveScene: PropTypes.func,
     onTileSelected: PropTypes.func,
     onUnitSelected: PropTypes.func,
+    onUnitDeselected: PropTypes.func,
 }

@@ -15,8 +15,8 @@ export const getWorldCoordinates = (q, r) => {
     const y = 100 * Math.sqrt(3) * (r + q / 2)
 
     return {
-        x: Math.floor(x),
-        y: Math.floor(y),
+        x: Math.floor(x) || 0,
+        y: Math.floor(y) || 0,
     }
 }
 

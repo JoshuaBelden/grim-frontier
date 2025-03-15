@@ -1,0 +1,129 @@
+$color-red: #cb0b0690;
+
+.radial-menu {
+    position: absolute;
+    height: 24px;
+    width: 24px;
+    * {
+        box-sizing: border-box;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        position: relative;
+    }
+
+    .menu-button {
+        border-radius: 50%;
+        border: solid 2px white;
+        background-color: $color-red;
+        color: white;
+        width: 24px;
+        height: 24px;
+    }
+
+    .wrapper {
+        background: transparent;
+        border-radius: 50%;
+        height: 27em;
+        left: 50%;
+        margin-left: -13.5em;
+        margin-top: -13em;
+        opacity: 0;
+        overflow: hidden;
+        pointer-events: none;
+        position: absolute;
+        top: 100%;
+        transform: scale(0.1);
+        transition: all 0.3s ease 0.3s;
+        width: 27em;
+        z-index: 10;
+    }
+
+    .show {
+        border-radius: 50%;
+        opacity: 1;
+        pointer-events: auto;
+        transform: scale(1);
+        transition: all 0.3s ease;
+    }
+
+    .wrapper li {
+        font-size: 1.5em;
+        height: 10em;
+        left: 50%;
+        margin-left: -10em;
+        margin-top: -1.3em;
+        overflow: hidden;
+        pointer-events: none;
+        position: absolute;
+        top: 50%;
+        transform-origin: 100% 100%;
+        transform: rotate(76deg) skew(60deg);
+        transition: all 0.3s ease;
+        width: 10em;
+    }
+
+    .wrapper li a {
+        backface-visibility: hidden;
+        background: #000000;
+        background: radial-gradient(transparent 35%, #00000075 35%);
+        border-radius: 50%;
+        bottom: -7.25em;
+        color: #fff;
+        display: block;
+        font-family: "Chau Philomene One", sans-serif;
+        font-size: 1.2em;
+        height: 14.5em;
+        line-height: 2;
+        pointer-events: auto;
+        position: absolute;
+        right: -7.25em;
+        text-align: center;
+        text-decoration: none;
+        transform: skew(-60deg) rotate(-75deg) scale(1);
+        width: 14.5em;
+    }
+
+    .wrapper li a span {
+        display: block;
+        font-size: 0.5em;
+        font-weight: 700;
+        position: relative;
+        text-transform: uppercase;
+        top: 1.8em;
+    }
+
+    .wrapper li a:hover,
+    .wrapper li a:active,
+    .wrapper li a:focus {
+        background: radial-gradient(transparent 35%, $color-red 35%);
+    }
+
+    .show li:first-child {
+        transform: rotate(-20deg) skew(60deg);
+    }
+
+    .show li:nth-child(2) {
+        transform: rotate(12deg) skew(60deg);
+    }
+
+    .show li:nth-child(3) {
+        transform: rotate(44deg) skew(60deg);
+    }
+
+    .show li:nth-child(4) {
+        transform: rotate(76deg) skew(60deg);
+    }
+
+    .show li:nth-child(5) {
+        transform: rotate(108deg) skew(60deg);
+    }
+
+    .show li:nth-child(6) {
+        transform: rotate(140deg) skew(60deg);
+    }
+
+    .show li:nth-child(7) {
+        transform: rotate(172deg) skew(60deg);
+    }
+}
