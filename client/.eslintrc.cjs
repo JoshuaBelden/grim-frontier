@@ -17,9 +17,7 @@ module.exports = {
             "warn",
             { allowConstantExport: true },
         ],
-        indent: ["error", 4], // Use 4 spaces for indentation
-        "react/jsx-indent": ["error", 4], // Use 4 spaces for JSX indentation
-        "react/jsx-indent-props": ["error", 4], // Use 4 spaces for JSX props indentation
-        "arrow-parens": ["error", "as-needed"],
+        indent: ["off", 4],
+        "arrow-parens": ["warn", "as-needed"],
     },
 }

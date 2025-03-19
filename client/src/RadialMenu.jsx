@@ -3,6 +3,11 @@ import PropTypes from "prop-types"
 import "./radial-menu.scss"
 import { ACTION_TYPES } from "./lib/constants"
 
+/**
+ *
+ * @param {*} param0
+ * @returns
+ */
 const RadialMenu = ({ requestedPosition, onActionSelected }) => {
     const [currentPosition, setCurrentPosition] = useState(requestedPosition)
     const [showMenu, setShowMenu] = useState(false)
@@ -46,7 +51,12 @@ const RadialMenu = ({ requestedPosition, onActionSelected }) => {
                         </a>
                     </li>
                     <li>
-                        <a href="#">
+                        <a
+                            href="#"
+                            onClick={() =>
+                                onActionSelected(ACTION_TYPES.MOVE_UNIT)
+                            }
+                        >
                             <span>Move</span>
                         </a>
                     </li>
@@ -54,7 +64,7 @@ const RadialMenu = ({ requestedPosition, onActionSelected }) => {
                         <a
                             href="#"
                             onClick={() =>
-                                onActionSelected(ACTION_TYPES.TRAIL_REPORT)
+                                onActionSelected(ACTION_TYPES.SHOW_TRAIL_REPORT)
                             }
                         >
                             <span>Trail Report</span>

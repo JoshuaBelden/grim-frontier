@@ -3,7 +3,8 @@ import { Hud } from "./Hud"
 import { Map } from "./Map"
 import { TrailReport } from "./TrailReport"
 import RadialMenu from "./RadialMenu"
-import { ACTION_TYPES } from "./lib/constants"
+import { ACTION_TYPES, EVENT_TYPES } from "./lib/constants"
+import eventBus from "./lib/eventBus"
 
 function Layout() {
     const phaserRef = useRef()
@@ -25,8 +26,15 @@ function Layout() {
 
     const onActionSelected = actionType => {
         switch (actionType) {
-            case ACTION_TYPES.TRAIL_REPORT:
+            case ACTION_TYPES.SHOW_TRAIL_REPORT:
                 setShowTrailReport(true)
+                break
+            case ACTION_TYPES.MOVE_UNIT:
+                eventBus.emit(
+                    EVENT_TYPES.ACTION_SELECTED,
+                    ACTION_TYPES.MOVE_UNIT,
+                    selectedUnit
+                )
                 break
             default:
                 break

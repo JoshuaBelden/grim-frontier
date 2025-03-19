@@ -1,7 +1,8 @@
 import { forwardRef, useEffect, useLayoutEffect, useRef } from "react"
 import PropTypes from "prop-types"
 import Phaser from "phaser"
-import { EVENT_TYPES, EventBus } from "./lib/constants.js"
+import { EVENT_TYPES } from "./lib/constants.js"
+import eventBus from "./lib/eventBus.js"
 import DefaultScene from "./scenes/DefaultScene.jsx"
 
 export const Map = forwardRef(function PhaserGame(
@@ -44,26 +45,26 @@ export const Map = forwardRef(function PhaserGame(
     }, [ref])
 
     useEffect(() => {
-        EventBus.on(EVENT_TYPES.CURRENT_SCENE_READY, currentScene => {
+        eventBus.on(EVENT_TYPES.CURRENT_SCENE_READY, currentScene => {
             if (currentActiveScene instanceof Function) {
                 currentActiveScene(currentScene)
             }
             ref.current.scene = currentScene
         })
 
-        EventBus.on(EVENT_TYPES.TILE_SELECTED, tile => {
+        eventBus.on(EVENT_TYPES.TILE_SELECTED, tile => {
             if (onTileSelected instanceof Function) {
                 onTileSelected(tile)
             }
         })
 
-        EventBus.on(EVENT_TYPES.UNIT_SELECTED, unit => {
+        eventBus.on(EVENT_TYPES.UNIT_SELECTED, unit => {
             if (onUnitSelected instanceof Function) {
                 onUnitSelected(unit)
             }
         })
 
-        EventBus.on(EVENT_TYPES.UNIT_DESELECTED, () => {
+        eventBus.on(EVENT_TYPES.UNIT_DESELECTED, () => {
             if (onUnitSelected instanceof Function) {
                 onUnitDeselected(null)
             }
@@ -71,7 +72,7 @@ export const Map = forwardRef(function PhaserGame(
 
 
         return () => {
-            EventBus.removeListener("current-scene-ready")
+            eventBus.removeListener("current-scene-ready")
         }
     }, [currentActiveScene, onTileSelected, onUnitSelected, onUnitDeselected, ref])
 
