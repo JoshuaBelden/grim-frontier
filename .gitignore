@@ -1,1 +1,23 @@
 /.claude/settings.local.json
+
+# env
+.env
+
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# build output
+dist/
+build/
+.svelte-kit/
+
+# bun
+bun.lockb
+
+# docker volumes
+mongo_data/
+
+# OS
+.DS_Store

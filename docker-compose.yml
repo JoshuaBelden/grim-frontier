@@ -1,0 +1,50 @@
+services:
+  mongo:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./packages/backend
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      MONGO_URI: ${MONGO_URI:-mongodb://mongo:27017/grim-frontier}
+      REDIS_URI: ${REDIS_URI:-redis://redis:6379}
+      PORT: "3000"
+    volumes:
+      - ./packages/backend/src:/app/src
+      - ./packages/shared/src:/workspace/packages/shared/src
+    depends_on:
+      - mongo
+      - redis
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./packages/frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./packages/frontend/src:/app/src
+      - ./packages/frontend/static:/app/static
+      - ./packages/frontend/svelte.config.js:/app/svelte.config.js
+      - ./packages/frontend/vite.config.ts:/app/vite.config.ts
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  mongo_data:

@@ -1,0 +1,9 @@
+{
+  "name": "grim-frontier",
+  "private": true,
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "dev": "docker compose up",
+    "build": "docker compose build"
+  }
+}
