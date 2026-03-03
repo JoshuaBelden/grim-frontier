@@ -2,6 +2,7 @@ import type { FastifyInstance } from "fastify"
 import { ObjectId } from "mongodb"
 import { players } from "../models/collections.js"
 import { redis } from "../db/redis.js"
+import { authenticate } from "../middleware/authenticate.js"
 import type { Player, Characteristics, Nature, CharacterOrigin } from "@grim-frontier/shared"
 
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7 // 7 days
@@ -127,5 +128,19 @@ export async function authRoutes(app: FastifyInstance) {
     await redis.set(`session:${jti}`, player._id!.toString(), "EX", SESSION_TTL_SECONDS)
 
     return { token, playerId: player._id!.toString() }
+  })
+
+  app.get("/players/me", { preHandler: authenticate }, async (request, reply) => {
+    const { playerId } = request.user
+    const player = await players.findOne({ _id: new ObjectId(playerId) })
+    if (!player) {
+      return reply.status(404).send({ error: "Player not found" })
+    }
+    return {
+      playerId: player._id!.toString(),
+      username: player.username,
+      worldId: player.worldId ?? null,
+      campId: player.campId ?? null,
+    }
   })
 }

@@ -27,12 +27,11 @@ Each phase has a clear deliverable before moving on. Nothing in a later phase sh
 
 **Deliverable:** A player can log in, see their territory on a map, see the clock ticking, and drill into the town or camp. No interactions yet — views are read-only.
 
-- [ ] SvelteKit auth flow — register, login, redirect to world view
-- [ ] API client and WebSocket client set up in `packages/frontend/src/lib`
-- [ ] Territory view — shows town and player's camp as clickable nodes
-- [ ] Town view — placeholder, shows town name and location
-- [ ] Camp view — shows resource counts and empty NPC roster
-- [ ] Running in-world clock in the page header, updated via WebSocket
+- [x] SvelteKit auth flow — register, login, redirect to world view
+- [x] API client and WebSocket client set up in `packages/frontend/src/lib`
+- [x] Territory view — shows town and player's camp as clickable nodes
+- [x] Town view — placeholder, shows town name and location
+- [x] Camp view — shows resource counts and empty NPC roster
 
 ### Phase 4 — Map API & Game Clock
 
@@ -43,6 +42,7 @@ Each phase has a clear deliverable before moving on. Nothing in a later phase sh
 - [ ] `GET /camps/:id` — camp detail with resources, NPC roster, active tasks
 - [ ] `GameClock` tick process — advances in-world date and time on an interval, writes to Mongo, publishes tick event to Redis pub/sub
 - [ ] WebSocket gateway — client connects, receives clock updates on each tick
+- [ ] Running in-world clock in the frontend page header, updated via WebSocket
 
 ### Phase 5 — NPC Generation & Encounters
 
