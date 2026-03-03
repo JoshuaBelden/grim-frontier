@@ -15,9 +15,12 @@ services:
 
   backend:
     build:
-      context: ./packages/backend
+      context: .
+      dockerfile: packages/backend/Dockerfile
+    command: ["bun", "--inspect=0.0.0.0:9229", "--watch", "src/index.ts"]
     ports:
       - "3000:3000"
+      - "9229:9229"
     env_file:
       - .env
     environment:
@@ -25,8 +28,8 @@ services:
       REDIS_URI: ${REDIS_URI:-redis://redis:6379}
       PORT: "3000"
     volumes:
-      - ./packages/backend/src:/app/src
-      - ./packages/shared/src:/workspace/packages/shared/src
+      - ./packages/backend/src:/app/packages/backend/src
+      - ./packages/shared/src:/app/packages/shared/src
     depends_on:
       - mongo
       - redis
@@ -34,14 +37,15 @@ services:
 
   frontend:
     build:
-      context: ./packages/frontend
+      context: .
+      dockerfile: packages/frontend/Dockerfile
     ports:
       - "5173:5173"
     volumes:
-      - ./packages/frontend/src:/app/src
-      - ./packages/frontend/static:/app/static
-      - ./packages/frontend/svelte.config.js:/app/svelte.config.js
-      - ./packages/frontend/vite.config.ts:/app/vite.config.ts
+      - ./packages/frontend/src:/app/packages/frontend/src
+      - ./packages/frontend/static:/app/packages/frontend/static
+      - ./packages/frontend/svelte.config.js:/app/packages/frontend/svelte.config.js
+      - ./packages/frontend/vite.config.ts:/app/packages/frontend/vite.config.ts
     depends_on:
       - backend
     restart: unless-stopped

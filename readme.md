@@ -18,7 +18,17 @@ Monorepo: `packages/backend`, `packages/frontend`, `packages/shared`.
 
 ## Getting Started
 
-**Prerequisites:** Docker + Docker Compose
+**Prerequisites:** Docker + Docker Compose, [Bun](https://bun.sh)
+
+Install Bun if you don't have it:
+```bash
+brew install bun
+```
+
+After cloning, install dependencies (links the workspace packages and satisfies editor tooling):
+```bash
+bun install
+```
 
 ```bash
 # 1. Copy env and add your Claude API key
@@ -70,3 +80,13 @@ To rebuild after changing a `package.json`:
 ```bash
 docker compose up --build
 ```
+
+## Debugging
+
+Launch configs are in `.vscode/launch.json`. Docker must be running before attaching.
+
+**Backend** — Bun exposes the inspector on port 9229. Use the **"Attach: Backend (Docker)"** config to attach. Reconnects automatically on file-change reloads.
+
+**Frontend** — Use **"Debug: Frontend (Chrome)"** to open a Chrome instance with the debugger connected to `http://localhost:5173`. Set breakpoints directly in `.svelte` and `.ts` files — Vite source maps wire them up.
+
+**Full stack** — **"Debug: Full Stack"** runs both simultaneously.
