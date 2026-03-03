@@ -17,23 +17,13 @@ Each phase has a clear deliverable before moving on. Nothing in a later phase sh
 
 **Deliverable:** An admin can create a world via API. A player can register, log in, and join that world. No UI yet — curl or a REST client is enough.
 
-- [ ] `POST /auth/register` — creates player, hashes password, returns JWT
-- [ ] `POST /auth/login` — validates credentials, returns JWT
-- [ ] JWT middleware + Redis session storage
-- [ ] `POST /admin/worlds` — creates a World and seeds it with one Region, Territory, Town, and a blank Camp for the joining player using `world.json` for static topology
-- [ ] `POST /worlds/:id/join` — assigns player to world, creates their Camp document
+- [x] `POST /auth/register` — creates player, hashes password, returns JWT
+- [x] `POST /auth/login` — validates credentials, returns JWT
+- [x] JWT middleware + Redis session storage
+- [x] `POST /admin/worlds` — creates a World and seeds it with one Region, Territory, Town, and a blank Camp for the joining player using `world.json` for static topology
+- [x] `POST /worlds/:id/join` — assigns player to world, creates their Camp document
 
-### Phase 3 — Map API & Game Clock
-
-**Deliverable:** The world advances in time. A player can query the map hierarchy. All state is readable via API.
-
-- [ ] `GET /worlds/:id/map` — returns Region → Territory with nested Town and Camp refs
-- [ ] `GET /towns/:id` — town detail with current encounters list
-- [ ] `GET /camps/:id` — camp detail with resources, NPC roster, active tasks
-- [ ] `GameClock` tick process — advances in-world date and time on an interval, writes to Mongo, publishes tick event to Redis pub/sub
-- [ ] WebSocket gateway — client connects, receives clock updates on each tick
-
-### Phase 4 — Frontend Shell
+### Phase 3 — Frontend Shell
 
 **Deliverable:** A player can log in, see their territory on a map, see the clock ticking, and drill into the town or camp. No interactions yet — views are read-only.
 
@@ -43,6 +33,16 @@ Each phase has a clear deliverable before moving on. Nothing in a later phase sh
 - [ ] Town view — placeholder, shows town name and location
 - [ ] Camp view — shows resource counts and empty NPC roster
 - [ ] Running in-world clock in the page header, updated via WebSocket
+
+### Phase 4 — Map API & Game Clock
+
+**Deliverable:** The world advances in time. A player can query the map hierarchy. All state is readable via API.
+
+- [ ] `GET /worlds/:id/map` — returns Region → Territory with nested Town and Camp refs
+- [ ] `GET /towns/:id` — town detail with current encounters list
+- [ ] `GET /camps/:id` — camp detail with resources, NPC roster, active tasks
+- [ ] `GameClock` tick process — advances in-world date and time on an interval, writes to Mongo, publishes tick event to Redis pub/sub
+- [ ] WebSocket gateway — client connects, receives clock updates on each tick
 
 ### Phase 5 — NPC Generation & Encounters
 

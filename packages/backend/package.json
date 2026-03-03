@@ -8,8 +8,9 @@
     "start": "bun src/index.ts"
   },
   "dependencies": {
-    "@grim-frontier/shared": "workspace:*",
+    "@fastify/jwt": "^10.0.0",
     "@fastify/websocket": "^11.2.0",
+    "@grim-frontier/shared": "workspace:*",
     "fastify": "^5.2.1",
     "ioredis": "^5.3.2",
     "mongodb": "^6.12.0"

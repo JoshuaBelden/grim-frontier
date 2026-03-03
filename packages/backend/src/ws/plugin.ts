@@ -8,7 +8,7 @@ export async function registerWebSocket(app: FastifyInstance): Promise<void> {
     console.log("WebSocket client connected");
     socket.send(JSON.stringify({ type: "connected", message: "Welcome to Grim Frontier" }));
 
-    socket.on("message", (data) => {
+    socket.on("message", (data: Buffer) => {
       console.log("WS message:", data.toString());
     });
 
