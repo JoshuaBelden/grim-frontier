@@ -92,6 +92,12 @@ function getPayDaysInMonth(paycheck: Paycheck, month: Date): Date[] { ... }
 
 Only add inline comments when the logic is genuinely non-obvious — not for every line. Never add comments that describe recent changes (no "// added X" or "// updated to handle Y").
 
+## Shared Package Type Organization
+
+Types in `packages/shared/src/` are split into focused files by domain, with `index.ts` re-exporting everything. Each file should contain one cohesive group of related types.
+
+When adding new types, place them in the most relevant existing file or create a new focused file. Never add types directly to `index.ts`.
+
 ## SvelteKit Conventions
 
 - Stores are Svelte writable stores and auto-persist to localStorage via `saveToStorage`.

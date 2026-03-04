@@ -64,3 +64,14 @@ Each phase has a clear deliverable before moving on. Nothing in a later phase sh
 - [ ] `POST /npcs/:id/tasks` — assigns a Task document to an NPC (chore type, duration)
 - [ ] Task resolution tick — on each tick, checks active tasks, resolves completed ones, updates camp resources and NPC state
 - [ ] Camp view updated — shows resource collection button, NPC task assignment UI, active task progress
+
+### Phase 7 - Deployment Options
+
+Better fits for this architecture:
+
+Railway Docker-native, supports persistent services, Redis/Mongo add-ons, WebSockets
+Render Similar to Railway, good Docker support, free tier
+Fly.io Runs full Docker containers, persistent volumes, WebSocket-friendly
+DigitalOcean App Platform Docker support, managed databases available
+Self-hosted VPS Full control, your docker-compose.yml works as-is
+Railway or Fly.io are probably the closest to "one command deploys your compose stack" without much reconfiguration. Fly.io in particular handles the WebSocket + persistent process model well.
