@@ -2,18 +2,22 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Attach: Backend (Docker)",
+      "name": "Attach: Backend",
       "type": "node",
       "request": "attach",
       "port": 9229,
-      "host": "localhost",
       "restart": true,
-      "localRoot": "${workspaceFolder}/packages/backend/src",
-      "remoteRoot": "/app/packages/backend/src",
-      "skipFiles": ["<node_internals>/**"]
+      "localRoot": "${workspaceFolder}",
+      "remoteRoot": "/app",
+      "sourceMapPathOverrides": {
+        "/app/*": "${workspaceFolder}/*"
+      },
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
     },
     {
-      "name": "Debug: Frontend (Chrome)",
+      "name": "Debug: Frontend",
       "type": "chrome",
       "request": "launch",
       "url": "http://localhost:5173",
@@ -26,8 +30,10 @@
   "compounds": [
     {
       "name": "Debug: Full Stack",
-      "configurations": ["Attach: Backend (Docker)", "Debug: Frontend (Chrome)"],
-      "stopAll": true
+      "configurations": [
+        "Debug: Frontend",
+        "Attach: Backend"
+      ]
     }
   ]
 }
