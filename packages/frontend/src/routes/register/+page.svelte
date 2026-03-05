@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { goto } from '$app/navigation'
-  import { authStore } from '$lib/stores/auth'
-  import { apiRegister, apiGetMe } from '$lib/api'
+  import { goto } from "$app/navigation"
+  import { apiGetMe, apiRegister } from "$lib/api"
+  import { authStore } from "$lib/stores/auth"
 
-  let username = $state('')
-  let password = $state('')
+  let username = $state("")
+  let password = $state("")
   let error = $state<string | null>(null)
   let loading = $state(false)
 
@@ -19,12 +19,12 @@
       const me = await apiGetMe()
       if (me.worldId && me.campId) {
         authStore.setWorld(me.worldId, me.campId)
-        goto('/world')
+        goto("/world")
       } else {
-        goto('/world/join')
+        goto("/world/join")
       }
     } catch (err) {
-      error = err instanceof Error ? err.message : 'Registration failed'
+      error = err instanceof Error ? err.message : "Registration failed"
     } finally {
       loading = false
     }
@@ -52,7 +52,7 @@
       <p class="error">{error}</p>
     {/if}
     <button type="submit" disabled={loading}>
-      {loading ? 'Registering…' : 'Register'}
+      {loading ? "Registering…" : "Register"}
     </button>
   </form>
 

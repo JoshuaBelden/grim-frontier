@@ -1,15 +1,15 @@
 <script lang="ts">
-  import { onMount } from 'svelte'
-  import { goto } from '$app/navigation'
-  import { authStore } from '$lib/stores/auth'
-  import { apiGetMe } from '$lib/api'
+  import { goto } from "$app/navigation"
+  import { apiGetMe } from "$lib/api"
+  import { authStore } from "$lib/stores/auth"
+  import { onMount } from "svelte"
 
   onMount(async () => {
     const { token, worldId } = $authStore
     if (!token) return
 
     if (worldId) {
-      goto('/world')
+      goto("/world")
       return
     }
 
@@ -17,9 +17,9 @@
       const me = await apiGetMe()
       if (me.worldId && me.campId) {
         authStore.setWorld(me.worldId, me.campId)
-        goto('/world')
+        goto("/world")
       } else {
-        goto('/world/join')
+        goto("/world/join")
       }
     } catch {
       authStore.clear()

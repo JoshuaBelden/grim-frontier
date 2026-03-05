@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { onMount } from 'svelte'
-  import { page } from '$app/stores'
-  import { apiGetTown, type TownResponse } from '$lib/api'
+  import { page } from "$app/stores"
+  import { apiGetTown, type TownResponse } from "$lib/api"
+  import { onMount } from "svelte"
 
   let town = $state<TownResponse | null>(null)
   let error = $state<string | null>(null)
@@ -11,13 +11,13 @@
     try {
       town = await apiGetTown(townId)
     } catch (err) {
-      error = err instanceof Error ? err.message : 'Failed to load town'
+      error = err instanceof Error ? err.message : "Failed to load town"
     }
   })
 </script>
 
 <svelte:head>
-  <title>{town?.name ?? 'Town'} — Grim Frontier</title>
+  <title>{town?.name ?? "Town"} — Grim Frontier</title>
 </svelte:head>
 
 <div class="view">

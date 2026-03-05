@@ -1,4 +1,4 @@
-import type { FastifyRequest, FastifyReply } from "fastify"
+import type { FastifyReply, FastifyRequest } from "fastify"
 import { redis } from "../db/redis.js"
 
 declare module "@fastify/jwt" {

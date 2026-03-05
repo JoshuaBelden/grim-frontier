@@ -1,15 +1,15 @@
 <script lang="ts">
-  import { onMount } from 'svelte'
-  import { goto } from '$app/navigation'
-  import { authStore } from '$lib/stores/auth'
-  import { apiGetWorlds, apiJoinWorld, type WorldListItem } from '$lib/api'
+  import { goto } from "$app/navigation"
+  import { apiGetWorlds, apiJoinWorld, type WorldListItem } from "$lib/api"
+  import { authStore } from "$lib/stores/auth"
+  import { onMount } from "svelte"
 
   let worlds = $state<WorldListItem[]>([])
   let loadError = $state<string | null>(null)
   let joiningId = $state<string | null>(null)
   let joinError = $state<string | null>(null)
 
-  let customId = $state('')
+  let customId = $state("")
   let customLoading = $state(false)
   let customError = $state<string | null>(null)
 
@@ -17,7 +17,7 @@
     try {
       worlds = await apiGetWorlds()
     } catch (err) {
-      loadError = err instanceof Error ? err.message : 'Failed to load worlds'
+      loadError = err instanceof Error ? err.message : "Failed to load worlds"
     }
   })
 
@@ -27,9 +27,9 @@
     try {
       const result = await apiJoinWorld(worldId)
       authStore.setWorld(result.worldId, result.campId)
-      goto('/world')
+      goto("/world")
     } catch (err) {
-      joinError = err instanceof Error ? err.message : 'Failed to join world'
+      joinError = err instanceof Error ? err.message : "Failed to join world"
     } finally {
       joiningId = null
     }
@@ -42,16 +42,16 @@
     try {
       const result = await apiJoinWorld(customId.trim())
       authStore.setWorld(result.worldId, result.campId)
-      goto('/world')
+      goto("/world")
     } catch (err) {
-      customError = err instanceof Error ? err.message : 'Failed to join world'
+      customError = err instanceof Error ? err.message : "Failed to join world"
     } finally {
       customLoading = false
     }
   }
 
-  function formatDate(date: WorldListItem['inWorldDate']) {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+  function formatDate(date: WorldListItem["inWorldDate"]) {
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
     return `${months[date.month - 1]} ${date.day}, ${date.year}`
   }
 </script>
@@ -75,11 +75,8 @@
             <span class="world-name">{world.name}</span>
             <span class="world-date">{formatDate(world.inWorldDate)}</span>
           </div>
-          <button
-            onclick={() => joinWorld(world.id)}
-            disabled={joiningId !== null}
-          >
-            {joiningId === world.id ? 'Joining…' : 'Join'}
+          <button onclick={() => joinWorld(world.id)} disabled={joiningId !== null}>
+            {joiningId === world.id ? "Joining…" : "Join"}
           </button>
         </li>
       {/each}
@@ -99,7 +96,7 @@
       <p class="error">{customError}</p>
     {/if}
     <button type="submit" disabled={customLoading}>
-      {customLoading ? 'Joining…' : 'Join by ID'}
+      {customLoading ? "Joining…" : "Join by ID"}
     </button>
   </form>
 </div>
@@ -159,7 +156,7 @@
 
   .divider::before,
   .divider::after {
-    content: '';
+    content: "";
     flex: 1;
     border-top: 1px solid #2a1e0e;
   }

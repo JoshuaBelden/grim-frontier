@@ -1,11 +1,11 @@
-import Fastify from "fastify"
 import fastifyJwt from "@fastify/jwt"
-import { connectMongo, closeMongo, mongo } from "./db/mongo.js"
+import Fastify from "fastify"
+import { closeMongo, connectMongo, mongo } from "./db/mongo.js"
 import { redis } from "./db/redis.js"
-import { registerWebSocket } from "./ws/plugin.js"
-import { authRoutes } from "./routes/auth.js"
 import { adminRoutes } from "./routes/admin.js"
+import { authRoutes } from "./routes/auth.js"
 import { worldRoutes } from "./routes/worlds.js"
+import { registerWebSocket } from "./ws/plugin.js"
 
 const app = Fastify({ logger: true })
 const port = Number(process.env.PORT ?? 3000)

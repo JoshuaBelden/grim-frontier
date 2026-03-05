@@ -1,5 +1,5 @@
-import { writable } from 'svelte/store'
-import { browser } from '$app/environment'
+import { browser } from "$app/environment"
+import { writable } from "svelte/store"
 
 /** Persisted authentication and session state for the current player. */
 interface AuthState {
@@ -10,7 +10,7 @@ interface AuthState {
   campId: string | null
 }
 
-const STORAGE_KEY = 'grim-frontier:auth'
+const STORAGE_KEY = "grim-frontier:auth"
 
 const defaultState: AuthState = {
   token: null,

@@ -1,15 +1,15 @@
 <script lang="ts">
-  import type { Snippet } from 'svelte'
-  import { onMount } from 'svelte'
-  import { goto } from '$app/navigation'
-  import { authStore } from '$lib/stores/auth'
-  import { wsConnected, connectWs, disconnectWs } from '$lib/ws'
+  import { goto } from "$app/navigation"
+  import { authStore } from "$lib/stores/auth"
+  import { connectWs, disconnectWs, wsConnected } from "$lib/ws"
+  import type { Snippet } from "svelte"
+  import { onMount } from "svelte"
 
   let { children }: { children: Snippet } = $props()
 
   onMount(() => {
     if (!$authStore.token) {
-      goto('/login')
+      goto("/login")
       return
     }
     connectWs()
@@ -24,7 +24,7 @@
       {#if $authStore.username}
         <span class="player">{$authStore.username}</span>
       {/if}
-      <span class="ws-dot" class:connected={$wsConnected} title={$wsConnected ? 'Connected' : 'Disconnected'}></span>
+      <span class="ws-dot" class:connected={$wsConnected} title={$wsConnected ? "Connected" : "Disconnected"}></span>
     </div>
   </header>
 

@@ -4,6 +4,7 @@
   "workspaces": ["packages/*"],
   "scripts": {
     "dev": "docker compose up",
-    "build": "docker compose build"
+    "build": "docker compose build",
+    "sync": "cd packages/frontend && npx svelte-kit sync"
   }
 }

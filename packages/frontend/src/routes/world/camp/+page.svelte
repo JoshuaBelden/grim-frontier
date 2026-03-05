@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { onMount } from 'svelte'
-  import { goto } from '$app/navigation'
-  import { authStore } from '$lib/stores/auth'
-  import { apiGetCamp, type CampResponse } from '$lib/api'
+  import { goto } from "$app/navigation"
+  import { apiGetCamp, type CampResponse } from "$lib/api"
+  import { authStore } from "$lib/stores/auth"
+  import { onMount } from "svelte"
 
   let camp = $state<CampResponse | null>(null)
   let error = $state<string | null>(null)
@@ -10,19 +10,19 @@
   onMount(async () => {
     const { campId } = $authStore
     if (!campId) {
-      goto('/world/join')
+      goto("/world/join")
       return
     }
     try {
       camp = await apiGetCamp(campId)
     } catch (err) {
-      error = err instanceof Error ? err.message : 'Failed to load camp'
+      error = err instanceof Error ? err.message : "Failed to load camp"
     }
   })
 </script>
 
 <svelte:head>
-  <title>{camp?.name ?? 'Camp'} — Grim Frontier</title>
+  <title>{camp?.name ?? "Camp"} — Grim Frontier</title>
 </svelte:head>
 
 <div class="view">
@@ -63,7 +63,7 @@
           {#each camp.npcs as npc}
             <li>
               <span class="npc-name">{npc.name}</span>
-              <span class="npc-career">{npc.career.replace(/_/g, ' ')}</span>
+              <span class="npc-career">{npc.career.replace(/_/g, " ")}</span>
             </li>
           {/each}
         </ul>

@@ -1,9 +1,10 @@
+import type { Player } from "@grim-frontier/shared"
 import type { FastifyInstance } from "fastify"
 import { ObjectId } from "mongodb"
-import { players } from "../models/collections.js"
+import { defaultCharacteristics, defaultNature, defaultOrigin } from "../core/character.js"
 import { redis } from "../db/redis.js"
 import { authenticate } from "../middleware/authenticate.js"
-import type { Player, Characteristics, Nature, CharacterOrigin } from "@grim-frontier/shared"
+import { players } from "../models/collections.js"
 
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7 // 7 days
 
@@ -11,57 +12,6 @@ const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7 // 7 days
 interface RegisterBody {
   username: string
   password: string
-}
-
-/** Returns a random integer between min and max, inclusive. */
-function randomInt(min: number, max: number): number {
-  return Math.floor(Math.random() * (max - min + 1)) + min
-}
-
-/** Generates randomized starting characteristics for a new player. */
-function defaultCharacteristics(): Characteristics {
-  return {
-    strength: randomInt(3, 8),
-    hand: randomInt(3, 8),
-    presence: randomInt(3, 8),
-    wit: randomInt(3, 8),
-    temper: randomInt(3, 8),
-    grit: randomInt(3, 8),
-    nerve: randomInt(3, 8),
-    luck: randomInt(3, 8),
-  }
-}
-
-/** Returns neutral starting nature values for a new player. */
-function defaultNature(): Nature {
-  return {
-    disposition: {
-      generosity: 0,
-      mercy: 0,
-      courage: 0,
-      contentment: 0,
-      honesty: 0,
-    },
-    outlook: {
-      idealism: 0,
-      willfulness: 0,
-      trust: 0,
-      humility: 0,
-    },
-  }
-}
-
-/** Returns a generic frontier origin for a new player. */
-function defaultOrigin(): CharacterOrigin {
-  return {
-    background: {
-      origin: "frontier",
-      family: "settled",
-      formativeEvent: "Left home young, rode west with nothing but a bedroll and a name.",
-    },
-    scars: [],
-    pursuits: {},
-  }
 }
 
 /** Registers and logs in player accounts. */

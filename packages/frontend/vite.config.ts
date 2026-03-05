@@ -1,5 +1,5 @@
-import { sveltekit } from "@sveltejs/kit/vite";
-import { defineConfig } from "vite";
+import { sveltekit } from "@sveltejs/kit/vite"
+import { defineConfig } from "vite"
 
 export default defineConfig({
   plugins: [sveltekit()],
@@ -10,7 +10,7 @@ export default defineConfig({
       "/api": {
         target: "http://backend:3000",
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ""),
+        rewrite: path => path.replace(/^\/api/, ""),
       },
       "/ws": {
         target: "ws://backend:3000",
@@ -18,4 +18,4 @@ export default defineConfig({
       },
     },
   },
-});
+})

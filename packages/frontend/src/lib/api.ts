@@ -1,7 +1,7 @@
-import { get } from 'svelte/store'
-import { authStore } from '$lib/stores/auth'
+import { authStore } from "$lib/stores/auth"
+import { get } from "svelte/store"
 
-const BASE = '/api'
+const BASE = "/api"
 
 /** Response from GET /worlds/:id/map */
 export interface WorldMapResponse {
@@ -36,15 +36,15 @@ export interface CampResponse {
 
 function authHeaders(): Record<string, string> {
   const { token } = get(authStore)
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
-  if (token) headers['Authorization'] = `Bearer ${token}`
+  const headers: Record<string, string> = { "Content-Type": "application/json" }
+  if (token) headers["Authorization"] = `Bearer ${token}`
   return headers
 }
 
 async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
     const body = await response.json().catch(() => ({ error: response.statusText }))
-    throw new Error(body.error ?? 'Request failed')
+    throw new Error(body.error ?? "Request failed")
   }
   return response.json()
 }
@@ -52,8 +52,8 @@ async function handleResponse<T>(response: Response): Promise<T> {
 /** Registers a new player account. */
 export async function apiRegister(username: string, password: string) {
   const response = await fetch(`${BASE}/auth/register`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, password }),
   })
   return handleResponse<{ token: string; playerId: string }>(response)
@@ -62,8 +62,8 @@ export async function apiRegister(username: string, password: string) {
 /** Authenticates an existing player. */
 export async function apiLogin(username: string, password: string) {
   const response = await fetch(`${BASE}/auth/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, password }),
   })
   return handleResponse<{ token: string; playerId: string }>(response)
@@ -91,9 +91,9 @@ export async function apiGetWorlds() {
 /** Joins a world by id, creating the player's starting camp. */
 export async function apiJoinWorld(worldId: string) {
   const response = await fetch(`${BASE}/worlds/${worldId}/join`, {
-    method: 'POST',
+    method: "POST",
     headers: authHeaders(),
-    body: '{}',
+    body: "{}",
   })
   return handleResponse<{ campId: string; worldId: string }>(response)
 }

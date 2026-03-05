@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { onMount } from 'svelte'
-  import { goto } from '$app/navigation'
-  import { authStore } from '$lib/stores/auth'
-  import { apiGetWorldMap, type WorldMapResponse } from '$lib/api'
+  import { goto } from "$app/navigation"
+  import { apiGetWorldMap, type WorldMapResponse } from "$lib/api"
+  import { authStore } from "$lib/stores/auth"
+  import { onMount } from "svelte"
 
   let map = $state<WorldMapResponse | null>(null)
   let error = $state<string | null>(null)
@@ -10,13 +10,13 @@
   onMount(async () => {
     const { worldId } = $authStore
     if (!worldId) {
-      goto('/world/join')
+      goto("/world/join")
       return
     }
     try {
       map = await apiGetWorldMap(worldId)
     } catch (err) {
-      error = err instanceof Error ? err.message : 'Failed to load map'
+      error = err instanceof Error ? err.message : "Failed to load map"
     }
   })
 </script>

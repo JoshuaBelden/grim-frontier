@@ -1,10 +1,10 @@
+import type { Career } from "./careers"
 import type { Characteristics } from "./characteristics"
 import type { Nature } from "./nature"
-import type { Trait } from "./traits"
-import type { Career } from "./careers"
-import type { Skills } from "./skills"
 import type { CharacterOrigin } from "./origin"
 import type { Relationship } from "./relationships"
+import type { Skills } from "./skills"
+import type { Trait } from "./traits"
 
 /** A registered user and their in-world character. */
 export interface Player {
