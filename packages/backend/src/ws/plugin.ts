@@ -1,6 +1,6 @@
 import websocketPlugin from "@fastify/websocket"
 import type { FastifyInstance } from "fastify"
-import { getWorldDate } from "../core/clockTick.js"
+import { WorldClock } from "../core/worldClock.js"
 
 interface WsClient {
   readyState: number
@@ -22,7 +22,7 @@ export function broadcastToWorld(worldId: string, message: object): void {
   }
 }
 
-export async function registerWebSocket(app: FastifyInstance): Promise<void> {
+export async function registerWebSocket(app: FastifyInstance, clock: WorldClock): Promise<void> {
   await app.register(websocketPlugin)
 
   app.get("/ws", { websocket: true }, (socket, req) => {
@@ -43,7 +43,7 @@ export async function registerWebSocket(app: FastifyInstance): Promise<void> {
 
     socket.send(JSON.stringify({ type: "connected", message: "Welcome to Grim Frontier" }))
 
-    const currentDate = getWorldDate(worldId)
+    const currentDate = clock.getDate(worldId)
     if (currentDate) {
       socket.send(JSON.stringify({ type: "clockUpdate", inWorldDate: currentDate }))
     }

@@ -1,6 +1,20 @@
 import { authStore } from "$lib/stores/auth"
 import { get } from "svelte/store"
 
+/** In-world date as returned by the game clock. */
+interface InWorldDate {
+  year: number
+  month: number
+  day: number
+  hour: number
+}
+
+/** Active NPC action as returned by the camp API. */
+export interface NpcCurrentAction {
+  type: "food_gathering"
+  startedAt: InWorldDate
+}
+
 const BASE = "/api"
 
 /** Response from GET /worlds/:id/map */
@@ -31,12 +45,19 @@ export interface CampResponse {
   reputation: number
   wealth: number
   notoriety: number
-  npcs: Array<{ id: string; name: string; career: string }>
+  npcs: Array<{ id: string; name: string; career: string; currentAction: NpcCurrentAction | null }>
 }
 
 function authHeaders(): Record<string, string> {
   const { token } = get(authStore)
   const headers: Record<string, string> = { "Content-Type": "application/json" }
+  if (token) headers["Authorization"] = `Bearer ${token}`
+  return headers
+}
+
+function authOnlyHeaders(): Record<string, string> {
+  const { token } = get(authStore)
+  const headers: Record<string, string> = {}
   if (token) headers["Authorization"] = `Bearer ${token}`
   return headers
 }
@@ -161,6 +182,28 @@ export interface NpcDetailResponse {
     }
     scars: Array<{ type: string; description: string; triggerCondition?: string }>
     pursuits: { secret?: string; shortTerm?: string; longTerm?: string }
+  }
+}
+
+/** Starts a food_gathering action on the given NPC. */
+export async function apiStartGatherFood(npcId: string) {
+  const response = await fetch(`${BASE}/npcs/${npcId}/actions`, {
+    method: "POST",
+    headers: authHeaders(),
+    body: "{}",
+  })
+  return handleResponse<NpcCurrentAction>(response)
+}
+
+/** Stops the current action on the given NPC, discarding any partial progress. */
+export async function apiStopGatherFood(npcId: string) {
+  const response = await fetch(`${BASE}/npcs/${npcId}/actions`, {
+    method: "DELETE",
+    headers: authOnlyHeaders(),
+  })
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({ error: response.statusText }))
+    throw new Error(body.error ?? "Request failed")
   }
 }
 

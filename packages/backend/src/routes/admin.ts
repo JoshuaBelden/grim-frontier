@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify"
-import { clearAllWorldDates, setWorldDate } from "../core/clockTick.js"
 import worldTopology from "../core/topology.js"
 import { INITIAL_IN_WORLD_DATE, seedWorld } from "../core/world.js"
+import { WorldClock } from "../core/worldClock.js"
 import {
   camps,
   encounters,
@@ -21,7 +21,8 @@ interface CreateWorldBody {
 }
 
 /** Admin routes for world management. No auth required in MVP — admin ops via curl. */
-export async function adminRoutes(app: FastifyInstance) {
+export async function adminRoutes(app: FastifyInstance, opts: { clock: WorldClock }) {
+  const { clock } = opts
   app.post<{ Body: CreateWorldBody }>("/admin/worlds", async (request, reply) => {
     const { name } = request.body
 
@@ -48,9 +49,9 @@ export async function adminRoutes(app: FastifyInstance) {
       players.updateMany({}, { $set: { npcIds: [] }, $unset: { campId: "" } }),
     ])
 
-    clearAllWorldDates()
+    clock.clearAll()
     const result = await seedWorld("Grim Frontier", worldTopology)
-    setWorldDate(result.worldId, INITIAL_IN_WORLD_DATE)
+    clock.setDate(result.worldId, INITIAL_IN_WORLD_DATE)
 
     return reply.status(201).send(result)
   })

@@ -5,11 +5,17 @@ import type { CharacterOrigin } from "./origin"
 import type { Relationship } from "./relationships"
 import type { Skills } from "./skills"
 import type { Trait } from "./traits"
+import type { InWorldDate } from "./world"
 
 /** Lifecycle status of an NPC within the world simulation. */
 export type NPCStatus = "drifting" | "encountered" | "at_camp" | "gone"
 
-/** An AI-driven character drifting through the world, or a player's owned character. */
+/** An ongoing NPC activity that runs until explicitly stopped. */
+export interface NpcAction {
+  type: "food_gathering"
+  startedAt: InWorldDate
+}
+
 export interface NPC {
   worldId?: string
   ownerId?: string
@@ -21,9 +27,10 @@ export interface NPC {
   skills: Skills
   origin: CharacterOrigin
   status: NPCStatus
-  locationId?: string // Town or Camp id
+  locationId?: string
   locationType?: "town" | "camp"
   campId?: string
+  currentAction?: NpcAction
   relationships: Relationship[]
   createdAt: Date
   updatedAt: Date

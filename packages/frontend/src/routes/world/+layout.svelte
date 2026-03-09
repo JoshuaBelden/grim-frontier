@@ -29,7 +29,7 @@
     if ($authStore.campId) {
       apiGetCamp($authStore.campId)
         .then(camp => {
-          campNpcs = camp.npcs
+          campNpcs = camp.npcs.filter(npc => npc.id !== $authStore.npcId)
           campName = camp.name
         })
         .catch(() => {

@@ -1,10 +1,12 @@
 import type { FastifyInstance } from "fastify"
 import { ObjectId } from "mongodb"
+import { WorldClock } from "../core/worldClock.js"
 import { authenticate } from "../middleware/authenticate.js"
 import { camps, npcs, players, regions, territories, towns, worlds } from "../models/collections.js"
 
 /** World membership routes — joining an existing world. */
-export async function worldRoutes(app: FastifyInstance) {
+export async function worldRoutes(app: FastifyInstance, opts: { clock: WorldClock }) {
+  const { clock } = opts
   app.get("/worlds", { preHandler: authenticate }, async () => {
     const activeWorlds = await worlds.find({ status: "active" }).toArray()
     return activeWorlds.map(world => ({
@@ -56,7 +58,7 @@ export async function worldRoutes(app: FastifyInstance) {
       worldId,
       territoryId: territory._id!.toString(),
       name: `${player.username}'s Camp`,
-      resources: { food: 10, supplies: 5 },
+      resources: { food: 0, supplies: 5 },
       stability: 50,
       posture: "open",
       reputation: 0,
@@ -68,13 +70,10 @@ export async function worldRoutes(app: FastifyInstance) {
 
     await npcs.updateOne(
       { _id: playerNpc._id },
-      { $set: { worldId, locationId: campId.toString(), locationType: "camp", updatedAt: now } },
+      { $set: { worldId, status: "at_camp", locationId: campId.toString(), locationType: "camp", updatedAt: now } },
     )
 
-    await players.updateOne(
-      { _id: new ObjectId(playerId) },
-      { $set: { campId: campId.toString(), updatedAt: now } },
-    )
+    await players.updateOne({ _id: new ObjectId(playerId) }, { $set: { campId: campId.toString(), updatedAt: now } })
 
     const npcId = playerNpc._id!.toString()
     return reply.status(201).send({ campId: campId.toString(), worldId, npcId })
@@ -192,7 +191,62 @@ export async function worldRoutes(app: FastifyInstance) {
       reputation: camp.reputation,
       wealth: camp.wealth,
       notoriety: camp.notoriety,
-      npcs: campNpcs.map(npc => ({ id: npc._id!.toString(), name: npc.name, career: npc.career })),
+      npcs: campNpcs.map(npc => ({
+        id: npc._id!.toString(),
+        name: npc.name,
+        career: npc.career,
+        currentAction: npc.currentAction ?? null,
+      })),
     }
+  })
+
+  app.post<{ Params: { id: string } }>("/npcs/:id/actions", { preHandler: authenticate }, async (request, reply) => {
+    const { playerId } = request.user
+
+    let npcId: ObjectId
+    try {
+      npcId = new ObjectId(request.params.id)
+    } catch {
+      return reply.status(400).send({ error: "Invalid NPC id" })
+    }
+
+    const npc = await npcs.findOne({ _id: npcId })
+    if (!npc) return reply.status(404).send({ error: "NPC not found" })
+    if (npc.ownerId !== playerId) return reply.status(403).send({ error: "Not your NPC" })
+    if (npc.status !== "at_camp") return reply.status(409).send({ error: "NPC is not at camp" })
+    if (npc.currentAction) return reply.status(409).send({ error: "NPC already has an active action" })
+
+    const worldId = npc.worldId
+    if (!worldId) return reply.status(409).send({ error: "NPC is not in a world" })
+
+    const currentDate = clock.getDate(worldId)
+    if (!currentDate) return reply.status(503).send({ error: "World clock not available" })
+
+    const now = new Date()
+    await npcs.updateOne(
+      { _id: npcId },
+      { $set: { currentAction: { type: "food_gathering", startedAt: currentDate }, updatedAt: now } },
+    )
+
+    return reply.status(201).send({ type: "food_gathering", startedAt: currentDate })
+  })
+
+  app.delete<{ Params: { id: string } }>("/npcs/:id/actions", { preHandler: authenticate }, async (request, reply) => {
+    const { playerId } = request.user
+
+    let npcId: ObjectId
+    try {
+      npcId = new ObjectId(request.params.id)
+    } catch {
+      return reply.status(400).send({ error: "Invalid NPC id" })
+    }
+
+    const npc = await npcs.findOne({ _id: npcId })
+    if (!npc) return reply.status(404).send({ error: "NPC not found" })
+    if (npc.ownerId !== playerId) return reply.status(403).send({ error: "Not your NPC" })
+
+    await npcs.updateOne({ _id: npcId }, { $unset: { currentAction: "" }, $set: { updatedAt: new Date() } })
+
+    return reply.status(204).send()
   })
 }

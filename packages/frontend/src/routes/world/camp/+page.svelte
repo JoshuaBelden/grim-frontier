@@ -1,12 +1,23 @@
 <script lang="ts">
   import { goto } from "$app/navigation"
-  import { apiGetCamp, type CampResponse } from "$lib/api"
+  import { apiGetCamp, apiStartGatherFood, apiStopGatherFood, type CampResponse, type NpcCurrentAction } from "$lib/api"
+  import { GAME_HOUR_INTERVAL_MS } from "$lib/constants"
   import { authStore } from "$lib/stores/auth"
+  import { campResources } from "$lib/stores/camp"
   import { npcPanelStore } from "$lib/stores/npcPanels"
-  import { onMount } from "svelte"
+  import { lastClockUpdateAt } from "$lib/wsHandler"
+  import { onDestroy, onMount } from "svelte"
 
   let camp = $state<CampResponse | null>(null)
   let error = $state<string | null>(null)
+
+  /** Map of npcId → current action, updated optimistically on start/stop. */
+  let npcActions = $state<Record<string, NpcCurrentAction | null>>({})
+
+  /** Progress (0–1) through the current game hour, updated every second. */
+  let gatherProgress = $state(0)
+
+  let progressInterval: ReturnType<typeof setInterval> | null = null
 
   onMount(async () => {
     const { campId } = $authStore
@@ -16,10 +27,47 @@
     }
     try {
       camp = await apiGetCamp(campId)
+      campResources.set(camp.resources)
+
+      // Seed local action state from API response
+      for (const npc of camp.npcs) {
+        npcActions[npc.id] = npc.currentAction
+      }
     } catch (err) {
       error = err instanceof Error ? err.message : "Failed to load camp"
     }
+
+    progressInterval = setInterval(() => {
+      const elapsed = Date.now() - $lastClockUpdateAt
+      gatherProgress = $lastClockUpdateAt === 0 ? 0 : Math.min(elapsed / GAME_HOUR_INTERVAL_MS, 1)
+    }, 1000)
   })
+
+  onDestroy(() => {
+    if (progressInterval !== null) clearInterval(progressInterval)
+  })
+
+  function isGathering(npcId: string): boolean {
+    return npcActions[npcId]?.type === "food_gathering"
+  }
+
+  async function startGathering(npcId: string) {
+    try {
+      const action = await apiStartGatherFood(npcId)
+      npcActions[npcId] = action
+    } catch (err) {
+      error = err instanceof Error ? err.message : "Failed to start gathering"
+    }
+  }
+
+  async function stopGathering(npcId: string) {
+    try {
+      await apiStopGatherFood(npcId)
+      npcActions[npcId] = null
+    } catch (err) {
+      error = err instanceof Error ? err.message : "Failed to stop gathering"
+    }
+  }
 </script>
 
 <svelte:head>
@@ -42,11 +90,11 @@
       <div class="resources">
         <div class="resource">
           <span class="resource-label">Food</span>
-          <span class="resource-value">{camp.resources.food}</span>
+          <span class="resource-value">{$campResources?.food ?? camp.resources.food}</span>
         </div>
         <div class="resource">
           <span class="resource-label">Supplies</span>
-          <span class="resource-value">{camp.resources.supplies}</span>
+          <span class="resource-value">{$campResources?.supplies ?? camp.resources.supplies}</span>
         </div>
         <div class="resource">
           <span class="resource-label">Stability</span>
@@ -63,13 +111,28 @@
         <ul class="roster">
           {#each camp.npcs as npc}
             <li>
-              <button
-                class="roster-btn"
-                onclick={() => npcPanelStore.open({ key: npc.id, npcId: npc.id, name: npc.name, career: npc.career })}
-              >
-                <span class="npc-name">{npc.name}</span>
-                <span class="npc-career">{npc.career.replace(/_/g, " ")}</span>
-              </button>
+              <div class="roster-row">
+                <button
+                  class="roster-btn"
+                  onclick={() => npcPanelStore.open({ key: npc.id, npcId: npc.id, name: npc.name, career: npc.career })}
+                >
+                  <span class="npc-name">{npc.name}</span>
+                  <span class="npc-career">{npc.career.replace(/_/g, " ")}</span>
+                </button>
+
+                <div class="npc-actions">
+                  {#if isGathering(npc.id)}
+                    <div class="gather-status">
+                      <div class="progress-track">
+                        <div class="progress-fill" style="width: {gatherProgress * 100}%"></div>
+                      </div>
+                      <button class="action-btn stop" onclick={() => stopGathering(npc.id)}>Stop</button>
+                    </div>
+                  {:else}
+                    <button class="action-btn gather" onclick={() => startGathering(npc.id)}>Gather Food</button>
+                  {/if}
+                </div>
+              </div>
             </li>
           {/each}
         </ul>
@@ -154,6 +217,13 @@
     display: flex;
   }
 
+  .roster-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+  }
+
   .roster-btn {
     align-items: baseline;
     background: none;
@@ -165,7 +235,7 @@
     gap: 1rem;
     padding: 0.25rem 0;
     text-align: left;
-    width: 100%;
+    flex: 1;
   }
 
   .roster-btn:hover .npc-name {
@@ -181,6 +251,62 @@
     font-size: 0.7rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
+  }
+
+  .npc-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .gather-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .progress-track {
+    width: 80px;
+    height: 4px;
+    background: #2a1e0e;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: #7a9a4a;
+    border-radius: 2px;
+    transition: width 0.5s linear;
+  }
+
+  .action-btn {
+    background: none;
+    border: 1px solid #5a4020;
+    border-radius: 2px;
+    color: #8a7060;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    padding: 0.2rem 0.5rem;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .action-btn:hover {
+    border-color: #d4b896;
+    color: #d4b896;
+  }
+
+  .action-btn.stop {
+    border-color: #6a3020;
+    color: #8a5040;
+  }
+
+  .action-btn.stop:hover {
+    border-color: #c0512a;
+    color: #c0512a;
   }
 
   .muted {
