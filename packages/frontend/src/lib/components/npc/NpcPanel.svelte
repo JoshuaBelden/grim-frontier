@@ -69,6 +69,9 @@
     <h2 class="name">{entry.name}</h2>
     {#if npc}
       <span class="status">{npc.status.replace(/_/g, " ")}</span>
+      {#if npc.locationName}
+        <span class="location">{npc.locationName}</span>
+      {/if}
     {/if}
   </div>
 
@@ -262,6 +265,13 @@
     color: #8a7060;
     font-size: 0.65rem;
     letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .location {
+    color: #5a4020;
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
   }
 

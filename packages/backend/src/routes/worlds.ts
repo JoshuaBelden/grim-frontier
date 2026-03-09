@@ -66,7 +66,10 @@ export async function worldRoutes(app: FastifyInstance) {
       updatedAt: now,
     })
 
-    await npcs.updateOne({ _id: playerNpc._id }, { $set: { worldId, updatedAt: now } })
+    await npcs.updateOne(
+      { _id: playerNpc._id },
+      { $set: { worldId, locationId: campId.toString(), locationType: "camp", updatedAt: now } },
+    )
 
     await players.updateOne(
       { _id: new ObjectId(playerId) },
@@ -133,9 +136,23 @@ export async function worldRoutes(app: FastifyInstance) {
       return reply.status(404).send({ error: "NPC not found" })
     }
 
+    let locationName: string | null = null
+    if (npc.locationId) {
+      if (npc.locationType === "camp") {
+        const camp = await camps.findOne({ _id: new ObjectId(npc.locationId) })
+        locationName = camp?.name ?? null
+      } else if (npc.locationType === "town") {
+        const town = await towns.findOne({ _id: new ObjectId(npc.locationId) })
+        locationName = town?.name ?? null
+      }
+    }
+
     return {
       id: npc._id!.toString(),
       worldId: npc.worldId ?? null,
+      locationId: npc.locationId ?? null,
+      locationType: npc.locationType ?? null,
+      locationName,
       name: npc.name,
       career: npc.career,
       status: npc.status,
@@ -160,7 +177,10 @@ export async function worldRoutes(app: FastifyInstance) {
       return reply.status(404).send({ error: "Camp not found" })
     }
 
-    const campNpcs = await npcs.find({ campId: camp._id!.toString() }).toArray()
+    const campIdStr = camp._id!.toString()
+    const campNpcs = await npcs
+      .find({ $or: [{ campId: campIdStr }, { locationId: campIdStr, locationType: "camp" }] })
+      .toArray()
 
     return {
       id: camp._id!.toString(),

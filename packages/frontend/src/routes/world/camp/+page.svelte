@@ -2,6 +2,7 @@
   import { goto } from "$app/navigation"
   import { apiGetCamp, type CampResponse } from "$lib/api"
   import { authStore } from "$lib/stores/auth"
+  import { npcPanelStore } from "$lib/stores/npcPanels"
   import { onMount } from "svelte"
 
   let camp = $state<CampResponse | null>(null)
@@ -62,8 +63,13 @@
         <ul class="roster">
           {#each camp.npcs as npc}
             <li>
-              <span class="npc-name">{npc.name}</span>
-              <span class="npc-career">{npc.career.replace(/_/g, " ")}</span>
+              <button
+                class="roster-btn"
+                onclick={() => npcPanelStore.open({ key: npc.id, npcId: npc.id, name: npc.name, career: npc.career })}
+              >
+                <span class="npc-name">{npc.name}</span>
+                <span class="npc-career">{npc.career.replace(/_/g, " ")}</span>
+              </button>
             </li>
           {/each}
         </ul>
@@ -146,8 +152,24 @@
 
   .roster li {
     display: flex;
+  }
+
+  .roster-btn {
     align-items: baseline;
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    display: flex;
+    font-family: inherit;
     gap: 1rem;
+    padding: 0.25rem 0;
+    text-align: left;
+    width: 100%;
+  }
+
+  .roster-btn:hover .npc-name {
+    color: #d4b896;
   }
 
   .npc-name {

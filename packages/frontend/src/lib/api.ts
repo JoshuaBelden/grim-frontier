@@ -120,6 +120,9 @@ export async function apiGetCamp(campId: string) {
 export interface NpcDetailResponse {
   id: string
   worldId: string | null
+  locationId: string | null
+  locationType: "town" | "camp" | null
+  locationName: string | null
   name: string
   career: string
   status: string

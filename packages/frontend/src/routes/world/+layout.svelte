@@ -19,6 +19,7 @@
   }
 
   let campNpcs = $state<CampNpc[]>([])
+  let campName = $state<string | null>(null)
 
   onMount(() => {
     if (!$authStore.token) {
@@ -29,6 +30,7 @@
       apiGetCamp($authStore.campId)
         .then(camp => {
           campNpcs = camp.npcs
+          campName = camp.name
         })
         .catch(() => {
           // Non-critical — avatar tray degrades gracefully
@@ -48,7 +50,12 @@
   /** The player's own avatar entry — shown in the tray when npcId is available. */
   const playerEntry = $derived(
     $authStore.npcId
-      ? { key: $authStore.npcId, npcId: $authStore.npcId, name: $authStore.username ?? "Player" }
+      ? {
+          key: $authStore.npcId,
+          npcId: $authStore.npcId,
+          name: $authStore.username ?? "Player",
+          location: campName ?? undefined,
+        }
       : null,
   )
 </script>
@@ -80,7 +87,7 @@
       <NpcAvatar entry={playerEntry} />
     {/if}
     {#each campNpcs as npc}
-      <NpcAvatar entry={{ key: npc.id, npcId: npc.id, name: npc.name, career: npc.career }} />
+      <NpcAvatar entry={{ key: npc.id, npcId: npc.id, name: npc.name, career: npc.career, location: campName ?? undefined }} />
     {/each}
   </div>
 </div>

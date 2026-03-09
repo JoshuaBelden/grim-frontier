@@ -8,6 +8,7 @@ export interface PanelEntry {
   npcId: string
   name: string
   career?: string
+  location?: string
 }
 
 const { subscribe, update } = writable<PanelEntry[]>([])

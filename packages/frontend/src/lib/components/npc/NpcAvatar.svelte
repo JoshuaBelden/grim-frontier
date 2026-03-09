@@ -11,6 +11,9 @@
 <button class="avatar" onclick={handleClick} title={entry.name}>
   <img src="/images/default-avatar.png" alt={entry.name} class="portrait" />
   <span class="name">{entry.name}</span>
+  {#if entry.location}
+    <span class="location">{entry.location}</span>
+  {/if}
 </button>
 
 <style>
@@ -21,7 +24,7 @@
     cursor: pointer;
     display: flex;
     flex-direction: column;
-    gap: 0.35rem;
+    gap: 0.25rem;
     padding: 0.5rem 0.4rem;
     transition: border-color 0.15s;
     width: 56px;
@@ -41,6 +44,18 @@
     color: #8a7060;
     font-size: 0.55rem;
     letter-spacing: 0.06em;
+    overflow: hidden;
+    text-align: center;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    white-space: nowrap;
+    width: 100%;
+  }
+
+  .location {
+    color: #5a4020;
+    font-size: 0.5rem;
+    letter-spacing: 0.04em;
     overflow: hidden;
     text-align: center;
     text-overflow: ellipsis;
