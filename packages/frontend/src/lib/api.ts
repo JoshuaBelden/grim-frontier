@@ -75,6 +75,12 @@ export async function apiGetMe() {
   return handleResponse<{ playerId: string; username: string; worldId: string | null; campId: string | null }>(response)
 }
 
+/** Returns the current player's character sheet (same shape as NpcDetailResponse, no status). */
+export async function apiGetPlayerCharacter() {
+  const response = await fetch(`${BASE}/players/me`, { headers: authHeaders() })
+  return handleResponse<Omit<NpcDetailResponse, "id" | "status"> & { playerId: string; username: string }>(response)
+}
+
 /** Response item from GET /worlds */
 export interface WorldListItem {
   id: string
@@ -114,4 +120,54 @@ export async function apiGetTown(townId: string) {
 export async function apiGetCamp(campId: string) {
   const response = await fetch(`${BASE}/camps/${campId}`, { headers: authHeaders() })
   return handleResponse<CampResponse>(response)
+}
+
+/** Full NPC detail including characteristics, nature, traits, skills, and origin. */
+export interface NpcDetailResponse {
+  id: string
+  name: string
+  career: string
+  status: string
+  characteristics: {
+    strength: number
+    hand: number
+    presence: number
+    wit: number
+    temper: number
+    grit: number
+    nerve: number
+    luck: number
+  }
+  nature: {
+    disposition: {
+      generosity: number
+      mercy: number
+      courage: number
+      contentment: number
+      honesty: number
+    }
+    outlook: {
+      idealism: number
+      willfulness: number
+      trust: number
+      humility: number
+    }
+  }
+  traits: string[]
+  skills: Partial<Record<string, number>>
+  origin: {
+    background: {
+      origin: string
+      family: string
+      formativeEvent: string
+    }
+    scars: Array<{ type: string; description: string; triggerCondition?: string }>
+    pursuits: { secret?: string; shortTerm?: string; longTerm?: string }
+  }
+}
+
+/** Returns full NPC detail. */
+export async function apiGetNpc(npcId: string) {
+  const response = await fetch(`${BASE}/npcs/${npcId}`, { headers: authHeaders() })
+  return handleResponse<NpcDetailResponse>(response)
 }

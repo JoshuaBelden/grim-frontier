@@ -91,6 +91,12 @@ export async function authRoutes(app: FastifyInstance) {
       username: player.username,
       worldId: player.worldId ?? null,
       campId: player.campId ?? null,
+      career: player.career,
+      characteristics: player.characteristics,
+      nature: player.nature,
+      traits: player.traits,
+      skills: player.skills,
+      origin: player.origin,
     }
   })
 }

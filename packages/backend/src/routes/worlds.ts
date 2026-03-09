@@ -116,6 +116,32 @@ export async function worldRoutes(app: FastifyInstance) {
     return { id: town._id!.toString(), name: town.name, territoryId: town.territoryId }
   })
 
+  app.get<{ Params: { id: string } }>("/npcs/:id", { preHandler: authenticate }, async (request, reply) => {
+    let npcId: ObjectId
+    try {
+      npcId = new ObjectId(request.params.id)
+    } catch {
+      return reply.status(400).send({ error: "Invalid NPC id" })
+    }
+
+    const npc = await npcs.findOne({ _id: npcId })
+    if (!npc) {
+      return reply.status(404).send({ error: "NPC not found" })
+    }
+
+    return {
+      id: npc._id!.toString(),
+      name: npc.name,
+      career: npc.career,
+      status: npc.status,
+      characteristics: npc.characteristics,
+      nature: npc.nature,
+      traits: npc.traits,
+      skills: npc.skills,
+      origin: npc.origin,
+    }
+  })
+
   app.get<{ Params: { id: string } }>("/camps/:id", { preHandler: authenticate }, async (request, reply) => {
     let campId: ObjectId
     try {

@@ -1,5 +1,8 @@
 <script lang="ts">
   import { goto } from "$app/navigation"
+  import { apiGetCamp } from "$lib/api"
+  import NpcAvatar from "$lib/components/npc/NpcAvatar.svelte"
+  import NpcPanels from "$lib/components/npc/NpcPanels.svelte"
   import { authStore } from "$lib/stores/auth"
   import { formatInWorldDate } from "$lib/utils/time"
   import { connectWs, disconnectWs, wsConnected } from "$lib/ws"
@@ -9,10 +12,27 @@
 
   let { children }: { children: Snippet } = $props()
 
+  interface CampNpc {
+    id: string
+    name: string
+    career: string
+  }
+
+  let campNpcs = $state<CampNpc[]>([])
+
   onMount(() => {
     if (!$authStore.token) {
       goto("/login")
-      return
+      return disconnectWs
+    }
+    if ($authStore.campId) {
+      apiGetCamp($authStore.campId)
+        .then(camp => {
+          campNpcs = camp.npcs
+        })
+        .catch(() => {
+          // Non-critical — avatar tray degrades gracefully
+        })
     }
     return disconnectWs
   })
@@ -23,6 +43,13 @@
     } else {
       disconnectWs()
     }
+  })
+
+  /** The player's own avatar entry — always shown in the tray. */
+  const playerEntry = $derived({
+    key: $authStore.playerId ?? "player",
+    npcId: null,
+    name: $authStore.username ?? "Player",
   })
 </script>
 
@@ -47,7 +74,16 @@
   <div class="content">
     {@render children()}
   </div>
+
+  <div class="avatar-tray">
+    <NpcAvatar entry={playerEntry} />
+    {#each campNpcs as npc}
+      <NpcAvatar entry={{ key: npc.id, npcId: npc.id, name: npc.name, career: npc.career }} />
+    {/each}
+  </div>
 </div>
+
+<NpcPanels />
 
 <style>
   .shell {
@@ -105,5 +141,15 @@
   .content {
     flex: 1;
     padding: 2rem 1.5rem;
+  }
+
+  .avatar-tray {
+    bottom: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    left: 1.25rem;
+    position: fixed;
+    z-index: 10;
   }
 </style>
