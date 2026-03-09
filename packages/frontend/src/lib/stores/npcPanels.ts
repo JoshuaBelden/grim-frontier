@@ -2,10 +2,10 @@ import { writable } from "svelte/store"
 
 /** A single entry in the open NPC panels list. */
 export interface PanelEntry {
-  /** Unique key — npcId for NPCs, playerId for the player avatar. */
+  /** Unique key — the npcId. */
   key: string
-  /** NPC document id, or null if this is the player placeholder. */
-  npcId: string | null
+  /** NPC document id. */
+  npcId: string
   name: string
   career?: string
 }

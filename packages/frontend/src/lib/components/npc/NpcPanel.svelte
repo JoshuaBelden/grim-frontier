@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { apiGetNpc, apiGetPlayerCharacter, type NpcDetailResponse } from "$lib/api"
+  import { apiGetNpc, type NpcDetailResponse } from "$lib/api"
   import { npcPanelStore, type PanelEntry } from "$lib/stores/npcPanels"
   import { onMount } from "svelte"
 
@@ -10,22 +10,7 @@
 
   onMount(async () => {
     try {
-      if (entry.npcId) {
-        npc = await apiGetNpc(entry.npcId)
-      } else {
-        const playerData = await apiGetPlayerCharacter()
-        npc = {
-          id: entry.key,
-          name: entry.name,
-          career: playerData.career,
-          status: "player",
-          characteristics: playerData.characteristics,
-          nature: playerData.nature,
-          traits: playerData.traits,
-          skills: playerData.skills,
-          origin: playerData.origin,
-        }
-      }
+      npc = await apiGetNpc(entry.npcId)
     } catch (err) {
       error = err instanceof Error ? err.message : "Failed to load character"
     }
@@ -82,7 +67,7 @@
   <div class="panel-header">
     <p class="career-label">{entry.career ? formatKey(entry.career) : "Player"}</p>
     <h2 class="name">{entry.name}</h2>
-    {#if npc && npc.status !== "player"}
+    {#if npc}
       <span class="status">{npc.status.replace(/_/g, " ")}</span>
     {/if}
   </div>

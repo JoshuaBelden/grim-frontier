@@ -26,7 +26,7 @@
     joinError = null
     try {
       const result = await apiJoinWorld(worldId)
-      authStore.setWorld(result.worldId, result.campId)
+      authStore.setWorld(result.worldId, result.campId, result.npcId)
       goto("/world")
     } catch (err) {
       joinError = err instanceof Error ? err.message : "Failed to join world"
@@ -41,7 +41,7 @@
     customLoading = true
     try {
       const result = await apiJoinWorld(customId.trim())
-      authStore.setWorld(result.worldId, result.campId)
+      authStore.setWorld(result.worldId, result.campId, result.npcId)
       goto("/world")
     } catch (err) {
       customError = err instanceof Error ? err.message : "Failed to join world"

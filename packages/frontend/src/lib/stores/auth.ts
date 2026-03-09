@@ -6,6 +6,7 @@ interface AuthState {
   token: string | null
   playerId: string | null
   username: string | null
+  npcId: string | null
   worldId: string | null
   campId: string | null
 }
@@ -16,6 +17,7 @@ const defaultState: AuthState = {
   token: null,
   playerId: null,
   username: null,
+  npcId: null,
   worldId: null,
   campId: null,
 }
@@ -42,11 +44,11 @@ export const authStore = {
   setAuth(token: string, playerId: string, username: string) {
     update(state => ({ ...state, token, playerId, username }))
   },
-  setWorld(worldId: string, campId: string) {
-    update(state => ({ ...state, worldId, campId }))
+  setWorld(worldId: string, campId: string, npcId: string) {
+    update(state => ({ ...state, worldId, campId, npcId }))
   },
   clearWorld() {
-    update(state => ({ ...state, worldId: null, campId: null }))
+    update(state => ({ ...state, worldId: null, campId: null, npcId: null }))
   },
   clear() {
     set(defaultState)

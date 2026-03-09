@@ -35,8 +35,9 @@ export async function worldRoutes(app: FastifyInstance) {
       return reply.status(404).send({ error: "Player not found" })
     }
 
-    if (player.worldId) {
-      return reply.status(409).send({ error: "Already in a world" })
+    const playerNpc = await npcs.findOne({ ownerId: playerId, worldId: { $exists: false } })
+    if (!playerNpc) {
+      return reply.status(409).send({ error: "No available character to join with" })
     }
 
     const region = await regions.findOne({ worldId })
@@ -65,12 +66,15 @@ export async function worldRoutes(app: FastifyInstance) {
       updatedAt: now,
     })
 
+    await npcs.updateOne({ _id: playerNpc._id }, { $set: { worldId, updatedAt: now } })
+
     await players.updateOne(
       { _id: new ObjectId(playerId) },
-      { $set: { worldId, campId: campId.toString(), updatedAt: now } },
+      { $set: { campId: campId.toString(), updatedAt: now } },
     )
 
-    return reply.status(201).send({ campId: campId.toString(), worldId })
+    const npcId = playerNpc._id!.toString()
+    return reply.status(201).send({ campId: campId.toString(), worldId, npcId })
   })
 
   app.get<{ Params: { id: string } }>("/worlds/:id/map", { preHandler: authenticate }, async (request, reply) => {
@@ -131,6 +135,7 @@ export async function worldRoutes(app: FastifyInstance) {
 
     return {
       id: npc._id!.toString(),
+      worldId: npc.worldId ?? null,
       name: npc.name,
       career: npc.career,
       status: npc.status,

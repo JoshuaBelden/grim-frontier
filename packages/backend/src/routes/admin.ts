@@ -45,7 +45,7 @@ export async function adminRoutes(app: FastifyInstance) {
       encounters.deleteMany({}),
       tasks.deleteMany({}),
       gameClocks.deleteMany({}),
-      players.updateMany({}, { $unset: { worldId: "", campId: "" } }),
+      players.updateMany({}, { $set: { npcIds: [] }, $unset: { campId: "" } }),
     ])
 
     clearAllWorldDates()

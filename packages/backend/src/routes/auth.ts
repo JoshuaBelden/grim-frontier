@@ -1,10 +1,10 @@
-import type { Player } from "@grim-frontier/shared"
+import type { NPC, Player } from "@grim-frontier/shared"
 import type { FastifyInstance } from "fastify"
 import { ObjectId } from "mongodb"
 import { defaultCharacteristics, defaultNature, defaultOrigin } from "../core/character.js"
 import { redis } from "../db/redis.js"
 import { authenticate } from "../middleware/authenticate.js"
-import { players } from "../models/collections.js"
+import { npcs, players } from "../models/collections.js"
 
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7 // 7 days
 
@@ -31,11 +31,12 @@ export async function authRoutes(app: FastifyInstance) {
     const passwordHash = await Bun.password.hash(password)
     const now = new Date()
     const playerId = new ObjectId()
+    const npcId = new ObjectId()
 
-    const player: Player & { _id: ObjectId } = {
-      _id: playerId,
-      username,
-      passwordHash,
+    const npc: NPC & { _id: ObjectId } = {
+      _id: npcId,
+      ownerId: playerId.toString(),
+      name: username,
       characteristics: defaultCharacteristics(),
       nature: defaultNature(),
       traits: [],
@@ -43,6 +44,18 @@ export async function authRoutes(app: FastifyInstance) {
       skills: {},
       origin: defaultOrigin(),
       relationships: [],
+      status: "drifting",
+      createdAt: now,
+      updatedAt: now,
+    }
+
+    await npcs.insertOne(npc)
+
+    const player: Player & { _id: ObjectId } = {
+      _id: playerId,
+      username,
+      passwordHash,
+      npcIds: [npcId.toString()],
       createdAt: now,
       updatedAt: now,
     }
@@ -89,14 +102,8 @@ export async function authRoutes(app: FastifyInstance) {
     return {
       playerId: player._id!.toString(),
       username: player.username,
-      worldId: player.worldId ?? null,
       campId: player.campId ?? null,
-      career: player.career,
-      characteristics: player.characteristics,
-      nature: player.nature,
-      traits: player.traits,
-      skills: player.skills,
-      origin: player.origin,
+      npcIds: player.npcIds,
     }
   })
 }

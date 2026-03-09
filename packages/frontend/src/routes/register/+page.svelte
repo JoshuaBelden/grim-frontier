@@ -15,14 +15,7 @@
     try {
       const { token, playerId } = await apiRegister(username, password)
       authStore.setAuth(token, playerId, username)
-
-      const me = await apiGetMe()
-      if (me.worldId && me.campId) {
-        authStore.setWorld(me.worldId, me.campId)
-        goto("/world")
-      } else {
-        goto("/world/join")
-      }
+      goto("/world/join")
     } catch (err) {
       error = err instanceof Error ? err.message : "Registration failed"
     } finally {

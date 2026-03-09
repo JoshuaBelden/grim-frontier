@@ -1,6 +1,6 @@
 <script lang="ts">
   import { goto } from "$app/navigation"
-  import { apiGetMe, apiLogin } from "$lib/api"
+  import { apiGetMe, apiGetNpc, apiLogin } from "$lib/api"
   import { authStore } from "$lib/stores/auth"
 
   let username = $state("")
@@ -17,12 +17,16 @@
       authStore.setAuth(token, playerId, username)
 
       const me = await apiGetMe()
-      if (me.worldId && me.campId) {
-        authStore.setWorld(me.worldId, me.campId)
-        goto("/world")
-      } else {
-        goto("/world/join")
+      const npcId = me.npcIds[0] ?? null
+      if (npcId && me.campId) {
+        const npc = await apiGetNpc(npcId)
+        if (npc.worldId) {
+          authStore.setWorld(npc.worldId, me.campId, npcId)
+          goto("/world")
+          return
+        }
       }
+      goto("/world/join")
     } catch (err) {
       error = err instanceof Error ? err.message : "Login failed"
     } finally {

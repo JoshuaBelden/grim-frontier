@@ -9,9 +9,10 @@ import type { Trait } from "./traits"
 /** Lifecycle status of an NPC within the world simulation. */
 export type NPCStatus = "drifting" | "encountered" | "at_camp" | "gone"
 
-/** An AI-driven character drifting through the world. */
+/** An AI-driven character drifting through the world, or a player's owned character. */
 export interface NPC {
-  worldId: string
+  worldId?: string
+  ownerId?: string
   name: string
   characteristics: Characteristics
   nature: Nature

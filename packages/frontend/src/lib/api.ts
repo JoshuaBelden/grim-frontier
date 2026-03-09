@@ -72,13 +72,7 @@ export async function apiLogin(username: string, password: string) {
 /** Returns the current player's profile. */
 export async function apiGetMe() {
   const response = await fetch(`${BASE}/players/me`, { headers: authHeaders() })
-  return handleResponse<{ playerId: string; username: string; worldId: string | null; campId: string | null }>(response)
-}
-
-/** Returns the current player's character sheet (same shape as NpcDetailResponse, no status). */
-export async function apiGetPlayerCharacter() {
-  const response = await fetch(`${BASE}/players/me`, { headers: authHeaders() })
-  return handleResponse<Omit<NpcDetailResponse, "id" | "status"> & { playerId: string; username: string }>(response)
+  return handleResponse<{ playerId: string; username: string; campId: string | null; npcIds: string[] }>(response)
 }
 
 /** Response item from GET /worlds */
@@ -94,14 +88,14 @@ export async function apiGetWorlds() {
   return handleResponse<WorldListItem[]>(response)
 }
 
-/** Joins a world by id, creating the player's starting camp. */
+/** Joins a world by id, creating the player's starting camp and binding their NPC. */
 export async function apiJoinWorld(worldId: string) {
   const response = await fetch(`${BASE}/worlds/${worldId}/join`, {
     method: "POST",
     headers: authHeaders(),
     body: "{}",
   })
-  return handleResponse<{ campId: string; worldId: string }>(response)
+  return handleResponse<{ campId: string; worldId: string; npcId: string }>(response)
 }
 
 /** Returns the territory map for a world, including town and player camp nodes. */
@@ -125,6 +119,7 @@ export async function apiGetCamp(campId: string) {
 /** Full NPC detail including characteristics, nature, traits, skills, and origin. */
 export interface NpcDetailResponse {
   id: string
+  worldId: string | null
   name: string
   career: string
   status: string

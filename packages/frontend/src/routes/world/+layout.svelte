@@ -45,12 +45,12 @@
     }
   })
 
-  /** The player's own avatar entry — always shown in the tray. */
-  const playerEntry = $derived({
-    key: $authStore.playerId ?? "player",
-    npcId: null,
-    name: $authStore.username ?? "Player",
-  })
+  /** The player's own avatar entry — shown in the tray when npcId is available. */
+  const playerEntry = $derived(
+    $authStore.npcId
+      ? { key: $authStore.npcId, npcId: $authStore.npcId, name: $authStore.username ?? "Player" }
+      : null,
+  )
 </script>
 
 <div class="shell">
@@ -76,7 +76,9 @@
   </div>
 
   <div class="avatar-tray">
-    <NpcAvatar entry={playerEntry} />
+    {#if playerEntry}
+      <NpcAvatar entry={playerEntry} />
+    {/if}
     {#each campNpcs as npc}
       <NpcAvatar entry={{ key: npc.id, npcId: npc.id, name: npc.name, career: npc.career }} />
     {/each}
