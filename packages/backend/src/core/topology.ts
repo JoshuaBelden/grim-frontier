@@ -8,12 +8,12 @@ const world: WorldTopology = {
       resourceProfile: { timber: 3, ore: 2, game: 5, water: 4 },
       territories: [
         {
-          key: "dustcreek_valley",
-          name: "Dustcreek Valley",
+          key: "dustercreek_valley",
+          name: "Dustercreek Valley",
           towns: [
             {
-              key: "dustcreek",
-              name: "Dustcreek",
+              key: "dustercreek",
+              name: "Dustercreek",
             },
           ],
         },

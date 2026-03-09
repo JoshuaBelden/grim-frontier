@@ -45,6 +45,9 @@ export const authStore = {
   setWorld(worldId: string, campId: string) {
     update(state => ({ ...state, worldId, campId }))
   },
+  clearWorld() {
+    update(state => ({ ...state, worldId: null, campId: null }))
+  },
   clear() {
     set(defaultState)
   },

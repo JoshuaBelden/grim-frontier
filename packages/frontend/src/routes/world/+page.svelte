@@ -6,6 +6,7 @@
 
   let map = $state<WorldMapResponse | null>(null)
   let error = $state<string | null>(null)
+  let worldGone = $state(false)
 
   onMount(async () => {
     const { worldId } = $authStore
@@ -17,6 +18,10 @@
       map = await apiGetWorldMap(worldId)
     } catch (err) {
       error = err instanceof Error ? err.message : "Failed to load map"
+      if (error === "World map not found") {
+        worldGone = true
+        authStore.clearWorld()
+      }
     }
   })
 </script>
@@ -25,7 +30,12 @@
   <title>Territory — Grim Frontier</title>
 </svelte:head>
 
-{#if error}
+{#if worldGone}
+  <div class="gone">
+    <p class="error">This world no longer exists.</p>
+    <a href="/world/join" class="join-link">Join a new world →</a>
+  </div>
+{:else if error}
   <p class="error">{error}</p>
 {:else if !map}
   <p class="muted">Loading territory…</p>
@@ -131,5 +141,17 @@
   .error {
     color: #c0512a;
     font-size: 0.85rem;
+  }
+
+  .gone {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .join-link {
+    color: #d4b896;
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
   }
 </style>

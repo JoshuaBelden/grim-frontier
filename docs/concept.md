@@ -343,22 +343,108 @@ An NPC stays when both are present. Relationship determines whether they _want_ 
 | Low          | High    | Bound but cold. Obligation without warmth. Volatile if the binding is ever broken.          |
 | Low          | Low     | Already leaving. The question is whether they take something with them when they go.        |
 
-### Camp Management
+### Camp Development
 
-TBD, but with some initial ideas:
-
-- Build and upgrade structures that unlock new capabilities
-- Set camp posture: open, closed, aggressive, defensive
-- Camp visually evolves from bedroll to full settlement
-- Stability determines how well camp functions offline
-  | Parameter | Effect |
-  | ---------- | -------------------------------------------------- |
-  | Reputation | NPC quality attracted, trade terms, raid frequency |
-  | Wealth | Visible to others — opportunity and threat |
-  | Stability | Offline performance, NPC morale |
-  | Territory | Patrol radius, resource access, political weight |
-  | Notoriety | Fame/fear — separate from reputation |
-
+  - Status
+    - Makeshift
+    - Rough
+    - Established
+    - Prosperous
+    - Legendary
+  - Rating
+    - Population Capacity
+    - Morale
+    - Defense
+    - Food Security
+    - Health
+    - Comfort
+  - Core Camp Systems
+    - Shelter
+      - Capacity
+      - Comfort
+      - Protection
+        - Tier 1: Bedrolls
+        - Tier 2: Lean-to
+        - Tier 3: Canvas Tent
+        - Tier 4: Framed Tent
+        - Tier 5: Cabin
+    - Fire Pit
+      - Heat
+        - Tier 1: Small Campfire
+        - Tier 2: Firepit
+        - Tier 3: Stone Firepit
+        - Tier 4: Cooking Fire
+        - Tier 5: Iron Stove
+      - Light
+      - Morale
+      - Fuel
+        - Brush
+        - Firewood
+        - Split logs
+        - Coal
+    - Food Supply
+      - Units per day
+      - Food Variety imroves moral
+      - Upgrades
+        - Hunting: Game rack
+        - Fishing: Cleaning station
+        - Garden
+        - Chicken Coop
+        - Pig Pen
+        - Cattle corral
+    - Protection
+      - Defense Rating
+      - Threat Deterrence
+      - Tier 1: Watch rotation
+      - Tier 2: Watch post
+      - Tier 3: Gun rack
+      - Tier 4: Wooden Barricade
+      - Tier 5: Palisade Wall
+      - Upgrades
+        - Alarm Bells
+        - Spike Traps
+        - Guard Tower
+    - Medicine
+      - Health Recovery
+      - Disease Resistance
+      - Tier 1: Medcine Chest
+      - Tier 2 Herbalist table
+      - Tier 3: Infirmary Tent
+      - Tier 4 Doctor's Shack
+      - Resources
+        - Herbs
+        - Whiskey
+        - Bandages
+    - Livestock
+      - Chickens: Coop
+      - Pigs: Pig pen
+      - Goats: Goat yard
+      - Cattle: Cattle corral
+      - Stats
+        - Meat production
+        - Eggs
+        - Trade value
+    - Horses
+      - Capacity
+      - Condition
+      - Tier 1: Hitching post
+      - Tier 2: Small corral
+      - Tier 3: Stable
+      - Tier 4: Large Stable
+    - Logistics
+      - Hitching rail: visitors
+      - Wagon yard: Storage
+      - Supply wagon: Trade
+      - Trail markers: Travel Speed
+      - Trading Post: Economy
+    - Morale
+      - Whiskey
+      - Card Table
+      - Water Source
+      - Bath Barrel
+      - Outhouse
+  
+- Involve NPCs
 ### Conflict
 
 TBD

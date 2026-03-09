@@ -1,15 +1,26 @@
-import { browser } from "$app/environment"
+import { browser, dev } from "$app/environment"
+import { get } from "svelte/store"
+import { authStore } from "$lib/stores/auth"
+import { handleWsMessage } from "$lib/wsHandler"
 import { writable } from "svelte/store"
 
 export const wsConnected = writable(false)
 
 let socket: WebSocket | null = null
 
-/** Opens a WebSocket connection to the game server. */
 export function connectWs(): void {
-  if (!browser || socket) return
+  if (!browser) return
+  const worldId = get(authStore).worldId
+  if (socket) {
+    if (socket.url.includes(`worldId=${worldId}`)) return
+    disconnectWs()
+  }
+  if (!worldId) return
   const protocol = window.location.protocol === "https:" ? "wss:" : "ws:"
-  socket = new WebSocket(`${protocol}//${window.location.host}/ws`)
+
+  // In dev, connect directly to the backend to bypass Vite's unreliable WS proxy
+  const host = dev ? "localhost:3000" : window.location.host
+  socket = new WebSocket(`${protocol}//${host}/ws?worldId=${worldId}`)
   socket.onopen = () => wsConnected.set(true)
   socket.onclose = () => {
     wsConnected.set(false)
@@ -18,9 +29,11 @@ export function connectWs(): void {
   socket.onerror = () => {
     wsConnected.set(false)
   }
+  socket.onmessage = event => {
+    handleWsMessage(JSON.parse(event.data))
+  }
 }
 
-/** Closes the active WebSocket connection. */
 export function disconnectWs(): void {
   socket?.close()
   socket = null

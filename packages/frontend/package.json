@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@grim-frontier/shared": "workspace:*",
     "@sveltejs/adapter-node": "^5.2.11",
     "@sveltejs/kit": "^2.16.0",
     "svelte": "^5.19.0"

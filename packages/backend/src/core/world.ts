@@ -2,7 +2,8 @@ import type { WorldTopology } from "@grim-frontier/shared"
 import { ObjectId } from "mongodb"
 import { regions, territories, towns, worlds } from "../models/collections.js"
 
-/** Result of seeding a new world from the static topology. */
+export const INITIAL_IN_WORLD_DATE = { year: 1893, month: 9, day: 16, hour: 6 }
+
 export interface SeedWorldResult {
   worldId: string
   regionId: string
@@ -10,7 +11,6 @@ export interface SeedWorldResult {
   townId: string
 }
 
-/** Creates a world and seeds its initial region, territory, and town from the static topology. */
 export async function seedWorld(name: string, topology: WorldTopology): Promise<SeedWorldResult> {
   const now = new Date()
   const worldId = new ObjectId()
@@ -19,7 +19,7 @@ export async function seedWorld(name: string, topology: WorldTopology): Promise<
     _id: worldId,
     name,
     status: "active",
-    inWorldDate: { year: 1875, month: 4, day: 1, hour: 6 },
+    inWorldDate: INITIAL_IN_WORLD_DATE,
     createdAt: now,
     updatedAt: now,
   })

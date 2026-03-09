@@ -1,7 +1,9 @@
 <script lang="ts">
   import { goto } from "$app/navigation"
   import { authStore } from "$lib/stores/auth"
+  import { formatInWorldDate } from "$lib/utils/time"
   import { connectWs, disconnectWs, wsConnected } from "$lib/ws"
+  import { worldClock } from "$lib/wsHandler"
   import type { Snippet } from "svelte"
   import { onMount } from "svelte"
 
@@ -12,14 +14,28 @@
       goto("/login")
       return
     }
-    connectWs()
     return disconnectWs
+  })
+
+  $effect(() => {
+    if ($authStore.worldId) {
+      connectWs()
+    } else {
+      disconnectWs()
+    }
   })
 </script>
 
 <div class="shell">
   <header>
     <a href="/world" class="brand">Grim Frontier</a>
+    <div class="world-clock">
+      {#if $worldClock}
+        Time: {formatInWorldDate($worldClock)}
+      {:else}
+        Time: —
+      {/if}
+    </div>
     <div class="meta">
       {#if $authStore.username}
         <span class="player">{$authStore.username}</span>
@@ -42,9 +58,9 @@
 
   header {
     border-bottom: 1px solid #2a1e0e;
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    justify-content: space-between;
     padding: 0.75rem 1.5rem;
   }
 
@@ -58,6 +74,14 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    justify-self: end;
+  }
+
+  .world-clock {
+    color: #8a7060;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-align: center;
   }
 
   .player {
