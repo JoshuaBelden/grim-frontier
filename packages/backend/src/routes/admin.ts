@@ -2,6 +2,7 @@ import type { FastifyInstance } from "fastify"
 import worldTopology from "../core/topology.js"
 import { INITIAL_IN_WORLD_DATE, seedWorld } from "../core/world.js"
 import { WorldClock } from "../core/worldClock.js"
+import { generateNpcPool } from "../core/npcGenerator.js"
 import {
   camps,
   encounters,
@@ -14,6 +15,11 @@ import {
   towns,
   worlds,
 } from "../models/collections.js"
+
+/** Request body for NPC pool generation. */
+interface GenerateNpcsBody {
+  count?: number
+}
 
 /** Request body for world creation. */
 interface CreateWorldBody {
@@ -54,5 +60,26 @@ export async function adminRoutes(app: FastifyInstance, opts: { clock: WorldCloc
     clock.setDate(result.worldId, INITIAL_IN_WORLD_DATE)
 
     return reply.status(201).send(result)
+  })
+
+  app.post<{ Body: GenerateNpcsBody }>("/admin/npcs/generate", async (request, reply) => {
+    const rawCount = request.body?.count ?? 20
+    const count = Math.max(1, Math.min(50, rawCount))
+
+    let pool
+    try {
+      pool = await generateNpcPool(count)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      if (message.includes("ANTHROPIC_API_KEY")) {
+        return reply.status(503).send({ error: "Claude API key not configured" })
+      }
+      return reply.status(502).send({ error: message })
+    }
+
+    const result = await npcs.insertMany(pool)
+    const ids = Object.values(result.insertedIds).map(id => id.toString())
+
+    return reply.status(201).send({ generated: count, ids })
   })
 }
