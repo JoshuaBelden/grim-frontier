@@ -6,6 +6,7 @@ import type {
   NpcActionStartedEvent,
   NpcActionStoppedEvent,
   NpcDetailEvent,
+  NpcListEvent,
   ServerEvent,
   TownDetailEvent,
   WorldMapEvent,
@@ -13,6 +14,7 @@ import type {
 } from "@grim-frontier/shared"
 import { writable } from "svelte/store"
 import { campDetailStore } from "./stores/camp"
+import { npcListStore } from "./stores/npcList"
 import { worldMapStore } from "./stores/worldMap"
 import { wsErrorStore } from "./stores/wsError"
 
@@ -52,6 +54,11 @@ const eventHandlers: Record<string, (message: ServerEvent) => void> = {
 
   townDetail(message) {
     townDetailStore.set(message as TownDetailEvent)
+  },
+
+  npcList(message) {
+    const event = message as NpcListEvent
+    npcListStore.set(event.npcs)
   },
 
   npcDetail(message) {

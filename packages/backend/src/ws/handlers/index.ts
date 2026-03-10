@@ -5,6 +5,7 @@ import { handleGetTown } from "./getTown.js"
 import { handleGetNpc } from "./getNpc.js"
 import { handleGetCamp } from "./getCamp.js"
 import { handleStartNpcAction } from "./startNpcAction.js"
+import { handleListNpcs } from "./listNpcs.js"
 import { handleStopNpcAction } from "./stopNpcAction.js"
 
 /** Context available to every command handler. */
@@ -27,6 +28,7 @@ export const commandHandlers: Record<ClientCommandType, CommandHandler> = {
   getTown: handleGetTown,
   getNpc: handleGetNpc,
   getCamp: handleGetCamp,
+  listNpcs: handleListNpcs,
   startNpcAction: handleStartNpcAction,
   stopNpcAction: handleStopNpcAction,
 }

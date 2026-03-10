@@ -13,7 +13,14 @@ import type { Career } from "./careers"
 // ---------------------------------------------------------------------------
 
 /** All possible client command type discriminators. */
-export type ClientCommandType = "getWorldMap" | "getTown" | "getNpc" | "getCamp" | "startNpcAction" | "stopNpcAction"
+export type ClientCommandType =
+  | "getWorldMap"
+  | "getTown"
+  | "getNpc"
+  | "getCamp"
+  | "listNpcs"
+  | "startNpcAction"
+  | "stopNpcAction"
 
 /** Request the territory map for the connected world. */
 export interface GetWorldMapCommand {
@@ -46,6 +53,11 @@ export interface StartNpcActionCommand {
   actionType: "food_gathering"
 }
 
+/** Request a list of all NPCs in the world. */
+export interface ListNpcsCommand {
+  type: "listNpcs"
+}
+
 /** Stop the current action on an NPC. */
 export interface StopNpcActionCommand {
   type: "stopNpcAction"
@@ -58,6 +70,7 @@ export type ClientCommand =
   | GetTownCommand
   | GetNpcCommand
   | GetCampCommand
+  | ListNpcsCommand
   | StartNpcActionCommand
   | StopNpcActionCommand
 
@@ -74,6 +87,7 @@ export type ServerEventType =
   | "worldMap"
   | "townDetail"
   | "npcDetail"
+  | "npcList"
   | "campDetail"
   | "npcActionStarted"
   | "npcActionStopped"
@@ -168,6 +182,22 @@ export interface NpcDetailEvent {
   origin: CharacterOrigin
 }
 
+/** A thin NPC summary for the list view. */
+export interface NpcListItem {
+  id: string
+  name: string
+  career: Career
+  status: NPCStatus
+  locationName: string | null
+  locationType: "town" | "camp" | null
+}
+
+/** Response to listNpcs — all NPCs in the world. */
+export interface NpcListEvent {
+  type: "npcList"
+  npcs: NpcListItem[]
+}
+
 /** Response to getCamp — camp detail with resources and NPC roster. */
 export interface CampDetailEvent {
   type: "campDetail"
@@ -213,6 +243,7 @@ export type ServerEvent =
   | WorldMapEvent
   | TownDetailEvent
   | NpcDetailEvent
+  | NpcListEvent
   | CampDetailEvent
   | NpcActionStartedEvent
   | NpcActionStoppedEvent

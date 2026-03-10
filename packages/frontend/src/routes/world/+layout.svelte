@@ -1,6 +1,7 @@
 <script lang="ts">
   import { goto } from "$app/navigation"
   import NpcAvatar from "$lib/components/npc/NpcAvatar.svelte"
+  import NpcListPanel from "$lib/components/npc/NpcListPanel.svelte"
   import NpcPanels from "$lib/components/npc/NpcPanels.svelte"
   import { authStore } from "$lib/stores/auth"
   import { campDetailStore } from "$lib/stores/camp"
@@ -81,6 +82,7 @@
   </div>
 </div>
 
+<NpcListPanel />
 <NpcPanels />
 
 <style>
