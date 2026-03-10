@@ -1,7 +1,8 @@
 import fastifyJwt from "@fastify/jwt"
-import Fastify from "fastify"
-import { foodHour } from "./core/foodService.js"
 import { GAME_HOUR_INTERVAL_MS } from "@grim-frontier/shared"
+import Fastify from "fastify"
+import { consumeFood } from "./core/hourlyUpdaters/consumeFood.js"
+import { gatherFood } from "./core/hourlyUpdaters/gatherFood.js"
 import { WorldClock } from "./core/worldClock.js"
 import { closeMongo, connectMongo, mongo } from "./db/mongo.js"
 import { redis } from "./db/redis.js"
@@ -51,8 +52,11 @@ app.addHook("onReady", async () => {
 
 async function start() {
   await connectMongo()
-  clock.registerHook(foodHour)
+
+  clock.registerHourlyUpdater(gatherFood)
+  clock.registerHourlyUpdater(consumeFood)
   clock.start(broadcastToWorld, GAME_HOUR_INTERVAL_MS)
+
   await app.listen({ port, host: "0.0.0.0" })
 }
 

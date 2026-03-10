@@ -3,7 +3,6 @@ import { ObjectId } from "mongodb"
 import { npcs } from "../../models/collections.js"
 import type { HandlerContext } from "./index.js"
 
-/** Starts a gathering action on an NPC owned by the requesting player. */
 export async function handleStartNpcAction(context: HandlerContext, payload: unknown): Promise<void> {
   const command = payload as StartNpcActionCommand
 

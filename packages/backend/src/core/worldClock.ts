@@ -4,7 +4,7 @@ import { worlds } from "../models/collections.js"
 
 const DAYS_PER_MONTH = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
-export type GameHourHook = (
+export type HourlyUpdater = (
   worldId: string,
   newDate: InWorldDate,
   broadcast: (worldId: string, message: object) => void,
@@ -13,7 +13,7 @@ export type GameHourHook = (
 /** Manages the in-world clock for all active worlds and dispatches per-hour hooks. */
 export class WorldClock {
   private worldDates = new Map<string, InWorldDate>()
-  private hooks: GameHourHook[] = []
+  private hourlyUpdater: HourlyUpdater[] = []
 
   getDate(worldId: string): InWorldDate | undefined {
     return this.worldDates.get(worldId)
@@ -27,8 +27,8 @@ export class WorldClock {
     this.worldDates.clear()
   }
 
-  registerHook(hook: GameHourHook): void {
-    this.hooks.push(hook)
+  registerHourlyUpdater(hourlyUpdater: HourlyUpdater): void {
+    this.hourlyUpdater.push(hourlyUpdater)
   }
 
   /**
@@ -45,8 +45,8 @@ export class WorldClock {
         // Persist to MongoDB without blocking the tick
         worlds.updateOne({ _id: new ObjectId(worldId) }, { $set: { inWorldDate: nextDate, updatedAt: new Date() } })
 
-        for (const hook of this.hooks) {
-          await hook(worldId, nextDate, broadcast)
+        for (const hourlyUpdater of this.hourlyUpdater) {
+          await hourlyUpdater(worldId, nextDate, broadcast)
         }
       }
     }, intervalMs)

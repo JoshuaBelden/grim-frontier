@@ -8,21 +8,16 @@ import { handleStartNpcAction } from "./startNpcAction.js"
 import { handleListNpcs } from "./listNpcs.js"
 import { handleStopNpcAction } from "./stopNpcAction.js"
 
-/** Context available to every command handler. */
 export interface HandlerContext {
   playerId: string
   worldId: string
-  /** Send an event to the requesting client only. */
   send: (event: ServerEvent) => void
-  /** Broadcast an event to all clients connected to this world. */
   broadcast: (event: ServerEvent) => void
   clock: WorldClock
 }
 
-/** Handler function signature for a client command. */
 export type CommandHandler = (context: HandlerContext, payload: unknown) => Promise<void>
 
-/** Maps each client command type to its handler function. */
 export const commandHandlers: Record<ClientCommandType, CommandHandler> = {
   getWorldMap: handleGetWorldMap,
   getTown: handleGetTown,

@@ -2,8 +2,6 @@
 
 ## Next
 
-- WS connections not loading areas or npcs
-- Rename Gather food to forage
 - Add camp amenities section
   - Bedroll
   - Food
@@ -26,5 +24,3 @@
 - Add soundtrack audio
 
 ## Bugs
-
-- Loading the app hangs and requires a couple refreshes
