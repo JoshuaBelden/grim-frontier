@@ -1,8 +1,10 @@
 import fastifyJwt from "@fastify/jwt"
 import { GAME_HOUR_INTERVAL_MS } from "@grim-frontier/shared"
 import Fastify from "fastify"
+import { consumeFireWood } from "./core/hourlyUpdaters/consumeFireWood.js"
 import { consumeFood } from "./core/hourlyUpdaters/consumeFood.js"
 import { gatherFood } from "./core/hourlyUpdaters/gatherFood.js"
+import { gatherWood } from "./core/hourlyUpdaters/gatherWood.js"
 import { WorldClock } from "./core/worldClock.js"
 import { closeMongo, connectMongo, mongo } from "./db/mongo.js"
 import { redis } from "./db/redis.js"
@@ -54,7 +56,9 @@ async function start() {
   await connectMongo()
 
   clock.registerHourlyUpdater(gatherFood)
+  clock.registerHourlyUpdater(gatherWood)
   clock.registerHourlyUpdater(consumeFood)
+  clock.registerHourlyUpdater(consumeFireWood)
   clock.start(broadcastToWorld, GAME_HOUR_INTERVAL_MS)
 
   await app.listen({ port, host: "0.0.0.0" })

@@ -6,6 +6,7 @@ import { handleGetNpc } from "./getNpc.js"
 import { handleGetCamp } from "./getCamp.js"
 import { handleStartNpcAction } from "./startNpcAction.js"
 import { handleListNpcs } from "./listNpcs.js"
+import { handleSetFirePit } from "./setFirePit.js"
 import { handleStopNpcAction } from "./stopNpcAction.js"
 
 export interface HandlerContext {
@@ -26,4 +27,5 @@ export const commandHandlers: Record<ClientCommandType, CommandHandler> = {
   listNpcs: handleListNpcs,
   startNpcAction: handleStartNpcAction,
   stopNpcAction: handleStopNpcAction,
+  setFirePit: handleSetFirePit,
 }

@@ -2,6 +2,7 @@ import type {
   CampDetailEvent,
   CampUpdateEvent,
   ClockUpdateEvent,
+  FirePitUpdateEvent,
   InWorldDate,
   NpcActionStartedEvent,
   NpcActionStoppedEvent,
@@ -41,7 +42,9 @@ const eventHandlers: Record<string, (message: ServerEvent) => void> = {
     const event = message as CampUpdateEvent
     campDetailStore.update(current => {
       if (current && current.id === event.campId) {
-        return { ...current, resources: event.resources }
+        const updates: Partial<CampDetailEvent> = { resources: event.resources }
+        if (event.amenities) updates.amenities = event.amenities
+        return { ...current, ...updates }
       }
       return current
     })
@@ -93,6 +96,16 @@ const eventHandlers: Record<string, (message: ServerEvent) => void> = {
         ...current,
         npcs: current.npcs.map(npc => (npc.id === event.npcId ? { ...npc, currentAction: null } : npc)),
       }
+    })
+  },
+
+  firePitUpdate(message) {
+    const event = message as FirePitUpdateEvent
+    campDetailStore.update(current => {
+      if (current && current.id === event.campId) {
+        return { ...current, amenities: { ...current.amenities, firePit: event.state } }
+      }
+      return current
     })
   },
 

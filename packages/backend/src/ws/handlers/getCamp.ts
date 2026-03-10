@@ -32,6 +32,7 @@ export async function handleGetCamp(context: HandlerContext, payload: unknown): 
     name: camp.name,
     ownerId: camp.ownerId,
     resources: camp.resources,
+    amenities: camp.amenities ?? { firePit: "burned_out" },
     stability: camp.stability,
     posture: camp.posture,
     reputation: camp.reputation,

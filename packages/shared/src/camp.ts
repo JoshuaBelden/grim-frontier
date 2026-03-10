@@ -1,10 +1,19 @@
 /** How a camp presents itself to outsiders. */
 export type CampPosture = "open" | "closed" | "aggressive" | "defensive"
 
+/** Whether the camp fire pit is currently burning. */
+export type FirePitState = "burned_out" | "lit"
+
+/** Built structures and improvements within a camp. */
+export interface Amenities {
+  firePit: FirePitState
+}
+
 /** Consumable resources held by a camp or task reward. */
 export interface Resources {
   food: number
   supplies: number
+  wood: number
 }
 
 /** A player-owned base of operations within a territory. */
@@ -16,6 +25,7 @@ export interface Camp {
   nearestLandmarkKey: string
   distanceToLandmark: number // miles (3–5)
   resources: Resources
+  amenities: Amenities
   stability: number // 0–100
   posture: CampPosture
   reputation: number // 0–100

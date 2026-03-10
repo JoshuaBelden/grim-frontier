@@ -44,7 +44,7 @@ export async function handleStartNpcAction(context: HandlerContext, payload: unk
     return
   }
 
-  const action = { type: command.actionType as "food_gathering", startedAt: currentDate }
+  const action = { type: command.actionType, startedAt: currentDate }
 
   await npcs.updateOne({ _id: npcObjectId }, { $set: { currentAction: action, updatedAt: new Date() } })
 

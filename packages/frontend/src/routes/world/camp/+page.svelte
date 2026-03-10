@@ -12,7 +12,10 @@
   let camp = $derived($campDetailStore)
 
   const error = $derived(
-    $wsErrorStore?.command === "getCamp" || $wsErrorStore?.command === "startNpcAction" || $wsErrorStore?.command === "stopNpcAction"
+    $wsErrorStore?.command === "getCamp" ||
+      $wsErrorStore?.command === "startNpcAction" ||
+      $wsErrorStore?.command === "stopNpcAction" ||
+      $wsErrorStore?.command === "setFirePit"
       ? $wsErrorStore.message
       : null,
   )
@@ -40,17 +43,23 @@
     if (progressInterval !== null) clearInterval(progressInterval)
   })
 
-  function isGathering(npcId: string): boolean {
+  function getActionType(npcId: string): string | null {
     const npc = camp?.npcs.find(entry => entry.id === npcId)
-    return npc?.currentAction?.type === "food_gathering"
+    return npc?.currentAction?.type ?? null
   }
 
-  function startGathering(npcId: string) {
-    sendCommand({ type: "startNpcAction", npcId, actionType: "food_gathering" })
+  function startGathering(npcId: string, actionType: "food_gathering" | "wood_gathering") {
+    sendCommand({ type: "startNpcAction", npcId, actionType })
   }
 
   function stopGathering(npcId: string) {
     sendCommand({ type: "stopNpcAction", npcId })
+  }
+
+  function toggleFirePit() {
+    if (!camp) return
+    const newState = camp.amenities.firePit === "lit" ? "burned_out" : "lit"
+    sendCommand({ type: "setFirePit", campId: camp.id, state: newState })
   }
 </script>
 
@@ -81,8 +90,27 @@
           <span class="resource-value">{camp.resources.supplies}</span>
         </div>
         <div class="resource">
+          <span class="resource-label">Wood</span>
+          <span class="resource-value">{camp.resources.wood}</span>
+        </div>
+        <div class="resource">
           <span class="resource-label">Stability</span>
           <span class="resource-value">{camp.stability}</span>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Amenities</h2>
+      <div class="amenities">
+        <div class="amenity">
+          <span class="amenity-label">Fire Pit</span>
+          <span class="amenity-status {camp.amenities.firePit === 'lit' ? 'lit' : 'out'}">
+            {camp.amenities.firePit === "lit" ? "Lit" : "Burned Out"}
+          </span>
+          <button class="action-btn" onclick={toggleFirePit}>
+            {camp.amenities.firePit === "lit" ? "Extinguish" : "Light"}
+          </button>
         </div>
       </div>
     </section>
@@ -105,15 +133,17 @@
                 </button>
 
                 <div class="npc-actions">
-                  {#if isGathering(npc.id)}
+                  {#if getActionType(npc.id)}
                     <div class="gather-status">
+                      <span class="action-label">{getActionType(npc.id) === "food_gathering" ? "Food" : "Wood"}</span>
                       <div class="progress-track">
                         <div class="progress-fill" style="width: {gatherProgress * 100}%"></div>
                       </div>
                       <button class="action-btn stop" onclick={() => stopGathering(npc.id)}>Stop</button>
                     </div>
                   {:else}
-                    <button class="action-btn gather" onclick={() => startGathering(npc.id)}>Gather Food</button>
+                    <button class="action-btn gather" onclick={() => startGathering(npc.id, "food_gathering")}>Gather Food</button>
+                    <button class="action-btn gather" onclick={() => startGathering(npc.id, "wood_gathering")}>Gather Wood</button>
                   {/if}
                 </div>
               </div>
@@ -188,6 +218,43 @@
   .resource-value {
     font-size: 1.5rem;
     letter-spacing: 0.05em;
+  }
+
+  .amenities {
+    display: flex;
+    gap: 2rem;
+  }
+
+  .amenity {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .amenity-label {
+    color: #5a4020;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .amenity-status {
+    font-size: 0.85rem;
+  }
+
+  .amenity-status.lit {
+    color: #c89040;
+  }
+
+  .amenity-status.out {
+    color: #8a7060;
+  }
+
+  .action-label {
+    color: #8a7060;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
   }
 
   .roster {

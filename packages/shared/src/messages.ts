@@ -1,4 +1,4 @@
-import type { CampPosture, Resources } from "./camp"
+import type { Amenities, CampPosture, FirePitState, Resources } from "./camp"
 import type { Characteristics } from "./characteristics"
 import type { Nature } from "./nature"
 import type { NpcAction, NPCStatus } from "./npc"
@@ -21,6 +21,7 @@ export type ClientCommandType =
   | "listNpcs"
   | "startNpcAction"
   | "stopNpcAction"
+  | "setFirePit"
 
 /** Request the territory map for the connected world. */
 export interface GetWorldMapCommand {
@@ -46,11 +47,11 @@ export interface GetCampCommand {
   campId: string
 }
 
-/** Start an action on an NPC (e.g. food gathering). */
+/** Start an action on an NPC (e.g. food or wood gathering). */
 export interface StartNpcActionCommand {
   type: "startNpcAction"
   npcId: string
-  actionType: "food_gathering"
+  actionType: "food_gathering" | "wood_gathering"
 }
 
 /** Request a list of all NPCs in the world. */
@@ -64,6 +65,13 @@ export interface StopNpcActionCommand {
   npcId: string
 }
 
+/** Light or extinguish the camp fire pit. */
+export interface SetFirePitCommand {
+  type: "setFirePit"
+  campId: string
+  state: FirePitState
+}
+
 /** Discriminated union of all client-to-server commands. */
 export type ClientCommand =
   | GetWorldMapCommand
@@ -73,6 +81,7 @@ export type ClientCommand =
   | ListNpcsCommand
   | StartNpcActionCommand
   | StopNpcActionCommand
+  | SetFirePitCommand
 
 // ---------------------------------------------------------------------------
 // Server → Client events
@@ -91,6 +100,7 @@ export type ServerEventType =
   | "campDetail"
   | "npcActionStarted"
   | "npcActionStopped"
+  | "firePitUpdate"
 
 /** Sent on initial WebSocket connection. */
 export interface ConnectedEvent {
@@ -111,11 +121,12 @@ export interface ClockUpdateEvent {
   inWorldDate: InWorldDate
 }
 
-/** Broadcast when a camp's resources change (gathering or consumption). */
+/** Broadcast when a camp's resources or amenities change. */
 export interface CampUpdateEvent {
   type: "campUpdate"
   campId: string
   resources: Resources
+  amenities?: Amenities
 }
 
 /** A landmark on the territory map. */
@@ -205,6 +216,7 @@ export interface CampDetailEvent {
   name: string
   ownerId: string
   resources: Resources
+  amenities: Amenities
   stability: number
   posture: CampPosture
   reputation: number
@@ -234,6 +246,13 @@ export interface NpcActionStoppedEvent {
   npcId: string
 }
 
+/** Broadcast when the fire pit state changes. */
+export interface FirePitUpdateEvent {
+  type: "firePitUpdate"
+  campId: string
+  state: FirePitState
+}
+
 /** Discriminated union of all server-to-client events. */
 export type ServerEvent =
   | ConnectedEvent
@@ -247,3 +266,4 @@ export type ServerEvent =
   | CampDetailEvent
   | NpcActionStartedEvent
   | NpcActionStoppedEvent
+  | FirePitUpdateEvent
