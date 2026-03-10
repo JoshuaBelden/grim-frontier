@@ -1,37 +1,15 @@
+# TODO
 
-Player joins world
-Player sees game screen
-  - starts with regional map
-  - Menu system
-    - Top nav menu system
-    - 
-Player sees regional map with:
-- Terrain features 
-- paper drawn skybox
-- Name banners above camp and towns
-- Town of Duster Creek
-- Player can move around map in limited way
-- Hovering over camp area highlights
-- Clicking on camp takes them to the camp
+## Next
 
-Players in the camp screen see:
-- Camp map with only a fire pit
-- Camp stats
-  - Food units
-  - population capacity
-- Bottom Relvant NPC menu with players character
-  - Shows basic stats
-  - Clicking brings up the npc modal
-  - Clicking brings up the action menu
+- FE shows map of region
+- Rename Gather food to forage
+- Assign npcs to a location
+  - Location shows on npc panel
+- Show debug panel of npcs and where they're located
+- NPCs should show hunger level
+- Hunger levels drop without food
 
-Initial systems
+- Camps attract npcs
 
-- Camp Core Systems Monitor
-  - World time
-  - Npcs have a moral, health, and hunger value
-    - With no food, hunger increases every day from Stuffed, Fed, Hungry, Starving
-    - Every day 1 npc uses 1 unit of food
-    - Every day starving, moral decreases by 1
-- NPCs can take the forage action
-  - Relevant npc menu shows current action
-
+- Add soundtrack audio

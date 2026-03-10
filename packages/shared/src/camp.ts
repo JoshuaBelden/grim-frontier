@@ -13,6 +13,8 @@ export interface Camp {
   worldId: string
   territoryId: string
   name: string
+  nearestLandmarkKey: string
+  distanceToLandmark: number // miles (3–5)
   resources: Resources
   stability: number // 0–100
   posture: CampPosture

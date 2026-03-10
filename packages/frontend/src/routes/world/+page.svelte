@@ -1,6 +1,7 @@
 <script lang="ts">
   import { goto } from "$app/navigation"
-  import { apiGetWorldMap, type WorldMapResponse } from "$lib/api"
+  import { apiGetWorldMap, type MapLandmark, type WorldMapResponse } from "$lib/api"
+  import WorldMap from "$lib/components/map/WorldMap.svelte"
   import { authStore } from "$lib/stores/auth"
   import { onMount } from "svelte"
 
@@ -24,6 +25,14 @@
       }
     }
   })
+
+  function handleLandmarkClick(landmark: MapLandmark) {
+    goto(`/world/town/${landmark.id}`)
+  }
+
+  function handleCampClick() {
+    goto("/world/camp")
+  }
 </script>
 
 <svelte:head>
@@ -41,22 +50,25 @@
   <p class="muted">Loading territory…</p>
 {:else}
   <div class="territory">
-    <p class="region-label">Dustcreek Valley</p>
+    <p class="region-label">Dustercreek Valley</p>
     <h1>{map.territory.name}</h1>
 
+    <WorldMap
+      landmarks={map.territory.landmarks}
+      connections={map.territory.connections}
+      camp={map.territory.camp}
+      onLandmarkClick={handleLandmarkClick}
+      onCampClick={handleCampClick}
+    />
+
     <div class="nodes">
-      {#if map.territory.town}
-        <a href="/world/town/{map.territory.town.id}" class="node">
-          <span class="node-type">Town</span>
-          <span class="node-name">{map.territory.town.name}</span>
+      {#each map.territory.landmarks as landmark}
+        <a href="/world/town/{landmark.id}" class="node">
+          <span class="node-type">{landmark.type}</span>
+          <span class="node-name">{landmark.name}</span>
           <span class="node-hint">Enter →</span>
         </a>
-      {:else}
-        <div class="node node--empty">
-          <span class="node-type">Town</span>
-          <span class="node-name muted">No town</span>
-        </div>
-      {/if}
+      {/each}
 
       {#if map.territory.camp}
         <a href="/world/camp" class="node">

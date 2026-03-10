@@ -48,7 +48,11 @@ export async function adminRoutes(app: FastifyInstance, opts: { clock: WorldCloc
       territories.deleteMany({}),
       towns.deleteMany({}),
       camps.deleteMany({}),
-      npcs.deleteMany({}),
+      npcs.deleteMany({ ownerId: { $exists: true } }),
+      npcs.updateMany(
+        { ownerId: { $exists: false } },
+        { $unset: { worldId: "", locationId: "", locationType: "", campId: "", currentAction: "" } },
+      ),
       encounters.deleteMany({}),
       tasks.deleteMany({}),
       gameClocks.deleteMany({}),

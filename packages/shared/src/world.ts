@@ -4,11 +4,36 @@ export interface TownNode {
   name: string
 }
 
-/** A bounded area within a region, containing one or more towns. */
+/** Classification of a location in the world topology. */
+export type LandmarkType = "town" | "outpost" | "crossing"
+
+/** A named location node in the static world graph with type and map position. */
+export interface LandmarkNode {
+  key: string
+  name: string
+  type: LandmarkType
+  position: { x: number; y: number }
+}
+
+/** Classification of a route between two landmarks. */
+export type RouteClassification = "road" | "trail"
+
+/** A named connection between two landmarks in the static topology. */
+export interface TopologyConnection {
+  from: string
+  to: string
+  name: string
+  distance: number
+  classification: RouteClassification
+}
+
+/** A bounded area within a region, containing landmarks and connections. */
 export interface TerritoryNode {
   key: string
   name: string
   towns: TownNode[]
+  landmarks: LandmarkNode[]
+  connections: TopologyConnection[]
 }
 
 /** A geographic zone with a distinct resource profile and one or more territories. */
@@ -57,6 +82,7 @@ export interface Region {
 export interface Territory {
   regionId: string
   name: string
+  nodeKey: string
   createdAt: Date
   updatedAt: Date
 }
@@ -65,7 +91,8 @@ export interface Territory {
 export interface Town {
   territoryId: string
   name: string
-  nodeKey: string // reference key in world.json static topology
+  nodeKey: string
+  type?: LandmarkType
   createdAt: Date
   updatedAt: Date
 }

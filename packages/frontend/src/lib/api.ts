@@ -17,13 +17,40 @@ export interface NpcCurrentAction {
 
 const BASE = "/api"
 
+/** A landmark on the territory map. */
+export interface MapLandmark {
+  id: string
+  name: string
+  type: "town" | "outpost" | "crossing"
+  nodeKey: string
+  position: { x: number; y: number }
+}
+
+/** A connection between two landmarks. */
+export interface MapConnection {
+  from: string
+  to: string
+  name: string
+  distance: number
+  classification: "road" | "trail"
+}
+
+/** The player's camp with its topology placement. */
+export interface MapCamp {
+  id: string
+  name: string
+  nearestLandmarkKey: string
+  distanceToLandmark: number
+}
+
 /** Response from GET /worlds/:id/map */
 export interface WorldMapResponse {
   territory: {
     id: string
     name: string
-    town: { id: string; name: string } | null
-    camp: { id: string; name: string } | null
+    landmarks: MapLandmark[]
+    connections: MapConnection[]
+    camp: MapCamp | null
   }
 }
 

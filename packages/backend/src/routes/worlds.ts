@@ -1,5 +1,6 @@
 import type { FastifyInstance } from "fastify"
 import { ObjectId } from "mongodb"
+import worldTopology from "../core/topology.js"
 import { WorldClock } from "../core/worldClock.js"
 import { authenticate } from "../middleware/authenticate.js"
 import { camps, npcs, players, regions, territories, towns, worlds } from "../models/collections.js"
@@ -49,6 +50,15 @@ export async function worldRoutes(app: FastifyInstance, opts: { clock: WorldCloc
       return reply.status(500).send({ error: "World is not fully initialized" })
     }
 
+    const territoryNode = worldTopology.regions
+      .flatMap(region => region.territories)
+      .find(node => node.key === territory.nodeKey)
+
+    const landmarks = territoryNode?.landmarks ?? []
+    const nearestLandmark = landmarks[Math.floor(Math.random() * landmarks.length)]
+    const nearestLandmarkKey = nearestLandmark?.key ?? "dustercreek"
+    const distanceToLandmark = Math.floor(Math.random() * 3) + 3
+
     const now = new Date()
     const campId = new ObjectId()
 
@@ -58,6 +68,8 @@ export async function worldRoutes(app: FastifyInstance, opts: { clock: WorldCloc
       worldId,
       territoryId: territory._id!.toString(),
       name: `${player.username}'s Camp`,
+      nearestLandmarkKey,
+      distanceToLandmark,
       resources: { food: 0, supplies: 5 },
       stability: 50,
       posture: "open",
@@ -70,7 +82,16 @@ export async function worldRoutes(app: FastifyInstance, opts: { clock: WorldCloc
 
     await npcs.updateOne(
       { _id: playerNpc._id },
-      { $set: { worldId, status: "at_camp", locationId: campId.toString(), locationType: "camp", updatedAt: now } },
+      {
+        $set: {
+          worldId,
+          status: "at_camp",
+          locationId: campId.toString(),
+          locationType: "camp",
+          campId: campId.toString(),
+          updatedAt: now,
+        },
+      },
     )
 
     await players.updateOne({ _id: new ObjectId(playerId) }, { $set: { campId: campId.toString(), updatedAt: now } })
@@ -93,15 +114,37 @@ export async function worldRoutes(app: FastifyInstance, opts: { clock: WorldCloc
       return reply.status(404).send({ error: "Territory not found" })
     }
 
-    const town = await towns.findOne({ territoryId: territory._id!.toString() })
+    const allLandmarks = await towns.find({ territoryId: territory._id!.toString() }).toArray()
     const camp = await camps.findOne({ worldId, ownerId: playerId })
+
+    const territoryNode = worldTopology.regions
+      .flatMap(region => region.territories)
+      .find(node => node.key === territory.nodeKey)
+
+    const landmarkPositions = new Map(
+      (territoryNode?.landmarks ?? []).map(landmark => [landmark.key, landmark.position]),
+    )
 
     return {
       territory: {
         id: territory._id!.toString(),
         name: territory.name,
-        town: town ? { id: town._id!.toString(), name: town.name } : null,
-        camp: camp ? { id: camp._id!.toString(), name: camp.name } : null,
+        landmarks: allLandmarks.map(landmark => ({
+          id: landmark._id!.toString(),
+          name: landmark.name,
+          type: landmark.type ?? "town",
+          nodeKey: landmark.nodeKey,
+          position: landmarkPositions.get(landmark.nodeKey) ?? { x: 0, y: 0 },
+        })),
+        connections: territoryNode?.connections ?? [],
+        camp: camp
+          ? {
+              id: camp._id!.toString(),
+              name: camp.name,
+              nearestLandmarkKey: camp.nearestLandmarkKey,
+              distanceToLandmark: camp.distanceToLandmark,
+            }
+          : null,
       },
     }
   })

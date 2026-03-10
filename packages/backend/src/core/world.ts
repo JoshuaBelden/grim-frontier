@@ -4,13 +4,15 @@ import { regions, territories, towns, worlds } from "../models/collections.js"
 
 export const INITIAL_IN_WORLD_DATE = { year: 1893, month: 9, day: 16, hour: 6 }
 
+/** Result of seeding a world from static topology. */
 export interface SeedWorldResult {
   worldId: string
   regionId: string
   territoryId: string
-  townId: string
+  landmarkIds: Record<string, string>
 }
 
+/** Creates database documents from static topology for a new world. */
 export async function seedWorld(name: string, topology: WorldTopology): Promise<SeedWorldResult> {
   const now = new Date()
   const worldId = new ObjectId()
@@ -43,26 +45,31 @@ export async function seedWorld(name: string, topology: WorldTopology): Promise<
     _id: territoryId,
     regionId: regionId.toString(),
     name: territoryData.name,
+    nodeKey: territoryData.key,
     createdAt: now,
     updatedAt: now,
   })
 
-  const townData = territoryData.towns[0]
-  const townId = new ObjectId()
+  const landmarkIds: Record<string, string> = {}
 
-  await towns.insertOne({
-    _id: townId,
-    territoryId: territoryId.toString(),
-    name: townData.name,
-    nodeKey: townData.key,
-    createdAt: now,
-    updatedAt: now,
-  })
+  for (const landmark of territoryData.landmarks) {
+    const landmarkId = new ObjectId()
+    await towns.insertOne({
+      _id: landmarkId,
+      territoryId: territoryId.toString(),
+      name: landmark.name,
+      nodeKey: landmark.key,
+      type: landmark.type,
+      createdAt: now,
+      updatedAt: now,
+    })
+    landmarkIds[landmark.key] = landmarkId.toString()
+  }
 
   return {
     worldId: worldId.toString(),
     regionId: regionId.toString(),
     territoryId: territoryId.toString(),
-    townId: townId.toString(),
+    landmarkIds,
   }
 }
