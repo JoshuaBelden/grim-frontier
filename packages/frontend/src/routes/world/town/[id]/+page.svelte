@@ -1,18 +1,21 @@
 <script lang="ts">
   import { page } from "$app/stores"
-  import { apiGetTown, type TownResponse } from "$lib/api"
+  import { wsErrorStore } from "$lib/stores/wsError"
+  import { sendCommand } from "$lib/ws"
+  import { townDetailStore } from "$lib/wsHandler"
   import { onMount } from "svelte"
 
-  let town = $state<TownResponse | null>(null)
-  let error = $state<string | null>(null)
+  let town = $derived($townDetailStore)
 
-  onMount(async () => {
+  const error = $derived(
+    $wsErrorStore?.command === "getTown" ? $wsErrorStore.message : null,
+  )
+
+  onMount(() => {
     const townId = $page.params.id
-    try {
-      town = await apiGetTown(townId)
-    } catch (err) {
-      error = err instanceof Error ? err.message : "Failed to load town"
-    }
+    if (!townId) return
+    townDetailStore.set(null)
+    sendCommand({ type: "getTown", townId })
   })
 </script>
 

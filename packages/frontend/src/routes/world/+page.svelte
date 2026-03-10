@@ -1,28 +1,32 @@
 <script lang="ts">
   import { goto } from "$app/navigation"
-  import { apiGetWorldMap, type MapLandmark, type WorldMapResponse } from "$lib/api"
+  import type { MapLandmark } from "@grim-frontier/shared"
   import WorldMap from "$lib/components/map/WorldMap.svelte"
   import { authStore } from "$lib/stores/auth"
+  import { worldMapStore } from "$lib/stores/worldMap"
+  import { wsErrorStore } from "$lib/stores/wsError"
+  import { sendCommand } from "$lib/ws"
   import { onMount } from "svelte"
 
-  let map = $state<WorldMapResponse | null>(null)
-  let error = $state<string | null>(null)
   let worldGone = $state(false)
 
-  onMount(async () => {
+  onMount(() => {
     const { worldId } = $authStore
     if (!worldId) {
       goto("/world/join")
       return
     }
-    try {
-      map = await apiGetWorldMap(worldId)
-    } catch (err) {
-      error = err instanceof Error ? err.message : "Failed to load map"
-      if (error === "World map not found") {
-        worldGone = true
-        authStore.clearWorld()
-      }
+    sendCommand({ type: "getWorldMap", worldId })
+  })
+
+  const error = $derived(
+    $wsErrorStore?.command === "getWorldMap" ? $wsErrorStore.message : null,
+  )
+
+  $effect(() => {
+    if (error === "World map not found") {
+      worldGone = true
+      authStore.clearWorld()
     }
   })
 
@@ -46,23 +50,23 @@
   </div>
 {:else if error}
   <p class="error">{error}</p>
-{:else if !map}
+{:else if !$worldMapStore}
   <p class="muted">Loading territory…</p>
 {:else}
   <div class="territory">
     <p class="region-label">Dustercreek Valley</p>
-    <h1>{map.territory.name}</h1>
+    <h1>{$worldMapStore.name}</h1>
 
     <WorldMap
-      landmarks={map.territory.landmarks}
-      connections={map.territory.connections}
-      camp={map.territory.camp}
+      landmarks={$worldMapStore.landmarks}
+      connections={$worldMapStore.connections}
+      camp={$worldMapStore.camp}
       onLandmarkClick={handleLandmarkClick}
       onCampClick={handleCampClick}
     />
 
     <div class="nodes">
-      {#each map.territory.landmarks as landmark}
+      {#each $worldMapStore.landmarks as landmark}
         <a href="/world/town/{landmark.id}" class="node">
           <span class="node-type">{landmark.type}</span>
           <span class="node-name">{landmark.name}</span>
@@ -70,10 +74,10 @@
         </a>
       {/each}
 
-      {#if map.territory.camp}
+      {#if $worldMapStore.camp}
         <a href="/world/camp" class="node">
           <span class="node-type">Camp</span>
-          <span class="node-name">{map.territory.camp.name}</span>
+          <span class="node-name">{$worldMapStore.camp.name}</span>
           <span class="node-hint">Enter →</span>
         </a>
       {:else}

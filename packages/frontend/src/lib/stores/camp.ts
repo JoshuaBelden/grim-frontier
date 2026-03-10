@@ -1,4 +1,5 @@
+import type { CampDetailEvent } from "@grim-frontier/shared"
 import { writable } from "svelte/store"
 
-/** Live camp resources, seeded on page load and updated via campUpdate WebSocket events. */
-export const campResources = writable<{ food: number; supplies: number } | null>(null)
+/** Full camp detail pushed by the server, including resources and NPC roster. */
+export const campDetailStore = writable<CampDetailEvent | null>(null)

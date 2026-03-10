@@ -33,7 +33,7 @@ app.get("/health", async () => {
 
 await app.register(authRoutes)
 await app.register(adminRoutes, { clock })
-await app.register(worldRoutes, { clock })
+await app.register(worldRoutes)
 
 app.addHook("onReady", async () => {
   const activeWorlds = await worlds.find({ status: "active" }).toArray()

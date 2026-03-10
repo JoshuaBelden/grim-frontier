@@ -1,41 +1,34 @@
 <script lang="ts">
   import { goto } from "$app/navigation"
-  import { apiGetCamp, apiStartGatherFood, apiStopGatherFood, type CampResponse, type NpcCurrentAction } from "$lib/api"
   import { GAME_HOUR_INTERVAL_MS } from "$lib/constants"
   import { authStore } from "$lib/stores/auth"
-  import { campResources } from "$lib/stores/camp"
+  import { campDetailStore } from "$lib/stores/camp"
   import { npcPanelStore } from "$lib/stores/npcPanels"
+  import { wsErrorStore } from "$lib/stores/wsError"
+  import { sendCommand } from "$lib/ws"
   import { lastClockUpdateAt } from "$lib/wsHandler"
   import { onDestroy, onMount } from "svelte"
 
-  let camp = $state<CampResponse | null>(null)
-  let error = $state<string | null>(null)
+  let camp = $derived($campDetailStore)
 
-  /** Map of npcId → current action, updated optimistically on start/stop. */
-  let npcActions = $state<Record<string, NpcCurrentAction | null>>({})
+  const error = $derived(
+    $wsErrorStore?.command === "getCamp" || $wsErrorStore?.command === "startNpcAction" || $wsErrorStore?.command === "stopNpcAction"
+      ? $wsErrorStore.message
+      : null,
+  )
 
   /** Progress (0–1) through the current game hour, updated every second. */
   let gatherProgress = $state(0)
 
   let progressInterval: ReturnType<typeof setInterval> | null = null
 
-  onMount(async () => {
+  onMount(() => {
     const { campId } = $authStore
     if (!campId) {
       goto("/world/join")
       return
     }
-    try {
-      camp = await apiGetCamp(campId)
-      campResources.set(camp.resources)
-
-      // Seed local action state from API response
-      for (const npc of camp.npcs) {
-        npcActions[npc.id] = npc.currentAction
-      }
-    } catch (err) {
-      error = err instanceof Error ? err.message : "Failed to load camp"
-    }
+    sendCommand({ type: "getCamp", campId })
 
     progressInterval = setInterval(() => {
       const elapsed = Date.now() - $lastClockUpdateAt
@@ -48,25 +41,16 @@
   })
 
   function isGathering(npcId: string): boolean {
-    return npcActions[npcId]?.type === "food_gathering"
+    const npc = camp?.npcs.find(entry => entry.id === npcId)
+    return npc?.currentAction?.type === "food_gathering"
   }
 
-  async function startGathering(npcId: string) {
-    try {
-      const action = await apiStartGatherFood(npcId)
-      npcActions[npcId] = action
-    } catch (err) {
-      error = err instanceof Error ? err.message : "Failed to start gathering"
-    }
+  function startGathering(npcId: string) {
+    sendCommand({ type: "startNpcAction", npcId, actionType: "food_gathering" })
   }
 
-  async function stopGathering(npcId: string) {
-    try {
-      await apiStopGatherFood(npcId)
-      npcActions[npcId] = null
-    } catch (err) {
-      error = err instanceof Error ? err.message : "Failed to stop gathering"
-    }
+  function stopGathering(npcId: string) {
+    sendCommand({ type: "stopNpcAction", npcId })
   }
 </script>
 
@@ -90,11 +74,11 @@
       <div class="resources">
         <div class="resource">
           <span class="resource-label">Food</span>
-          <span class="resource-value">{$campResources?.food ?? camp.resources.food}</span>
+          <span class="resource-value">{camp.resources.food}</span>
         </div>
         <div class="resource">
           <span class="resource-label">Supplies</span>
-          <span class="resource-value">{$campResources?.supplies ?? camp.resources.supplies}</span>
+          <span class="resource-value">{camp.resources.supplies}</span>
         </div>
         <div class="resource">
           <span class="resource-label">Stability</span>

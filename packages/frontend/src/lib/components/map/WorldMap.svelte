@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { MapLandmark, MapConnection, MapCamp } from "$lib/api"
+  import type { MapLandmark, MapConnection, MapCamp } from "@grim-frontier/shared"
   import { onMount } from "svelte"
   import * as THREE from "three"
   import { OrbitControls } from "three/addons/controls/OrbitControls.js"

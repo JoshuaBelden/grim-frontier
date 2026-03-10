@@ -1,19 +1,21 @@
 <script lang="ts">
-  import { apiGetNpc, type NpcDetailResponse } from "$lib/api"
+  import type { NpcDetailEvent } from "@grim-frontier/shared"
   import { npcPanelStore, type PanelEntry } from "$lib/stores/npcPanels"
+  import { wsErrorStore } from "$lib/stores/wsError"
+  import { sendCommand } from "$lib/ws"
+  import { npcDetailStore } from "$lib/wsHandler"
   import { onMount } from "svelte"
 
   let { entry }: { entry: PanelEntry } = $props()
 
-  let npc = $state<NpcDetailResponse | null>(null)
-  let error = $state<string | null>(null)
+  let npc = $derived($npcDetailStore.get(entry.npcId) ?? null)
 
-  onMount(async () => {
-    try {
-      npc = await apiGetNpc(entry.npcId)
-    } catch (err) {
-      error = err instanceof Error ? err.message : "Failed to load character"
-    }
+  const error = $derived(
+    $wsErrorStore?.command === "getNpc" ? $wsErrorStore.message : null,
+  )
+
+  onMount(() => {
+    sendCommand({ type: "getNpc", npcId: entry.npcId })
   })
 
   function close() {

@@ -1,25 +1,21 @@
 <script lang="ts">
   import { goto } from "$app/navigation"
-  import { apiGetCamp } from "$lib/api"
   import NpcAvatar from "$lib/components/npc/NpcAvatar.svelte"
   import NpcPanels from "$lib/components/npc/NpcPanels.svelte"
   import { authStore } from "$lib/stores/auth"
+  import { campDetailStore } from "$lib/stores/camp"
   import { formatInWorldDate } from "$lib/utils/time"
-  import { connectWs, disconnectWs, wsConnected } from "$lib/ws"
+  import { connectWs, disconnectWs, sendCommand, wsConnected } from "$lib/ws"
   import { worldClock } from "$lib/wsHandler"
   import type { Snippet } from "svelte"
   import { onMount } from "svelte"
 
   let { children }: { children: Snippet } = $props()
 
-  interface CampNpc {
-    id: string
-    name: string
-    career: string
-  }
-
-  let campNpcs = $state<CampNpc[]>([])
-  let campName = $state<string | null>(null)
+  const campNpcs = $derived(
+    ($campDetailStore?.npcs ?? []).filter(npc => npc.id !== $authStore.npcId),
+  )
+  const campName = $derived($campDetailStore?.name ?? null)
 
   onMount(() => {
     if (!$authStore.token) {
@@ -27,14 +23,7 @@
       return disconnectWs
     }
     if ($authStore.campId) {
-      apiGetCamp($authStore.campId)
-        .then(camp => {
-          campNpcs = camp.npcs.filter(npc => npc.id !== $authStore.npcId)
-          campName = camp.name
-        })
-        .catch(() => {
-          // Non-critical — avatar tray degrades gracefully
-        })
+      sendCommand({ type: "getCamp", campId: $authStore.campId })
     }
     return disconnectWs
   })

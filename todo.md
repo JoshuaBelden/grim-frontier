@@ -2,7 +2,6 @@
 
 ## Next
 
-- FE shows map of region
 - Rename Gather food to forage
 - Assign npcs to a location
   - Location shows on npc panel
