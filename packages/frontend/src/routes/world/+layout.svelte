@@ -7,7 +7,8 @@
   import { campDetailStore } from "$lib/stores/camp"
   import { formatInWorldDate } from "$lib/utils/time"
   import { connectWs, disconnectWs, sendCommand, wsConnected } from "$lib/ws"
-  import { worldClock } from "$lib/wsHandler"
+  import { formatWeatherReport } from "$lib/utils/weather"
+  import { weatherStore, worldClock } from "$lib/wsHandler"
   import type { Snippet } from "svelte"
   import { onMount } from "svelte"
 
@@ -55,9 +56,12 @@
     <a href="/world" class="brand">Grim Frontier</a>
     <div class="world-clock">
       {#if $worldClock}
-        Time: {formatInWorldDate($worldClock)}
+        <div>Time: {formatInWorldDate($worldClock)}</div>
       {:else}
-        Time: —
+        <div>Time: —</div>
+      {/if}
+      {#if $weatherStore}
+        <div class="weather">{formatWeatherReport($weatherStore)}</div>
       {/if}
     </div>
     <div class="meta">
@@ -118,6 +122,11 @@
     font-size: 0.75rem;
     letter-spacing: 0.08em;
     text-align: center;
+  }
+
+  .weather {
+    font-size: 0.7rem;
+    margin-top: 0.15rem;
   }
 
   .player {

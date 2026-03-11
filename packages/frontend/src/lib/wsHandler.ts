@@ -12,6 +12,7 @@ import type {
   ServerEvent,
   TownDetailEvent,
   WorldMapEvent,
+  WorldWeather,
   ErrorEvent,
 } from "@grim-frontier/shared"
 import { writable } from "svelte/store"
@@ -21,6 +22,9 @@ import { worldMapStore } from "./stores/worldMap"
 import { wsErrorStore } from "./stores/wsError"
 
 export const worldClock = writable<InWorldDate | null>(null)
+
+/** Current weather state for the connected world. */
+export const weatherStore = writable<WorldWeather | null>(null)
 
 /** Wall-clock timestamp (ms) of when the most recent clockUpdate was received. Used for progress bar animation. */
 export const lastClockUpdateAt = writable<number>(0)
@@ -37,6 +41,7 @@ const eventHandlers: Record<string, (message: ServerEvent) => void> = {
     const event = message as ClockUpdateEvent
     worldClock.set(event.inWorldDate)
     lastClockUpdateAt.set(Date.now())
+    if (event.weather) weatherStore.set(event.weather)
   },
 
   campUpdate(message) {

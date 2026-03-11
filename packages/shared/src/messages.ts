@@ -5,6 +5,7 @@ import type { NpcAction, NPCStatus } from "./npc"
 import type { CharacterOrigin } from "./origin"
 import type { Skills } from "./skills"
 import type { Trait } from "./traits"
+import type { WorldWeather } from "./weather"
 import type { InWorldDate, LandmarkType, RouteClassification } from "./world"
 import type { Career } from "./careers"
 
@@ -116,10 +117,11 @@ export interface ErrorEvent {
   message: string
 }
 
-/** Broadcast every game hour with the updated in-world date. */
+/** Broadcast every game hour with the updated in-world date and current weather. */
 export interface ClockUpdateEvent {
   type: "clockUpdate"
   inWorldDate: InWorldDate
+  weather?: WorldWeather
 }
 
 /** Broadcast when a camp's resources or amenities change. */

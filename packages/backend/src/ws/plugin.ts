@@ -83,7 +83,7 @@ export async function registerWebSocket(app: FastifyInstance, clock: WorldClock)
 
     const currentDate = clock.getDate(worldId)
     if (currentDate) {
-      sendToClient(socket, { type: "clockUpdate", inWorldDate: currentDate })
+      sendToClient(socket, { type: "clockUpdate", inWorldDate: currentDate, weather: clock.getWeather(worldId) })
     }
 
     socket.on("message", async (data: Buffer) => {

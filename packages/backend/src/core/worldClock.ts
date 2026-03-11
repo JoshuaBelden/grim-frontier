@@ -1,4 +1,4 @@
-import type { InWorldDate } from "@grim-frontier/shared"
+import type { InWorldDate, WorldWeather } from "@grim-frontier/shared"
 import { ObjectId } from "mongodb"
 import { worlds } from "../models/collections.js"
 
@@ -13,6 +13,7 @@ export type HourlyUpdater = (
 /** Manages the in-world clock for all active worlds and dispatches per-hour hooks. */
 export class WorldClock {
   private worldDates = new Map<string, InWorldDate>()
+  private worldWeather = new Map<string, WorldWeather>()
   private hourlyUpdater: HourlyUpdater[] = []
 
   getDate(worldId: string): InWorldDate | undefined {
@@ -23,8 +24,17 @@ export class WorldClock {
     this.worldDates.set(worldId, date)
   }
 
+  getWeather(worldId: string): WorldWeather | undefined {
+    return this.worldWeather.get(worldId)
+  }
+
+  setWeather(worldId: string, weather: WorldWeather): void {
+    this.worldWeather.set(worldId, weather)
+  }
+
   clearAll(): void {
     this.worldDates.clear()
+    this.worldWeather.clear()
   }
 
   registerHourlyUpdater(hourlyUpdater: HourlyUpdater): void {
@@ -40,7 +50,7 @@ export class WorldClock {
       for (const [worldId, date] of this.worldDates) {
         const nextDate = this.advanceOneHour(date)
         this.worldDates.set(worldId, nextDate)
-        broadcast(worldId, { type: "clockUpdate", inWorldDate: nextDate })
+        broadcast(worldId, { type: "clockUpdate", inWorldDate: nextDate, weather: this.worldWeather.get(worldId) })
 
         // Persist to MongoDB without blocking the tick
         worlds.updateOne({ _id: new ObjectId(worldId) }, { $set: { inWorldDate: nextDate, updatedAt: new Date() } })

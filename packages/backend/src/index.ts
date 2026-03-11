@@ -6,6 +6,8 @@ import { consumeFood } from "./core/hourlyUpdaters/consumeFood.js"
 import { gatherFood } from "./core/hourlyUpdaters/gatherFood.js"
 import { gatherWood } from "./core/hourlyUpdaters/gatherWood.js"
 import { restFatigue } from "./core/hourlyUpdaters/restFatigue.js"
+import { createWeatherUpdater } from "./core/hourlyUpdaters/updateWeather.js"
+import { generateDailyWeather } from "./core/weatherGenerator.js"
 import { WorldClock } from "./core/worldClock.js"
 import { closeMongo, connectMongo, mongo } from "./db/mongo.js"
 import { redis } from "./db/redis.js"
@@ -47,7 +49,16 @@ app.addHook("onReady", async () => {
   }
   for (const world of activeWorlds) {
     if (world._id) {
-      clock.setDate(world._id.toString(), world.inWorldDate)
+      const worldId = world._id.toString()
+      clock.setDate(worldId, world.inWorldDate)
+
+      if (world.weather) {
+        clock.setWeather(worldId, world.weather)
+      } else {
+        const weather = generateDailyWeather(world.inWorldDate)
+        clock.setWeather(worldId, weather)
+        worlds.updateOne({ _id: world._id }, { $set: { weather, updatedAt: new Date() } })
+      }
     }
   }
   console.log(`Clock seeded for ${activeWorlds.length} world(s)`)
@@ -56,6 +67,7 @@ app.addHook("onReady", async () => {
 async function start() {
   await connectMongo()
 
+  clock.registerHourlyUpdater(createWeatherUpdater(clock))
   clock.registerHourlyUpdater(gatherFood)
   clock.registerHourlyUpdater(gatherWood)
   clock.registerHourlyUpdater(consumeFood)

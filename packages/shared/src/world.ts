@@ -4,6 +4,8 @@ export interface TownNode {
   name: string
 }
 
+import type { WorldWeather } from "./weather"
+
 /** Classification of a location in the world topology. */
 export type LandmarkType = "town" | "outpost" | "crossing"
 
@@ -65,6 +67,7 @@ export interface World {
   name: string
   status: WorldStatus
   inWorldDate: InWorldDate
+  weather?: WorldWeather
   createdAt: Date
   updatedAt: Date
 }
