@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { NpcDetailEvent } from "@grim-frontier/shared"
+  import type { InWorldDate, NpcDetailEvent } from "@grim-frontier/shared"
   import { npcPanelStore, type PanelEntry } from "$lib/stores/npcPanels"
   import { wsErrorStore } from "$lib/stores/wsError"
   import { sendCommand } from "$lib/ws"
@@ -61,6 +61,55 @@
   function formatKey(key: string): string {
     return key.replace(/_/g, " ").replace(/\b\w/g, char => char.toUpperCase())
   }
+
+  /** Returns a description and severity class for health (10=best, 0=worst). */
+  function healthDesc(value: number): { label: string; severity: string } {
+    if (value >= 7) return { label: "Healthy", severity: "good" }
+    if (value >= 4) return { label: "Unwell", severity: "warn" }
+    if (value >= 2) return { label: "Sick", severity: "bad" }
+    if (value === 1) return { label: "Dying", severity: "critical" }
+    return { label: "Dead", severity: "critical" }
+  }
+
+  /** Returns a description and severity class for morale (10=best, 0=worst). */
+  function moraleDesc(value: number): { label: string; severity: string } {
+    if (value >= 7) return { label: "Happy", severity: "good" }
+    if (value >= 4) return { label: "Discouraged", severity: "warn" }
+    if (value >= 2) return { label: "Despondent", severity: "bad" }
+    if (value === 1) return { label: "Miserable", severity: "critical" }
+    return { label: "Broken", severity: "critical" }
+  }
+
+  /** Returns a description and severity class for fatigue (0=best, 10=worst). */
+  function fatigueDesc(value: number): { label: string; severity: string } {
+    if (value <= 3) return { label: "Rested", severity: "good" }
+    if (value <= 6) return { label: "Tired", severity: "warn" }
+    if (value <= 8) return { label: "Exhausted", severity: "bad" }
+    if (value === 9) return { label: "Fading", severity: "critical" }
+    return { label: "Collapsed", severity: "critical" }
+  }
+
+  /** Returns a description and severity class for hunger (0=best, 10=worst). */
+  function hungerDesc(value: number): { label: string; severity: string } {
+    if (value <= 3) return { label: "Full", severity: "good" }
+    if (value <= 6) return { label: "Peckish", severity: "warn" }
+    if (value <= 8) return { label: "Hungry", severity: "bad" }
+    if (value === 9) return { label: "Weak", severity: "critical" }
+    return { label: "Starving", severity: "critical" }
+  }
+
+  /** Formats an InWorldDate for display. */
+  function formatDate(date: InWorldDate): string {
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    const monthName = months[(date.month - 1) % 12] ?? "???"
+    const hour = date.hour % 12 || 12
+    const ampm = date.hour < 12 ? "am" : "pm"
+    return `${monthName} ${date.day}, ${date.year} ${hour}${ampm}`
+  }
+
+  function startResting() {
+    sendCommand({ type: "startNpcAction", npcId: entry.npcId, actionType: "resting" })
+  }
 </script>
 
 <div class="panel">
@@ -88,25 +137,42 @@
           <div class="vital">
             <span class="vital-label">Health</span>
             <div class="bar-track">
-              <div class="bar-fill health-fill" style="width: {npc.health * 10}%"></div>
+              <div class="bar-fill severity-{healthDesc(npc.health).severity}" style="width: {npc.health * 10}%"></div>
             </div>
-            <span class="vital-value">{npc.health}</span>
+            <span class="vital-desc severity-text-{healthDesc(npc.health).severity}">{healthDesc(npc.health).label}</span>
           </div>
           <div class="vital">
             <span class="vital-label">Morale</span>
             <div class="bar-track">
-              <div class="bar-fill morale-fill" style="width: {npc.morale * 10}%"></div>
+              <div class="bar-fill severity-{moraleDesc(npc.morale).severity}" style="width: {npc.morale * 10}%"></div>
             </div>
-            <span class="vital-value">{npc.morale}</span>
+            <span class="vital-desc severity-text-{moraleDesc(npc.morale).severity}">{moraleDesc(npc.morale).label}</span>
+          </div>
+          <div class="vital">
+            <span class="vital-label">Fatigue</span>
+            <div class="bar-track">
+              <div class="bar-fill severity-{fatigueDesc(npc.fatigue).severity}" style="width: {npc.fatigue * 10}%"></div>
+            </div>
+            <span class="vital-desc severity-text-{fatigueDesc(npc.fatigue).severity}">{fatigueDesc(npc.fatigue).label}</span>
           </div>
           <div class="vital">
             <span class="vital-label">Hunger</span>
             <div class="bar-track">
-              <div class="bar-fill hunger-fill" style="width: {npc.hunger * 10}%"></div>
+              <div class="bar-fill severity-{hungerDesc(npc.hunger).severity}" style="width: {npc.hunger * 10}%"></div>
             </div>
-            <span class="vital-value">{npc.hunger}</span>
+            <span class="vital-desc severity-text-{hungerDesc(npc.hunger).severity}">{hungerDesc(npc.hunger).label}</span>
           </div>
         </div>
+        {#if npc.status === "at_camp"}
+          <div class="rest-action">
+            <button class="action-btn" onclick={startResting}>Rest</button>
+            {#if npc.lastRestedAt}
+              <span class="last-rested">Last rested: {formatDate(npc.lastRestedAt)}</span>
+            {:else}
+              <span class="last-rested">Never rested</span>
+            {/if}
+          </div>
+        {/if}
       </section>
 
       <section>
@@ -336,7 +402,7 @@
     align-items: center;
     display: grid;
     gap: 0.5rem;
-    grid-template-columns: 80px 1fr 24px;
+    grid-template-columns: 60px 1fr auto;
   }
 
   .vital-label {
@@ -345,22 +411,73 @@
     letter-spacing: 0.05em;
   }
 
-  .vital-value {
-    color: #d4b896;
-    font-size: 0.7rem;
+  .vital-desc {
+    font-size: 0.65rem;
+    letter-spacing: 0.05em;
     text-align: right;
+    text-transform: uppercase;
+    min-width: 72px;
   }
 
-  .health-fill {
-    background: #6b3030;
+  .severity-good {
+    background: #3a6b30;
   }
 
-  .morale-fill {
-    background: #30506b;
-  }
-
-  .hunger-fill {
+  .severity-warn {
     background: #6b5a30;
+  }
+
+  .severity-bad {
+    background: #6b3a20;
+  }
+
+  .severity-critical {
+    background: #6b2020;
+  }
+
+  .severity-text-good {
+    color: #7aaa60;
+  }
+
+  .severity-text-warn {
+    color: #c8a050;
+  }
+
+  .severity-text-bad {
+    color: #c07040;
+  }
+
+  .severity-text-critical {
+    color: #c04040;
+  }
+
+  .rest-action {
+    align-items: center;
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 0.25rem;
+  }
+
+  .action-btn {
+    background: #2a1e0e;
+    border: 1px solid #5a4020;
+    color: #d4b896;
+    cursor: pointer;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    padding: 0.3rem 0.75rem;
+    text-transform: uppercase;
+    transition: background 0.15s;
+  }
+
+  .action-btn:hover {
+    background: #3a2e1e;
+  }
+
+  .last-rested {
+    color: #5a4020;
+    font-size: 0.6rem;
+    letter-spacing: 0.05em;
   }
 
   .characteristics,

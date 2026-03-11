@@ -51,7 +51,7 @@ export interface GetCampCommand {
 export interface StartNpcActionCommand {
   type: "startNpcAction"
   npcId: string
-  actionType: "food_gathering" | "wood_gathering"
+  actionType: "food_gathering" | "wood_gathering" | "resting"
 }
 
 /** Request a list of all NPCs in the world. */
@@ -188,6 +188,8 @@ export interface NpcDetailEvent {
   health: number
   morale: number
   hunger: number
+  fatigue: number
+  lastRestedAt: InWorldDate | null
   career: Career
   status: NPCStatus
   characteristics: Characteristics
@@ -254,9 +256,10 @@ export interface NpcActionStoppedEvent {
 export interface NpcUpdateEvent {
   type: "npcUpdate"
   npcId: string
-  hunger: number
+  hunger?: number
   morale?: number
   health?: number
+  fatigue?: number
 }
 
 /** Broadcast when the fire pit state changes. */

@@ -1,5 +1,6 @@
 import type { FastifyInstance } from "fastify"
 import { ObjectId } from "mongodb"
+import { defaultCharacteristics, defaultNature, defaultOrigin } from "../core/character.js"
 import worldTopology from "../core/topology.js"
 import { authenticate } from "../middleware/authenticate.js"
 import { camps, npcs, players, regions, territories, towns, worlds } from "../models/collections.js"
@@ -78,9 +79,31 @@ export async function worldRoutes(app: FastifyInstance) {
       return reply.status(404).send({ error: "Player not found" })
     }
 
-    const playerNpc = await npcs.findOne({ ownerId: playerId, worldId: { $exists: false } })
+    let playerNpc = await npcs.findOne({ ownerId: playerId, worldId: { $exists: false } })
     if (!playerNpc) {
-      return reply.status(409).send({ error: "No available character to join with" })
+      const now = new Date()
+      const npcId = new ObjectId()
+      playerNpc = {
+        _id: npcId,
+        ownerId: playerId,
+        name: player.username,
+        health: 10,
+        morale: 10,
+        hunger: 0,
+        fatigue: 0,
+        characteristics: defaultCharacteristics(),
+        nature: defaultNature(),
+        traits: [],
+        career: "cowboy" as const,
+        skills: {},
+        origin: defaultOrigin(),
+        relationships: [],
+        status: "drifting" as const,
+        createdAt: now,
+        updatedAt: now,
+      }
+      await npcs.insertOne(playerNpc)
+      await players.updateOne({ _id: new ObjectId(playerId) }, { $push: { npcIds: npcId.toString() } })
     }
 
     const region = await regions.findOne({ worldId })

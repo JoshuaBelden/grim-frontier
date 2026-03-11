@@ -48,12 +48,19 @@
     return npc?.currentAction?.type ?? null
   }
 
-  function startGathering(npcId: string, actionType: "food_gathering" | "wood_gathering") {
+  function startAction(npcId: string, actionType: "food_gathering" | "wood_gathering" | "resting") {
     sendCommand({ type: "startNpcAction", npcId, actionType })
   }
 
-  function stopGathering(npcId: string) {
+  function stopAction(npcId: string) {
     sendCommand({ type: "stopNpcAction", npcId })
+  }
+
+  function actionLabel(actionType: string): string {
+    if (actionType === "food_gathering") return "Food"
+    if (actionType === "wood_gathering") return "Wood"
+    if (actionType === "resting") return "Resting"
+    return actionType
   }
 
   function toggleFirePit() {
@@ -135,15 +142,18 @@
                 <div class="npc-actions">
                   {#if getActionType(npc.id)}
                     <div class="gather-status">
-                      <span class="action-label">{getActionType(npc.id) === "food_gathering" ? "Food" : "Wood"}</span>
-                      <div class="progress-track">
-                        <div class="progress-fill" style="width: {gatherProgress * 100}%"></div>
-                      </div>
-                      <button class="action-btn stop" onclick={() => stopGathering(npc.id)}>Stop</button>
+                      <span class="action-label">{actionLabel(getActionType(npc.id)!)}</span>
+                      {#if getActionType(npc.id) !== "resting"}
+                        <div class="progress-track">
+                          <div class="progress-fill" style="width: {gatherProgress * 100}%"></div>
+                        </div>
+                      {/if}
+                      <button class="action-btn stop" onclick={() => stopAction(npc.id)}>Stop</button>
                     </div>
                   {:else}
-                    <button class="action-btn gather" onclick={() => startGathering(npc.id, "food_gathering")}>Gather Food</button>
-                    <button class="action-btn gather" onclick={() => startGathering(npc.id, "wood_gathering")}>Gather Wood</button>
+                    <button class="action-btn gather" onclick={() => startAction(npc.id, "food_gathering")}>Gather Food</button>
+                    <button class="action-btn gather" onclick={() => startAction(npc.id, "wood_gathering")}>Gather Wood</button>
+                    <button class="action-btn gather" onclick={() => startAction(npc.id, "resting")}>Rest</button>
                   {/if}
                 </div>
               </div>

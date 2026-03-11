@@ -48,7 +48,13 @@ export async function adminRoutes(app: FastifyInstance, opts: { clock: WorldCloc
       territories.deleteMany({}),
       towns.deleteMany({}),
       camps.deleteMany({}),
-      npcs.deleteMany({ ownerId: { $exists: true } }),
+      npcs.updateMany(
+        { ownerId: { $exists: true } },
+        {
+          $unset: { worldId: "", locationId: "", locationType: "", campId: "", currentAction: "", lastRestedAt: "" },
+          $set: { status: "drifting", health: 10, morale: 10, hunger: 0, fatigue: 0, updatedAt: new Date() },
+        },
+      ),
       npcs.updateMany(
         { ownerId: { $exists: false } },
         { $unset: { worldId: "", locationId: "", locationType: "", campId: "", currentAction: "" } },
@@ -56,7 +62,7 @@ export async function adminRoutes(app: FastifyInstance, opts: { clock: WorldCloc
       encounters.deleteMany({}),
       tasks.deleteMany({}),
       gameClocks.deleteMany({}),
-      players.updateMany({}, { $set: { npcIds: [] }, $unset: { campId: "" } }),
+      players.updateMany({}, { $unset: { campId: "" } }),
     ])
 
     clock.clearAll()

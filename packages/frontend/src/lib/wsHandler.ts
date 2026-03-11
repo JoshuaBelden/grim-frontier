@@ -108,9 +108,10 @@ const eventHandlers: Record<string, (message: ServerEvent) => void> = {
       const updated = new Map(current)
       updated.set(event.npcId, {
         ...existing,
-        hunger: event.hunger,
+        ...(event.hunger !== undefined && { hunger: event.hunger }),
         ...(event.morale !== undefined && { morale: event.morale }),
         ...(event.health !== undefined && { health: event.health }),
+        ...(event.fatigue !== undefined && { fatigue: event.fatigue }),
       })
       return updated
     })

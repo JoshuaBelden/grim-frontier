@@ -12,7 +12,7 @@ export type NPCStatus = "drifting" | "encountered" | "at_camp" | "gone"
 
 /** An ongoing NPC activity that runs until explicitly stopped. */
 export interface NpcAction {
-  type: "food_gathering" | "wood_gathering"
+  type: "food_gathering" | "wood_gathering" | "resting"
   startedAt: InWorldDate
 }
 
@@ -23,6 +23,8 @@ export interface NPC {
   health: number
   morale: number
   hunger: number
+  fatigue: number
+  lastRestedAt?: InWorldDate
   characteristics: Characteristics
   nature: Nature
   traits: Trait[]
