@@ -126,6 +126,19 @@ const eventHandlers: Record<string, (message: ServerEvent) => void> = {
       })
       return updated
     })
+    campDetailStore.update(current => {
+      if (!current) return current
+      const statUpdates: Partial<{ health: number; morale: number; hunger: number; fatigue: number }> = {}
+      if (event.health !== undefined) statUpdates.health = event.health
+      if (event.morale !== undefined) statUpdates.morale = event.morale
+      if (event.hunger !== undefined) statUpdates.hunger = event.hunger
+      if (event.fatigue !== undefined) statUpdates.fatigue = event.fatigue
+      if (Object.keys(statUpdates).length === 0) return current
+      return {
+        ...current,
+        npcs: current.npcs.map(npc => (npc.id === event.npcId ? { ...npc, ...statUpdates } : npc)),
+      }
+    })
   },
 
   firePitUpdate(message) {

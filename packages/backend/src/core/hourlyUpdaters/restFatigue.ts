@@ -1,12 +1,36 @@
-import type { InWorldDate } from "@grim-frontier/shared"
+import type { Camp, InWorldDate, NpcAction } from "@grim-frontier/shared"
+import type { WithId } from "mongodb"
 import { camps, npcs } from "../../models/collections.js"
+
+/** Fatigue threshold at which camp NPCs automatically begin resting. */
+const AUTO_REST_THRESHOLD = 6
 
 /** Converts an InWorldDate to a comparable hour count for elapsed-time checks. */
 function toTotalHours(date: InWorldDate): number {
   return ((date.year * 12 + date.month) * 30 + date.day) * 24 + date.hour
 }
 
-/** Processes rest and fatigue each hour. Resting NPCs recover; idle NPCs accumulate fatigue after 6 hours without rest. */
+/** Computes fatigue recovery per hour based on NPC grit (1–10). Base 1, up to 2 at grit 10. */
+function fatigueRecoveryRate(grit: number): number {
+  return 1 + (grit - 1) / 9
+}
+
+/** Computes health recovery per hour based on NPC strength (1–10). Base 0.5, up to 1.5 at strength 10. */
+function healthRecoveryRate(strength: number): number {
+  return 0.5 + (strength / 10)
+}
+
+/** Chooses food or wood gathering based on camp resource needs. Prefers whichever resource has fewer days of supply. */
+function chooseGatheringAction(camp: WithId<Camp>, npcCount: number): NpcAction["type"] {
+  const dailyFoodNeed = Math.max(1, npcCount)
+  const dailyWoodNeed = camp.amenities.firePit === "lit" ? 24 : 0
+  const foodDaysSupply = dailyFoodNeed > 0 ? camp.resources.food / dailyFoodNeed : Infinity
+  const woodDaysSupply = dailyWoodNeed > 0 ? camp.resources.wood / dailyWoodNeed : Infinity
+
+  return foodDaysSupply <= woodDaysSupply ? "food_gathering" : "wood_gathering"
+}
+
+/** Processes rest and fatigue each hour. Resting NPCs recover; idle NPCs accumulate fatigue or auto-assign to gathering. */
 export async function restFatigue(
   worldId: string,
   newDate: InWorldDate,
@@ -29,16 +53,64 @@ export async function restFatigue(
       const npcId = npc._id!.toString()
       const isResting = npc.currentAction?.type === "resting"
 
-      if (isResting) {
-        const newFatigue = Math.max(0, (npc.fatigue ?? 0) - 1)
-        const newHealth = Math.min(10, npc.health + 1)
-
+      // Auto-rest: fatigued camp NPCs with no current action begin resting
+      if (!isResting && !npc.currentAction && npc.fatigue >= AUTO_REST_THRESHOLD) {
         await npcs.updateOne(
           { _id: npc._id },
-          { $set: { fatigue: newFatigue, health: newHealth, lastRestedAt: newDate, updatedAt: now } },
+          { $set: { currentAction: { type: "resting", startedAt: newDate }, updatedAt: now } },
         )
 
-        broadcast(worldId, { type: "npcUpdate", npcId, fatigue: newFatigue, health: newHealth })
+        broadcast(worldId, { type: "npcActionStarted", npcId, action: "resting" })
+        continue
+      }
+
+      // Auto-gather: idle camp NPCs with no action and low fatigue start gathering
+      if (!npc.currentAction) {
+        const action = chooseGatheringAction(camp, campNpcs.length)
+        await npcs.updateOne(
+          { _id: npc._id },
+          { $set: { currentAction: { type: action, startedAt: newDate }, updatedAt: now } },
+        )
+
+        broadcast(worldId, { type: "npcActionStarted", npcId, action })
+        continue
+      }
+
+      if (isResting) {
+        const grit = npc.characteristics?.grit ?? 5
+        const strength = npc.characteristics?.strength ?? 5
+        const fatigueRecovery = fatigueRecoveryRate(grit)
+        const healthRecovery = healthRecoveryRate(strength)
+
+        const newFatigue = Math.max(0, (npc.fatigue ?? 0) - fatigueRecovery)
+        const newHealth = Math.min(10, npc.health + healthRecovery)
+
+        // Round to one decimal to avoid floating-point drift
+        const roundedFatigue = Math.round(newFatigue * 10) / 10
+        const roundedHealth = Math.round(newHealth * 10) / 10
+
+        // Auto-wake: stop resting once fully recovered, immediately start gathering
+        const fullyRested = roundedFatigue === 0
+        const gatherAction = fullyRested ? chooseGatheringAction(camp, campNpcs.length) : null
+        const updates: Record<string, unknown> = {
+          fatigue: roundedFatigue,
+          health: roundedHealth,
+          lastRestedAt: newDate,
+          updatedAt: now,
+        }
+
+        if (fullyRested && gatherAction) {
+          updates.currentAction = { type: gatherAction, startedAt: newDate }
+        }
+
+        await npcs.updateOne({ _id: npc._id }, { $set: updates })
+
+        broadcast(worldId, { type: "npcUpdate", npcId, fatigue: roundedFatigue, health: roundedHealth })
+
+        if (fullyRested && gatherAction) {
+          broadcast(worldId, { type: "npcActionStarted", npcId, action: gatherAction })
+        }
+
         continue
       }
 

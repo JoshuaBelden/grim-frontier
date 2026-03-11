@@ -65,6 +65,42 @@
     return actionType
   }
 
+  /** Returns a descriptor label and severity class for health (10=best). */
+  function healthDesc(value: number): { label: string; severity: string } {
+    if (value >= 7) return { label: "Healthy", severity: "good" }
+    if (value >= 4) return { label: "Unwell", severity: "warn" }
+    if (value >= 2) return { label: "Sick", severity: "bad" }
+    if (value === 1) return { label: "Dying", severity: "critical" }
+    return { label: "Dead", severity: "critical" }
+  }
+
+  /** Returns a descriptor label and severity class for morale (10=best). */
+  function moraleDesc(value: number): { label: string; severity: string } {
+    if (value >= 7) return { label: "Happy", severity: "good" }
+    if (value >= 4) return { label: "Discouraged", severity: "warn" }
+    if (value >= 2) return { label: "Despondent", severity: "bad" }
+    if (value === 1) return { label: "Miserable", severity: "critical" }
+    return { label: "Broken", severity: "critical" }
+  }
+
+  /** Returns a descriptor label and severity class for fatigue (0=best). */
+  function fatigueDesc(value: number): { label: string; severity: string } {
+    if (value <= 3) return { label: "Rested", severity: "good" }
+    if (value <= 6) return { label: "Tired", severity: "warn" }
+    if (value <= 8) return { label: "Exhausted", severity: "bad" }
+    if (value === 9) return { label: "Fading", severity: "critical" }
+    return { label: "Collapsed", severity: "critical" }
+  }
+
+  /** Returns a descriptor label and severity class for hunger (0=best). */
+  function hungerDesc(value: number): { label: string; severity: string } {
+    if (value <= 3) return { label: "Full", severity: "good" }
+    if (value <= 6) return { label: "Peckish", severity: "warn" }
+    if (value <= 8) return { label: "Hungry", severity: "bad" }
+    if (value === 9) return { label: "Weak", severity: "critical" }
+    return { label: "Starving", severity: "critical" }
+  }
+
   function toggleFirePit() {
     if (!camp) return
     const newState = camp.amenities.firePit === "lit" ? "burned_out" : "lit"
@@ -132,16 +168,17 @@
         <ul class="roster">
           {#each camp.npcs as npc}
             <li>
-              <div class="roster-row">
-                <button
-                  class="roster-btn"
-                  onclick={() => npcPanelStore.open({ key: npc.id, npcId: npc.id, name: npc.name, career: npc.career })}
-                >
-                  <span class="npc-name">{npc.name}</span>
-                  <span class="npc-career">{npc.career.replace(/_/g, " ")}</span>
-                </button>
+              <div class="roster-entry">
+                <div class="roster-row">
+                  <button
+                    class="roster-btn"
+                    onclick={() => npcPanelStore.open({ key: npc.id, npcId: npc.id, name: npc.name, career: npc.career })}
+                  >
+                    <span class="npc-name">{npc.name}</span>
+                    <span class="npc-career">{npc.career.replace(/_/g, " ")}</span>
+                  </button>
 
-                <div class="npc-actions">
+                  <div class="npc-actions">
                   {#if getActionType(npc.id)}
                     <div class="gather-status">
                       <span class="action-label">{actionLabel(getActionType(npc.id)!)}</span>
@@ -157,6 +194,13 @@
                     <button class="action-btn gather" onclick={() => startAction(npc.id, "wood_gathering")}>Gather Wood</button>
                     <button class="action-btn gather" onclick={() => startAction(npc.id, "resting")}>Rest</button>
                   {/if}
+                  </div>
+                </div>
+                <div class="npc-stats">
+                  <span class="stat stat-{healthDesc(npc.health).severity}">{healthDesc(npc.health).label}</span>
+                  <span class="stat stat-{moraleDesc(npc.morale).severity}">{moraleDesc(npc.morale).label}</span>
+                  <span class="stat stat-{hungerDesc(npc.hunger).severity}">{hungerDesc(npc.hunger).label}</span>
+                  <span class="stat stat-{fatigueDesc(npc.fatigue).severity}">{fatigueDesc(npc.fatigue).label}</span>
                 </div>
               </div>
             </li>
@@ -275,11 +319,18 @@
     list-style: none;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.75rem;
   }
 
   .roster li {
     display: flex;
+  }
+
+  .roster-entry {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    width: 100%;
   }
 
   .roster-row {
@@ -287,6 +338,34 @@
     align-items: center;
     gap: 1rem;
     width: 100%;
+  }
+
+  .npc-stats {
+    display: flex;
+    gap: 1rem;
+    padding-left: 0.25rem;
+  }
+
+  .stat {
+    font-size: 0.6rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .stat-good {
+    color: #7aaa60;
+  }
+
+  .stat-warn {
+    color: #c8a050;
+  }
+
+  .stat-bad {
+    color: #c07040;
+  }
+
+  .stat-critical {
+    color: #c04040;
   }
 
   .roster-btn {

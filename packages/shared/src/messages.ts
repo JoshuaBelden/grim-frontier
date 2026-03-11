@@ -267,6 +267,10 @@ export interface CampDetailNpc {
   id: string
   name: string
   career: Career
+  health: number
+  morale: number
+  hunger: number
+  fatigue: number
   currentAction: NpcAction | null
 }
 

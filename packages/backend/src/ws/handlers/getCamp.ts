@@ -42,6 +42,10 @@ export async function handleGetCamp(context: HandlerContext, payload: unknown): 
       id: npc._id!.toString(),
       name: npc.name,
       career: npc.career,
+      health: npc.health,
+      morale: npc.morale,
+      hunger: npc.hunger,
+      fatigue: npc.fatigue,
       currentAction: npc.currentAction ?? null,
     })),
   })

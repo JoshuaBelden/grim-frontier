@@ -158,7 +158,7 @@
   .avatar-tray {
     bottom: 1.25rem;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     gap: 0.5rem;
     left: 1.25rem;
     position: fixed;

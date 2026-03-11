@@ -100,6 +100,10 @@ export async function handleRespondJoinRequest(context: HandlerContext, payload:
         id: npc._id!.toString(),
         name: npc.name,
         career: npc.career,
+        health: npc.health,
+        morale: npc.morale,
+        hunger: npc.hunger,
+        fatigue: npc.fatigue,
         currentAction: npc.currentAction ?? null,
       })),
     })
