@@ -55,10 +55,6 @@ export async function adminRoutes(app: FastifyInstance, opts: { clock: WorldCloc
           $set: { status: "drifting", health: 10, morale: 10, hunger: 0, fatigue: 0, updatedAt: new Date() },
         },
       ),
-      npcs.updateMany(
-        { ownerId: { $exists: false } },
-        { $unset: { worldId: "", locationId: "", locationType: "", campId: "", currentAction: "" } },
-      ),
       encounters.deleteMany({}),
       tasks.deleteMany({}),
       gameClocks.deleteMany({}),
@@ -68,6 +64,35 @@ export async function adminRoutes(app: FastifyInstance, opts: { clock: WorldCloc
     clock.clearAll()
     const result = await seedWorld("Grim Frontier", worldTopology)
     clock.setDate(result.worldId, INITIAL_IN_WORLD_DATE)
+
+    const townIds = Object.values(result.landmarkIds)
+    const unownedNpcs = await npcs.find({ ownerId: { $exists: false } }).toArray()
+    const bulkOps = unownedNpcs.map(npc => {
+      const randomTownId = townIds[Math.floor(Math.random() * townIds.length)]
+      return {
+        updateOne: {
+          filter: { _id: npc._id },
+          update: {
+            $set: {
+              worldId: result.worldId,
+              locationId: randomTownId,
+              locationType: "town" as const,
+              status: "drifting" as const,
+              health: 10,
+              morale: 10,
+              hunger: 0,
+              fatigue: 0,
+              updatedAt: new Date(),
+            },
+            $unset: { campId: "" as const, currentAction: "" as const },
+          },
+        },
+      }
+    })
+
+    if (bulkOps.length > 0) {
+      await npcs.bulkWrite(bulkOps)
+    }
 
     return reply.status(201).send(result)
   })
