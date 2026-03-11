@@ -2,8 +2,6 @@
 
 ## Next
 
-- NPCs have health
-- NPCs have morale
 - NPCs have hunger levels that increase without food
 - NPCs get tired, add bedrolls to amenities
 - Add seasons, weather, and temperature

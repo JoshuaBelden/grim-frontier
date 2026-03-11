@@ -84,6 +84,25 @@
       <p class="muted">Loading…</p>
     {:else}
       <section>
+        <div class="vitals">
+          <div class="vital">
+            <span class="vital-label">Health</span>
+            <div class="bar-track">
+              <div class="bar-fill health-fill" style="width: {npc.health * 10}%"></div>
+            </div>
+            <span class="vital-value">{npc.health}</span>
+          </div>
+          <div class="vital">
+            <span class="vital-label">Morale</span>
+            <div class="bar-track">
+              <div class="bar-fill morale-fill" style="width: {npc.morale * 10}%"></div>
+            </div>
+            <span class="vital-value">{npc.morale}</span>
+          </div>
+        </div>
+      </section>
+
+      <section>
         <h3 class="section-heading">Characteristics</h3>
         <div class="characteristics">
           {#each Object.entries(characteristicLabels) as [key, label]}
@@ -298,6 +317,39 @@
     letter-spacing: 0.15em;
     padding-bottom: 0.4rem;
     text-transform: uppercase;
+  }
+
+  .vitals {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+
+  .vital {
+    align-items: center;
+    display: grid;
+    gap: 0.5rem;
+    grid-template-columns: 80px 1fr 24px;
+  }
+
+  .vital-label {
+    color: #8a7060;
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+  }
+
+  .vital-value {
+    color: #d4b896;
+    font-size: 0.7rem;
+    text-align: right;
+  }
+
+  .health-fill {
+    background: #6b3030;
+  }
+
+  .morale-fill {
+    background: #30506b;
   }
 
   .characteristics,

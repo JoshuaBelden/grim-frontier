@@ -20,6 +20,8 @@ export interface NPC {
   worldId?: string
   ownerId?: string
   name: string
+  health: number
+  morale: number
   characteristics: Characteristics
   nature: Nature
   traits: Trait[]

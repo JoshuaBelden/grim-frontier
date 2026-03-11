@@ -269,6 +269,8 @@ export async function generateNpcPool(count: number): Promise<NPC[]> {
     const data = raw as Omit<NPC, "status" | "relationships" | "createdAt" | "updatedAt">
     return {
       ...data,
+      health: 10,
+      morale: 10,
       status: "drifting" as const,
       relationships: [],
       createdAt: now,

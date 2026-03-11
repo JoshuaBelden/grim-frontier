@@ -37,6 +37,8 @@ export async function authRoutes(app: FastifyInstance) {
       _id: npcId,
       ownerId: playerId.toString(),
       name: username,
+      health: 10,
+      morale: 10,
       characteristics: defaultCharacteristics(),
       nature: defaultNature(),
       traits: [],

@@ -184,6 +184,8 @@ export interface NpcDetailEvent {
   locationType: "town" | "camp" | null
   locationName: string | null
   name: string
+  health: number
+  morale: number
   career: Career
   status: NPCStatus
   characteristics: Characteristics

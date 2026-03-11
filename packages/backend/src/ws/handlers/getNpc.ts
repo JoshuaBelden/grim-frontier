@@ -40,6 +40,8 @@ export async function handleGetNpc(context: HandlerContext, payload: unknown): P
     locationType: npc.locationType ?? null,
     locationName,
     name: npc.name,
+    health: npc.health,
+    morale: npc.morale,
     career: npc.career,
     status: npc.status,
     characteristics: npc.characteristics,
