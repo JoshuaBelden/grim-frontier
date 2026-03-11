@@ -61,7 +61,6 @@ export async function handleRespondJoinRequest(context: HandlerContext, payload:
         $set: {
           status: "at_camp" as const,
           campId: campIdStr,
-          ownerId: context.playerId,
           locationId: campIdStr,
           locationType: "camp" as const,
           updatedAt: now,
@@ -98,6 +97,7 @@ export async function handleRespondJoinRequest(context: HandlerContext, payload:
       notoriety: camp.notoriety,
       npcs: campNpcs.map(npc => ({
         id: npc._id!.toString(),
+        ownerId: npc.ownerId ?? null,
         name: npc.name,
         career: npc.career,
         health: npc.health,

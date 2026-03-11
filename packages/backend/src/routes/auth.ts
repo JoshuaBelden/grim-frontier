@@ -1,10 +1,9 @@
-import type { NPC, Player } from "@grim-frontier/shared"
+import type { Player } from "@grim-frontier/shared"
 import type { FastifyInstance } from "fastify"
 import { ObjectId } from "mongodb"
-import { defaultCharacteristics, defaultNature, defaultOrigin } from "../core/character.js"
 import { redis } from "../db/redis.js"
 import { authenticate } from "../middleware/authenticate.js"
-import { npcs, players } from "../models/collections.js"
+import { players } from "../models/collections.js"
 
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7 // 7 days
 
@@ -31,35 +30,12 @@ export async function authRoutes(app: FastifyInstance) {
     const passwordHash = await Bun.password.hash(password)
     const now = new Date()
     const playerId = new ObjectId()
-    const npcId = new ObjectId()
-
-    const npc: NPC & { _id: ObjectId } = {
-      _id: npcId,
-      ownerId: playerId.toString(),
-      name: username,
-      health: 10,
-      morale: 10,
-      hunger: 0,
-      fatigue: 0,
-      characteristics: defaultCharacteristics(),
-      nature: defaultNature(),
-      traits: [],
-      career: "cowboy",
-      skills: {},
-      origin: defaultOrigin(),
-      relationships: [],
-      status: "drifting",
-      createdAt: now,
-      updatedAt: now,
-    }
-
-    await npcs.insertOne(npc)
 
     const player: Player & { _id: ObjectId } = {
       _id: playerId,
       username,
       passwordHash,
-      npcIds: [npcId.toString()],
+      npcIds: [],
       createdAt: now,
       updatedAt: now,
     }

@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { InWorldDate, NpcDetailEvent } from "@grim-frontier/shared"
+  import { authStore } from "$lib/stores/auth"
   import { npcPanelStore, type PanelEntry } from "$lib/stores/npcPanels"
   import { wsErrorStore } from "$lib/stores/wsError"
   import { sendCommand } from "$lib/ws"
@@ -165,7 +166,7 @@
             <span class="vital-desc severity-text-{hungerDesc(npc.hunger).severity}">{hungerDesc(npc.hunger).label}</span>
           </div>
         </div>
-        {#if npc.status === "at_camp"}
+        {#if npc.status === "at_camp" && npc.ownerId === $authStore.playerId}
           <div class="rest-action">
             <button class="action-btn" onclick={startResting}>Rest</button>
             {#if npc.lastRestedAt}

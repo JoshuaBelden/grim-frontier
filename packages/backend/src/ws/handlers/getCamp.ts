@@ -40,6 +40,7 @@ export async function handleGetCamp(context: HandlerContext, payload: unknown): 
     notoriety: camp.notoriety,
     npcs: campNpcs.map(npc => ({
       id: npc._id!.toString(),
+      ownerId: npc.ownerId ?? null,
       name: npc.name,
       career: npc.career,
       health: npc.health,

@@ -79,32 +79,29 @@ export async function worldRoutes(app: FastifyInstance) {
       return reply.status(404).send({ error: "Player not found" })
     }
 
-    let playerNpc = await npcs.findOne({ ownerId: playerId, worldId: { $exists: false } })
-    if (!playerNpc) {
-      const now = new Date()
-      const npcId = new ObjectId()
-      playerNpc = {
-        _id: npcId,
-        ownerId: playerId,
-        name: player.username,
-        health: 10,
-        morale: 10,
-        hunger: 0,
-        fatigue: 0,
-        characteristics: defaultCharacteristics(),
-        nature: defaultNature(),
-        traits: [],
-        career: "cowboy" as const,
-        skills: {},
-        origin: defaultOrigin(),
-        relationships: [],
-        status: "drifting" as const,
-        createdAt: now,
-        updatedAt: now,
-      }
-      await npcs.insertOne(playerNpc)
-      await players.updateOne({ _id: new ObjectId(playerId) }, { $push: { npcIds: npcId.toString() } })
+    const now = new Date()
+    const npcId = new ObjectId()
+    const playerNpc = {
+      _id: npcId,
+      ownerId: playerId,
+      name: player.username,
+      health: 10,
+      morale: 10,
+      hunger: 0,
+      fatigue: 0,
+      characteristics: defaultCharacteristics(),
+      nature: defaultNature(),
+      traits: [],
+      career: "cowboy" as const,
+      skills: {},
+      origin: defaultOrigin(),
+      relationships: [],
+      status: "drifting" as const,
+      createdAt: now,
+      updatedAt: now,
     }
+    await npcs.insertOne(playerNpc)
+    await players.updateOne({ _id: new ObjectId(playerId) }, { $push: { npcIds: npcId.toString() } })
 
     const region = await regions.findOne({ worldId })
     const territory = region ? await territories.findOne({ regionId: region._id!.toString() }) : null
@@ -122,7 +119,6 @@ export async function worldRoutes(app: FastifyInstance) {
     const nearestLandmarkKey = nearestLandmark?.key ?? "dustercreek"
     const distanceToLandmark = Math.floor(Math.random() * 3) + 3
 
-    const now = new Date()
     const campId = new ObjectId()
 
     await camps.insertOne({
@@ -160,7 +156,6 @@ export async function worldRoutes(app: FastifyInstance) {
 
     await players.updateOne({ _id: new ObjectId(playerId) }, { $set: { campId: campId.toString(), updatedAt: now } })
 
-    const npcId = playerNpc._id!.toString()
-    return reply.status(201).send({ campId: campId.toString(), worldId, npcId })
+    return reply.status(201).send({ campId: campId.toString(), worldId, npcId: npcId.toString() })
   })
 }

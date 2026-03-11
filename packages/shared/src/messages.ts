@@ -209,6 +209,7 @@ export interface TownDetailEvent {
 export interface NpcDetailEvent {
   type: "npcDetail"
   id: string
+  ownerId: string | null
   worldId: string | null
   locationId: string | null
   locationType: "town" | "camp" | null
@@ -265,6 +266,7 @@ export interface CampDetailEvent {
 /** Thin NPC summary within a camp detail payload. */
 export interface CampDetailNpc {
   id: string
+  ownerId: string | null
   name: string
   career: Career
   health: number

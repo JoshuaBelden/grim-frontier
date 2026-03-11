@@ -41,6 +41,7 @@ export async function handleGetNpc(context: HandlerContext, payload: unknown): P
   context.send({
     type: "npcDetail",
     id: npc._id!.toString(),
+    ownerId: npc.ownerId ?? null,
     worldId: npc.worldId ?? null,
     locationId: npc.locationId ?? null,
     locationType: npc.locationType ?? null,
