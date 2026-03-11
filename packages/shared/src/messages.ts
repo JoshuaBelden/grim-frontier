@@ -23,6 +23,9 @@ export type ClientCommandType =
   | "startNpcAction"
   | "stopNpcAction"
   | "setFirePit"
+  | "respondJoinRequest"
+  | "listJoinRequests"
+  | "listAcquaintances"
 
 /** Request the territory map for the connected world. */
 export interface GetWorldMapCommand {
@@ -73,6 +76,23 @@ export interface SetFirePitCommand {
   state: FirePitState
 }
 
+/** Accept or decline a drifter's request to join the player's camp. */
+export interface RespondJoinRequestCommand {
+  type: "respondJoinRequest"
+  requestId: string
+  response: "accept" | "decline"
+}
+
+/** Request all pending join requests for the player's camp. */
+export interface ListJoinRequestsCommand {
+  type: "listJoinRequests"
+}
+
+/** Request the player's acquaintance ledger. */
+export interface ListAcquaintancesCommand {
+  type: "listAcquaintances"
+}
+
 /** Discriminated union of all client-to-server commands. */
 export type ClientCommand =
   | GetWorldMapCommand
@@ -83,6 +103,9 @@ export type ClientCommand =
   | StartNpcActionCommand
   | StopNpcActionCommand
   | SetFirePitCommand
+  | RespondJoinRequestCommand
+  | ListJoinRequestsCommand
+  | ListAcquaintancesCommand
 
 // ---------------------------------------------------------------------------
 // Server → Client events
@@ -103,6 +126,10 @@ export type ServerEventType =
   | "npcActionStopped"
   | "npcUpdate"
   | "firePitUpdate"
+  | "joinRequestReceived"
+  | "joinRequestList"
+  | "joinRequestResolved"
+  | "acquaintanceList"
 
 /** Sent on initial WebSocket connection. */
 export interface ConnectedEvent {
@@ -186,6 +213,7 @@ export interface NpcDetailEvent {
   locationId: string | null
   locationType: "town" | "camp" | null
   locationName: string | null
+  travelDestination: string | null
   name: string
   health: number
   morale: number
@@ -209,6 +237,7 @@ export interface NpcListItem {
   status: NPCStatus
   locationName: string | null
   locationType: "town" | "camp" | null
+  travelDestination: string | null
 }
 
 /** Response to listNpcs — all NPCs in the world. */
@@ -271,6 +300,45 @@ export interface FirePitUpdateEvent {
   state: FirePitState
 }
 
+/** Sent to a player when a drifting NPC requests to join their camp. */
+export interface JoinRequestReceivedEvent {
+  type: "joinRequestReceived"
+  requestId: string
+  npcName: string
+  npcCareer: Career
+  originSummary: string
+}
+
+/** Response to listJoinRequests — all pending requests for the player's camp. */
+export interface JoinRequestListEvent {
+  type: "joinRequestList"
+  requests: Array<{
+    requestId: string
+    npcName: string
+    npcCareer: Career
+    originSummary: string
+  }>
+}
+
+/** Confirmation that a join request was accepted or declined. */
+export interface JoinRequestResolvedEvent {
+  type: "joinRequestResolved"
+  requestId: string
+  npcId: string
+  response: "accept" | "decline"
+}
+
+/** Response to listAcquaintances — NPCs the player has previously declined. */
+export interface AcquaintanceListEvent {
+  type: "acquaintanceList"
+  acquaintances: Array<{
+    npcId: string
+    npcName: string
+    npcCareer: Career
+    declinedAt: string
+  }>
+}
+
 /** Discriminated union of all server-to-client events. */
 export type ServerEvent =
   | ConnectedEvent
@@ -286,3 +354,7 @@ export type ServerEvent =
   | NpcActionStoppedEvent
   | NpcUpdateEvent
   | FirePitUpdateEvent
+  | JoinRequestReceivedEvent
+  | JoinRequestListEvent
+  | JoinRequestResolvedEvent
+  | AcquaintanceListEvent

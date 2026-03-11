@@ -29,6 +29,18 @@ function sendToClient(socket: WsClient, event: ServerEvent): void {
   }
 }
 
+/** Sends a message to a specific player in a world. */
+export function sendToPlayer(worldId: string, playerId: string, message: object): void {
+  const clients = worldClients.get(worldId)
+  if (!clients) return
+  const payload = JSON.stringify(message)
+  for (const client of clients) {
+    if (client.playerId === playerId && client.socket.readyState === client.socket.OPEN) {
+      client.socket.send(payload)
+    }
+  }
+}
+
 /** Broadcasts a message to all clients connected to a specific world. */
 export function broadcastToWorld(worldId: string, message: object): void {
   const clients = worldClients.get(worldId)

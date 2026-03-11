@@ -61,6 +61,13 @@ export async function handleListNpcs(context: HandlerContext): Promise<void> {
     locationNameMap.set(town._id!.toString(), town.name)
   }
 
+  // Build a nodeKey → name map for travel destinations
+  const allTowns = await towns.find({}).toArray()
+  const nodeKeyNameMap = new Map<string, string>()
+  for (const town of allTowns) {
+    if (town.nodeKey) nodeKeyNameMap.set(town.nodeKey, town.name)
+  }
+
   const items: NpcListItem[] = allNpcs.map(npc => ({
     id: npc._id!.toString(),
     name: npc.name,
@@ -68,6 +75,10 @@ export async function handleListNpcs(context: HandlerContext): Promise<void> {
     status: npc.status,
     locationName: npc.locationId ? locationNameMap.get(npc.locationId) ?? null : null,
     locationType: npc.locationType ?? null,
+    travelDestination:
+      npc.status === "travelling" && npc.travelState
+        ? nodeKeyNameMap.get(npc.travelState.toLandmarkKey) ?? npc.travelState.toLandmarkKey
+        : null,
   }))
 
   context.send({ type: "npcList", npcs: items })

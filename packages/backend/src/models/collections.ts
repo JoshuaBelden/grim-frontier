@@ -1,7 +1,9 @@
 import type {
+  Acquaintance,
   Camp,
   Encounter,
   GameClock,
+  JoinRequest,
   NPC,
   Player,
   Region,
@@ -31,3 +33,5 @@ export const npcs = db.collection<Doc<NPC>>("npcs") as Collection<Doc<NPC>>
 export const gameClocks = db.collection<Doc<GameClock>>("gameClocks") as Collection<Doc<GameClock>>
 export const tasks = db.collection<Doc<Task>>("tasks") as Collection<Doc<Task>>
 export const encounters = db.collection<Doc<Encounter>>("encounters") as Collection<Doc<Encounter>>
+export const joinRequests = db.collection<Doc<JoinRequest>>("joinRequests") as Collection<Doc<JoinRequest>>
+export const acquaintances = db.collection<Doc<Acquaintance>>("acquaintances") as Collection<Doc<Acquaintance>>

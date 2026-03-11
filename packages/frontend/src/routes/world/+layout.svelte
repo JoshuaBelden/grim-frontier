@@ -1,5 +1,6 @@
 <script lang="ts">
   import { goto } from "$app/navigation"
+  import JoinRequestModal from "$lib/components/camp/JoinRequestModal.svelte"
   import NpcAvatar from "$lib/components/npc/NpcAvatar.svelte"
   import NpcListPanel from "$lib/components/npc/NpcListPanel.svelte"
   import NpcPanels from "$lib/components/npc/NpcPanels.svelte"
@@ -27,6 +28,7 @@
     if ($authStore.campId) {
       sendCommand({ type: "getCamp", campId: $authStore.campId })
     }
+    sendCommand({ type: "listJoinRequests" })
     return disconnectWs
   })
 
@@ -88,6 +90,7 @@
 
 <NpcListPanel />
 <NpcPanels />
+<JoinRequestModal />
 
 <style>
   .shell {

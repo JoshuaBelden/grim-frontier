@@ -120,7 +120,9 @@
     <h2 class="name">{entry.name}</h2>
     {#if npc}
       <span class="status">{npc.status.replace(/_/g, " ")}</span>
-      {#if npc.locationName}
+      {#if npc.status === "travelling" && npc.travelDestination}
+        <span class="location travelling">Heading to {npc.travelDestination}</span>
+      {:else if npc.locationName}
         <span class="location">{npc.locationName}</span>
       {/if}
     {/if}
@@ -367,6 +369,11 @@
     font-size: 0.6rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
+  }
+
+  .location.travelling {
+    color: #9a8a4a;
+    font-style: italic;
   }
 
   .panel-body {

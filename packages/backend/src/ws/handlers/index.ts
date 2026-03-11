@@ -4,9 +4,12 @@ import { handleGetWorldMap } from "./getWorldMap.js"
 import { handleGetTown } from "./getTown.js"
 import { handleGetNpc } from "./getNpc.js"
 import { handleGetCamp } from "./getCamp.js"
-import { handleStartNpcAction } from "./startNpcAction.js"
+import { handleListAcquaintances } from "./listAcquaintances.js"
+import { handleListJoinRequests } from "./listJoinRequests.js"
 import { handleListNpcs } from "./listNpcs.js"
+import { handleRespondJoinRequest } from "./respondJoinRequest.js"
 import { handleSetFirePit } from "./setFirePit.js"
+import { handleStartNpcAction } from "./startNpcAction.js"
 import { handleStopNpcAction } from "./stopNpcAction.js"
 
 export interface HandlerContext {
@@ -28,4 +31,7 @@ export const commandHandlers: Record<ClientCommandType, CommandHandler> = {
   startNpcAction: handleStartNpcAction,
   stopNpcAction: handleStopNpcAction,
   setFirePit: handleSetFirePit,
+  respondJoinRequest: handleRespondJoinRequest,
+  listJoinRequests: handleListJoinRequests,
+  listAcquaintances: handleListAcquaintances,
 }

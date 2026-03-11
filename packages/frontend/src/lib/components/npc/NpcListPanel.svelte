@@ -50,11 +50,13 @@
           <div class="npc-name">{npc.name}</div>
           <div class="npc-meta">
             <span class="npc-career">{npc.career}</span>
-            <span class="npc-status" class:drifting={npc.status === "drifting"} class:at-camp={npc.status === "at_camp"}
+            <span class="npc-status" class:drifting={npc.status === "drifting"} class:travelling={npc.status === "travelling"} class:at-camp={npc.status === "at_camp"}
               >{formatStatus(npc.status)}</span
             >
           </div>
-          {#if npc.locationName}
+          {#if npc.status === "travelling" && npc.travelDestination}
+            <div class="npc-location travelling">{npc.travelDestination}</div>
+          {:else if npc.locationName}
             <div class="npc-location">
               {npc.locationType === "camp" ? "⛺" : "🏘"} {npc.locationName}
             </div>
@@ -190,6 +192,10 @@
     color: #7a6a40;
   }
 
+  .npc-status.travelling {
+    color: #9a8a4a;
+  }
+
   .npc-status.at-camp {
     color: #7a9a4a;
   }
@@ -198,6 +204,11 @@
     color: #6a5a40;
     font-size: 0.6rem;
     margin-top: 0.2rem;
+  }
+
+  .npc-location.travelling {
+    color: #9a8a4a;
+    font-style: italic;
   }
 
   .npc-location.faded {

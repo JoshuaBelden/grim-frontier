@@ -5,6 +5,7 @@ import { consumeFireWood } from "./core/hourlyUpdaters/consumeFireWood.js"
 import { consumeFood } from "./core/hourlyUpdaters/consumeFood.js"
 import { gatherFood } from "./core/hourlyUpdaters/gatherFood.js"
 import { gatherWood } from "./core/hourlyUpdaters/gatherWood.js"
+import { drifterAI } from "./core/hourlyUpdaters/drifterAI.js"
 import { restFatigue } from "./core/hourlyUpdaters/restFatigue.js"
 import { createWeatherUpdater } from "./core/hourlyUpdaters/updateWeather.js"
 import { generateDailyWeather } from "./core/weatherGenerator.js"
@@ -73,6 +74,7 @@ async function start() {
   clock.registerHourlyUpdater(consumeFood)
   clock.registerHourlyUpdater(consumeFireWood)
   clock.registerHourlyUpdater(restFatigue)
+  clock.registerHourlyUpdater(drifterAI)
   clock.start(broadcastToWorld, GAME_HOUR_INTERVAL_MS)
 
   await app.listen({ port, host: "0.0.0.0" })

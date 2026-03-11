@@ -1,5 +1,6 @@
 export * from "./camp"
 export * from "./careers"
+export * from "./drifter"
 export * from "./characteristics"
 export * from "./clock"
 export * from "./encounters"

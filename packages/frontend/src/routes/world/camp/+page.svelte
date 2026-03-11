@@ -1,5 +1,6 @@
 <script lang="ts">
   import { goto } from "$app/navigation"
+  import AcquaintanceList from "$lib/components/camp/AcquaintanceList.svelte"
   import { GAME_HOUR_INTERVAL_MS } from "$lib/constants"
   import { authStore } from "$lib/stores/auth"
   import { campDetailStore } from "$lib/stores/camp"
@@ -32,6 +33,7 @@
       return
     }
     sendCommand({ type: "getCamp", campId })
+    sendCommand({ type: "listAcquaintances" })
 
     progressInterval = setInterval(() => {
       const elapsed = Date.now() - $lastClockUpdateAt
@@ -162,6 +164,8 @@
         </ul>
       {/if}
     </section>
+
+    <AcquaintanceList />
   {/if}
 </div>
 

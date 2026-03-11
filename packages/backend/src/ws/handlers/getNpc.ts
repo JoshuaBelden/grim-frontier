@@ -32,6 +32,12 @@ export async function handleGetNpc(context: HandlerContext, payload: unknown): P
     }
   }
 
+  let travelDestination: string | null = null
+  if (npc.status === "travelling" && npc.travelState) {
+    const destinationTown = await towns.findOne({ nodeKey: npc.travelState.toLandmarkKey })
+    travelDestination = destinationTown?.name ?? npc.travelState.toLandmarkKey
+  }
+
   context.send({
     type: "npcDetail",
     id: npc._id!.toString(),
@@ -39,6 +45,7 @@ export async function handleGetNpc(context: HandlerContext, payload: unknown): P
     locationId: npc.locationId ?? null,
     locationType: npc.locationType ?? null,
     locationName,
+    travelDestination,
     name: npc.name,
     health: npc.health,
     morale: npc.morale,

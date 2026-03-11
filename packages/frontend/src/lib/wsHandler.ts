@@ -1,9 +1,14 @@
 import type {
+  AcquaintanceListEvent,
   CampDetailEvent,
   CampUpdateEvent,
   ClockUpdateEvent,
+  ErrorEvent,
   FirePitUpdateEvent,
   InWorldDate,
+  JoinRequestListEvent,
+  JoinRequestReceivedEvent,
+  JoinRequestResolvedEvent,
   NpcActionStartedEvent,
   NpcActionStoppedEvent,
   NpcDetailEvent,
@@ -13,10 +18,11 @@ import type {
   TownDetailEvent,
   WorldMapEvent,
   WorldWeather,
-  ErrorEvent,
 } from "@grim-frontier/shared"
 import { writable } from "svelte/store"
+import { acquaintanceStore } from "./stores/acquaintances"
 import { campDetailStore } from "./stores/camp"
+import { joinRequestStore } from "./stores/joinRequests"
 import { npcListStore } from "./stores/npcList"
 import { worldMapStore } from "./stores/worldMap"
 import { wsErrorStore } from "./stores/wsError"
@@ -130,6 +136,34 @@ const eventHandlers: Record<string, (message: ServerEvent) => void> = {
       }
       return current
     })
+  },
+
+  joinRequestReceived(message) {
+    const event = message as JoinRequestReceivedEvent
+    joinRequestStore.update(current => [...current, event])
+  },
+
+  joinRequestList(message) {
+    const event = message as JoinRequestListEvent
+    joinRequestStore.set(
+      event.requests.map(request => ({
+        type: "joinRequestReceived" as const,
+        requestId: request.requestId,
+        npcName: request.npcName,
+        npcCareer: request.npcCareer,
+        originSummary: request.originSummary,
+      })),
+    )
+  },
+
+  joinRequestResolved(message) {
+    const event = message as JoinRequestResolvedEvent
+    joinRequestStore.update(current => current.filter(request => request.requestId !== event.requestId))
+  },
+
+  acquaintanceList(message) {
+    const event = message as AcquaintanceListEvent
+    acquaintanceStore.set(event.acquaintances)
   },
 
   error(message) {

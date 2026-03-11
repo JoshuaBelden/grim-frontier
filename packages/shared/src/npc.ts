@@ -1,5 +1,6 @@
 import type { Career } from "./careers"
 import type { Characteristics } from "./characteristics"
+import type { NpcTravelState } from "./drifter"
 import type { Nature } from "./nature"
 import type { CharacterOrigin } from "./origin"
 import type { Relationship } from "./relationships"
@@ -8,7 +9,7 @@ import type { Trait } from "./traits"
 import type { InWorldDate } from "./world"
 
 /** Lifecycle status of an NPC within the world simulation. */
-export type NPCStatus = "drifting" | "encountered" | "at_camp" | "gone"
+export type NPCStatus = "drifting" | "travelling" | "encountered" | "at_camp" | "gone"
 
 /** An ongoing NPC activity that runs until explicitly stopped. */
 export interface NpcAction {
@@ -36,6 +37,7 @@ export interface NPC {
   locationId?: string
   locationType?: "town" | "camp"
   campId?: string
+  travelState?: NpcTravelState
   currentAction?: NpcAction
   relationships: Relationship[]
   createdAt: Date
