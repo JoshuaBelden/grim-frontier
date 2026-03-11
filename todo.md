@@ -9,7 +9,7 @@
 
 - Players can create their own npc and name it
 - Players can log out
-- Use a better font
+- NPC fatigue and health degrade in temps under 40 unless a fire is going
 
 ## Ideas
 

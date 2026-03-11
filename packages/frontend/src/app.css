@@ -1,3 +1,27 @@
+@font-face {
+  font-family: 'ChauPhilomeneOne';
+  src: url('/fonts/ChauPhilomeneOne-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Corinthia';
+  src: url('/fonts/Corinthia-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'NotoSerif';
+  src: url('/fonts/NotoSerif-VariableFont_wdth,wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -7,8 +31,12 @@
 body {
   background: #1a1208;
   color: #d4b896;
-  font-family: monospace;
+  font-family: 'NotoSerif', serif;
   min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'ChauPhilomeneOne', sans-serif;
 }
 
 a {
@@ -24,7 +52,7 @@ input {
   background: #2a1e0e;
   border: 1px solid #5a4020;
   color: #d4b896;
-  font-family: monospace;
+  font-family: 'NotoSerif', serif;
   font-size: 1rem;
   padding: 0.5rem 0.75rem;
   width: 100%;
@@ -40,7 +68,7 @@ button {
   border: 1px solid #d4b896;
   color: #d4b896;
   cursor: pointer;
-  font-family: monospace;
+  font-family: 'NotoSerif', serif;
   font-size: 0.9rem;
   letter-spacing: 0.1em;
   padding: 0.5rem 1.25rem;
