@@ -8,6 +8,7 @@ import type {
   NpcActionStoppedEvent,
   NpcDetailEvent,
   NpcListEvent,
+  NpcUpdateEvent,
   ServerEvent,
   TownDetailEvent,
   WorldMapEvent,
@@ -96,6 +97,22 @@ const eventHandlers: Record<string, (message: ServerEvent) => void> = {
         ...current,
         npcs: current.npcs.map(npc => (npc.id === event.npcId ? { ...npc, currentAction: null } : npc)),
       }
+    })
+  },
+
+  npcUpdate(message) {
+    const event = message as NpcUpdateEvent
+    npcDetailStore.update(current => {
+      const existing = current.get(event.npcId)
+      if (!existing) return current
+      const updated = new Map(current)
+      updated.set(event.npcId, {
+        ...existing,
+        hunger: event.hunger,
+        ...(event.morale !== undefined && { morale: event.morale }),
+        ...(event.health !== undefined && { health: event.health }),
+      })
+      return updated
     })
   },
 

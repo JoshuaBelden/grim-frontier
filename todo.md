@@ -2,8 +2,7 @@
 
 ## Next
 
-- NPCs have hunger levels that increase without food
-- NPCs get tired, add bedrolls to amenities
+- NPCs get tired
 - Add seasons, weather, and temperature
 
 - AI Engine
@@ -19,7 +18,9 @@
 - Add soundtrack audio
 - NPCs get diseases
 - NPCs have wardrobes for the seasons
+- NPC can upgrade their bed rolls
 
 ## Bugs
 
+- Data hangs with loading... and never refreshes
 - Gather actions don't actually take a game hour. If you start it right before the hour, it will automatically add it.

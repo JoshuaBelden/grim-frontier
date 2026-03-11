@@ -22,6 +22,7 @@ export interface NPC {
   name: string
   health: number
   morale: number
+  hunger: number
   characteristics: Characteristics
   nature: Nature
   traits: Trait[]

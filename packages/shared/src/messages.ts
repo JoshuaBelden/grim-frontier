@@ -100,6 +100,7 @@ export type ServerEventType =
   | "campDetail"
   | "npcActionStarted"
   | "npcActionStopped"
+  | "npcUpdate"
   | "firePitUpdate"
 
 /** Sent on initial WebSocket connection. */
@@ -186,6 +187,7 @@ export interface NpcDetailEvent {
   name: string
   health: number
   morale: number
+  hunger: number
   career: Career
   status: NPCStatus
   characteristics: Characteristics
@@ -248,6 +250,15 @@ export interface NpcActionStoppedEvent {
   npcId: string
 }
 
+/** Broadcast when an NPC's vitals change (hunger, morale, health). */
+export interface NpcUpdateEvent {
+  type: "npcUpdate"
+  npcId: string
+  hunger: number
+  morale?: number
+  health?: number
+}
+
 /** Broadcast when the fire pit state changes. */
 export interface FirePitUpdateEvent {
   type: "firePitUpdate"
@@ -268,4 +279,5 @@ export type ServerEvent =
   | CampDetailEvent
   | NpcActionStartedEvent
   | NpcActionStoppedEvent
+  | NpcUpdateEvent
   | FirePitUpdateEvent

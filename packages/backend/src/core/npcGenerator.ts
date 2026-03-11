@@ -271,6 +271,7 @@ export async function generateNpcPool(count: number): Promise<NPC[]> {
       ...data,
       health: 10,
       morale: 10,
+      hunger: 10,
       status: "drifting" as const,
       relationships: [],
       createdAt: now,

@@ -99,6 +99,13 @@
             </div>
             <span class="vital-value">{npc.morale}</span>
           </div>
+          <div class="vital">
+            <span class="vital-label">Hunger</span>
+            <div class="bar-track">
+              <div class="bar-fill hunger-fill" style="width: {npc.hunger * 10}%"></div>
+            </div>
+            <span class="vital-value">{npc.hunger}</span>
+          </div>
         </div>
       </section>
 
@@ -350,6 +357,10 @@
 
   .morale-fill {
     background: #30506b;
+  }
+
+  .hunger-fill {
+    background: #6b5a30;
   }
 
   .characteristics,

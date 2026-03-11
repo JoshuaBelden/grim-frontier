@@ -39,6 +39,7 @@ export async function authRoutes(app: FastifyInstance) {
       name: username,
       health: 10,
       morale: 10,
+      hunger: 10,
       characteristics: defaultCharacteristics(),
       nature: defaultNature(),
       traits: [],
