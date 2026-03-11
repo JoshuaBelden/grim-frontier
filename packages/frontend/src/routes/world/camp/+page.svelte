@@ -1,6 +1,7 @@
 <script lang="ts">
   import { goto } from "$app/navigation"
   import AcquaintanceList from "$lib/components/camp/AcquaintanceList.svelte"
+  import CollapsibleSection from "$lib/components/CollapsibleSection.svelte"
   import { GAME_HOUR_INTERVAL_MS } from "$lib/constants"
   import { authStore } from "$lib/stores/auth"
   import { campDetailStore } from "$lib/stores/camp"
@@ -123,8 +124,7 @@
     <p class="type-label">Camp</p>
     <h1>{camp.name}</h1>
 
-    <section>
-      <h2>Resources</h2>
+    <CollapsibleSection title="Resources">
       <div class="resources">
         <div class="resource">
           <span class="resource-label">Food</span>
@@ -143,10 +143,9 @@
           <span class="resource-value">{camp.stability}</span>
         </div>
       </div>
-    </section>
+    </CollapsibleSection>
 
-    <section>
-      <h2>Amenities</h2>
+    <CollapsibleSection title="Amenities">
       <div class="amenities">
         <div class="amenity">
           <span class="amenity-label">Fire Pit</span>
@@ -158,10 +157,9 @@
           </button>
         </div>
       </div>
-    </section>
+    </CollapsibleSection>
 
-    <section>
-      <h2>Roster</h2>
+    <CollapsibleSection title="Roster">
       {#if camp.npcs.length === 0}
         <p class="muted">No one's here yet. Attract someone worth keeping.</p>
       {:else}
@@ -207,7 +205,7 @@
           {/each}
         </ul>
       {/if}
-    </section>
+    </CollapsibleSection>
 
     <AcquaintanceList />
   {/if}
@@ -238,21 +236,6 @@
     font-size: 1.75rem;
     letter-spacing: 0.15em;
     text-transform: uppercase;
-  }
-
-  section {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  h2 {
-    font-size: 0.7rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: #8a7060;
-    border-bottom: 1px solid #2a1e0e;
-    padding-bottom: 0.5rem;
   }
 
   .resources {

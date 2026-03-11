@@ -2,7 +2,7 @@
 
 ## Next
 
-- Players can view past visitors
+- Players aren't allowed to tell drifters what to do.
 - NPCs in camp will leave if their morale drops
 - Players can suspend camp requests
 - NPC fatigue and health degrade in temps under 40 unless a fire is going
@@ -11,6 +11,7 @@
 - NPCs build loyalty
 - Camps build reputation
 - Camps need protection
+- NPC skills and traits improve their chores
 
 ## Upcoming
 
@@ -23,6 +24,7 @@
 - NPCs have pursuits and quests
 - Towns have stores and inventory
 - Add soundtrack audio
+- NPCs all have generated images
 
 ## Bugs
 

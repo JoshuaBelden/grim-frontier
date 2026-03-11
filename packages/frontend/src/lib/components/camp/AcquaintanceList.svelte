@@ -1,5 +1,7 @@
 <script lang="ts">
+  import CollapsibleSection from "$lib/components/CollapsibleSection.svelte"
   import { acquaintanceStore } from "$lib/stores/acquaintances"
+  import { npcPanelStore } from "$lib/stores/npcPanels"
 
   function formatCareer(career: string): string {
     return career.replace(/_/g, " ")
@@ -7,33 +9,28 @@
 </script>
 
 {#if $acquaintanceStore.length > 0}
-  <section class="acquaintances">
-    <h3 class="section-label">Past Visitors</h3>
+  <CollapsibleSection title="Past Visitors">
     <div class="list">
       {#each $acquaintanceStore as acquaintance}
-        <div class="acquaintance-row">
+        <button
+          class="acquaintance-row"
+          onclick={() =>
+            npcPanelStore.open({
+              key: acquaintance.npcId,
+              npcId: acquaintance.npcId,
+              name: acquaintance.npcName,
+              career: acquaintance.npcCareer,
+            })}
+        >
           <span class="name">{acquaintance.npcName}</span>
           <span class="career">{formatCareer(acquaintance.npcCareer)}</span>
-        </div>
+        </button>
       {/each}
     </div>
-  </section>
+  </CollapsibleSection>
 {/if}
 
 <style>
-  .acquaintances {
-    margin-top: 2rem;
-  }
-
-  .section-label {
-    color: #8a7060;
-    font-size: 0.65rem;
-    font-weight: normal;
-    letter-spacing: 0.15em;
-    margin: 0 0 0.75rem;
-    text-transform: uppercase;
-  }
-
   .list {
     display: flex;
     flex-direction: column;
@@ -44,9 +41,18 @@
     align-items: center;
     background: #1a1008;
     border: 1px solid #2a1e0e;
+    color: inherit;
+    cursor: pointer;
     display: flex;
+    font-family: inherit;
     gap: 0.75rem;
     padding: 0.5rem 0.75rem;
+    text-align: left;
+    width: 100%;
+  }
+
+  .acquaintance-row:hover .name {
+    color: #d4b896;
   }
 
   .name {
