@@ -1,4 +1,4 @@
-import type { Resources } from "./camp"
+import type { FoodStores, FuelStores } from "./camp"
 
 /** The type of chore an NPC can be assigned at a camp. */
 export type ChoreType = "food_gathering" | "supply_scavenging" | "patrol" | "camp_maintenance" | "trade_run"
@@ -15,7 +15,8 @@ export interface Task {
   status: TaskStatus
   startedAt: Date
   completesAt: Date
-  rewardResources?: Partial<Resources>
+  rewardFoodStores?: Partial<FoodStores>
+  rewardFuelStores?: Partial<FuelStores>
   createdAt: Date
   updatedAt: Date
 }

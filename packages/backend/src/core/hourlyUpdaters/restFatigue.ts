@@ -1,4 +1,4 @@
-import type { Camp, InWorldDate, NpcAction } from "@grim-frontier/shared"
+import { totalFood, totalFuel, type Camp, type InWorldDate, type NpcAction } from "@grim-frontier/shared"
 import { isRestingPeriod } from "@grim-frontier/shared"
 import type { WithId } from "mongodb"
 import { camps, npcs } from "../../models/collections.js"
@@ -21,14 +21,14 @@ function healthRecoveryRate(strength: number): number {
   return 0.5 + (strength / 10)
 }
 
-/** Chooses food or wood gathering based on camp resource needs. Prefers whichever resource has fewer days of supply. */
+/** Chooses food or fuel gathering based on camp resource needs. Prefers whichever resource has fewer days of supply. */
 function chooseGatheringAction(camp: WithId<Camp>, npcCount: number): NpcAction["type"] {
   const dailyFoodNeed = Math.max(1, npcCount)
-  const dailyWoodNeed = camp.amenities.firePit === "lit" ? 24 : 0
-  const foodDaysSupply = dailyFoodNeed > 0 ? camp.resources.food / dailyFoodNeed : Infinity
-  const woodDaysSupply = dailyWoodNeed > 0 ? camp.resources.wood / dailyWoodNeed : Infinity
+  const dailyFuelNeed = camp.amenities.firePit === "lit" ? 24 : 0
+  const foodDaysSupply = dailyFoodNeed > 0 ? totalFood(camp.foodStores) / dailyFoodNeed : Infinity
+  const fuelDaysSupply = dailyFuelNeed > 0 ? totalFuel(camp.fuelStores) / dailyFuelNeed : Infinity
 
-  return foodDaysSupply <= woodDaysSupply ? "food_gathering" : "wood_gathering"
+  return foodDaysSupply <= fuelDaysSupply ? "food_gathering" : "fuel_gathering"
 }
 
 /** Processes rest and fatigue each hour. Resting NPCs recover; idle NPCs accumulate fatigue or auto-assign to gathering. */

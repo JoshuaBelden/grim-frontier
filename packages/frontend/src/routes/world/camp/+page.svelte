@@ -10,6 +10,8 @@
   import { sendCommand } from "$lib/ws"
   import { lastClockUpdateAt } from "$lib/wsHandler"
   import { onDestroy, onMount } from "svelte"
+  import type { FoodStoreType, FuelStoreType } from "@grim-frontier/shared"
+  import { FUEL_BURN_VALUES } from "@grim-frontier/shared"
 
   let camp = $derived($campDetailStore)
 
@@ -18,6 +20,8 @@
       $wsErrorStore?.command === "startNpcAction" ||
       $wsErrorStore?.command === "stopNpcAction" ||
       $wsErrorStore?.command === "setFirePit" ||
+      $wsErrorStore?.command === "setPreferredFood" ||
+      $wsErrorStore?.command === "setActiveFuelSource" ||
       $wsErrorStore?.command === "setSuspendJoinRequests"
       ? $wsErrorStore.message
       : null,
@@ -52,7 +56,7 @@
     return npc?.currentAction?.type ?? null
   }
 
-  function startAction(npcId: string, actionType: "food_gathering" | "wood_gathering" | "resting") {
+  function startAction(npcId: string, actionType: "food_gathering" | "fuel_gathering" | "resting") {
     sendCommand({ type: "startNpcAction", npcId, actionType })
   }
 
@@ -62,7 +66,7 @@
 
   function actionLabel(actionType: string): string {
     if (actionType === "food_gathering") return "Food"
-    if (actionType === "wood_gathering") return "Wood"
+    if (actionType === "fuel_gathering") return "Fuel"
     if (actionType === "resting") return "Resting"
     return actionType
   }
@@ -113,6 +117,37 @@
     if (!camp) return
     sendCommand({ type: "setSuspendJoinRequests", campId: camp.id, suspended: !camp.suspendJoinRequests })
   }
+
+  function setPreferredFood(foodType: FoodStoreType) {
+    if (!camp) return
+    sendCommand({ type: "setPreferredFood", campId: camp.id, foodType })
+  }
+
+  function setActiveFuelSource(fuelType: FuelStoreType) {
+    if (!camp) return
+    sendCommand({ type: "setActiveFuelSource", campId: camp.id, fuelType })
+  }
+
+  const foodLabels: Record<FoodStoreType, string> = {
+    raw: "Raw",
+    staple: "Staple",
+    fresh: "Fresh",
+    prepared: "Prepared",
+  }
+
+  const foodQualityLabels: Record<FoodStoreType, string> = {
+    raw: "Poor",
+    staple: "Basic",
+    fresh: "Good",
+    prepared: "Hearty",
+  }
+
+  const fuelLabels: Record<FuelStoreType, string> = {
+    sticks: "Sticks",
+    splitLogs: "Split Logs",
+    coal: "Coal",
+    oil: "Oil",
+  }
 </script>
 
 <svelte:head>
@@ -130,16 +165,47 @@
     <p class="type-label">Camp</p>
     <h1>{camp.name}</h1>
 
-    <CollapsibleSection title="Resources">
-      <div class="resources">
-        <div class="resource">
-          <span class="resource-label">Food</span>
-          <span class="resource-value">{camp.resources.food}</span>
-        </div>
-        <div class="resource">
-          <span class="resource-label">Wood</span>
-          <span class="resource-value">{camp.resources.wood}</span>
-        </div>
+    <CollapsibleSection title="Food Stores">
+      <div class="stores-grid">
+        {#each (["raw", "staple", "fresh", "prepared"] as FoodStoreType[]) as foodType}
+          {@const entry = camp.foodStores[foodType]}
+          <div class="store-item" class:active={camp.preferredFood === foodType}>
+            <div class="store-header">
+              <span class="store-label">{foodLabels[foodType]}</span>
+              <span class="store-quality">{foodQualityLabels[foodType]}</span>
+            </div>
+            <span class="store-value">{entry.count}</span>
+            <button
+              class="action-btn"
+              class:selected={camp.preferredFood === foodType}
+              onclick={() => setPreferredFood(foodType)}
+            >
+              {camp.preferredFood === foodType ? "Eating" : "Eat"}
+            </button>
+          </div>
+        {/each}
+      </div>
+    </CollapsibleSection>
+
+    <CollapsibleSection title="Fuel Stores">
+      <div class="stores-grid">
+        {#each (["sticks", "splitLogs", "coal", "oil"] as FuelStoreType[]) as fuelType}
+          {@const amount = camp.fuelStores[fuelType]}
+          <div class="store-item" class:active={camp.amenities.activeFuelSource === fuelType}>
+            <div class="store-header">
+              <span class="store-label">{fuelLabels[fuelType]}</span>
+              <span class="store-quality">Burn: {FUEL_BURN_VALUES[fuelType]}</span>
+            </div>
+            <span class="store-value">{amount}</span>
+            <button
+              class="action-btn"
+              class:selected={camp.amenities.activeFuelSource === fuelType}
+              onclick={() => setActiveFuelSource(fuelType)}
+            >
+              {camp.amenities.activeFuelSource === fuelType ? "Burning" : "Burn"}
+            </button>
+          </div>
+        {/each}
       </div>
     </CollapsibleSection>
 
@@ -197,7 +263,7 @@
                       </div>
                     {:else}
                       <button class="action-btn gather" onclick={() => startAction(npc.id, "food_gathering")}>Gather Food</button>
-                      <button class="action-btn gather" onclick={() => startAction(npc.id, "wood_gathering")}>Gather Wood</button>
+                      <button class="action-btn gather" onclick={() => startAction(npc.id, "fuel_gathering")}>Gather Fuel</button>
                       <button class="action-btn gather" onclick={() => startAction(npc.id, "resting")}>Rest</button>
                     {/if}
                     </div>
@@ -249,25 +315,46 @@
     text-transform: uppercase;
   }
 
-  .resources {
-    display: flex;
-    gap: 2rem;
+  .stores-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
   }
 
-  .resource {
+  .store-item {
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
+    padding: 0.5rem;
+    border: 1px solid #2a1e0e;
+    border-radius: 2px;
   }
 
-  .resource-label {
+  .store-item.active {
+    border-color: #5a4020;
+  }
+
+  .store-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+
+  .store-label {
     color: #5a4020;
     font-size: 0.65rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
   }
 
-  .resource-value {
+  .store-quality {
+    color: #8a7060;
+    font-size: 0.55rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .store-value {
     font-size: 1.5rem;
     letter-spacing: 0.05em;
   }
@@ -435,6 +522,11 @@
   .action-btn:hover {
     border-color: #d4b896;
     color: #d4b896;
+  }
+
+  .action-btn.selected {
+    border-color: #c89040;
+    color: #c89040;
   }
 
   .action-btn.stop {

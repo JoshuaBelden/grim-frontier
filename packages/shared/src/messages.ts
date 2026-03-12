@@ -1,4 +1,4 @@
-import type { Amenities, CampPosture, FirePitState, Resources } from "./camp"
+import type { Amenities, CampPosture, FirePitState, FoodStores, FoodStoreType, FuelStores, FuelStoreType } from "./camp"
 import type { Career } from "./careers"
 import type { Characteristics } from "./characteristics"
 import type { Nature } from "./nature"
@@ -24,6 +24,8 @@ export type ClientCommandType =
   | "startNpcAction"
   | "stopNpcAction"
   | "setFirePit"
+  | "setPreferredFood"
+  | "setActiveFuelSource"
   | "setSuspendJoinRequests"
   | "respondJoinRequest"
   | "listJoinRequests"
@@ -53,11 +55,11 @@ export interface GetCampCommand {
   campId: string
 }
 
-/** Start an action on an NPC (e.g. food or wood gathering). */
+/** Start an action on an NPC (e.g. food or fuel gathering). */
 export interface StartNpcActionCommand {
   type: "startNpcAction"
   npcId: string
-  actionType: "food_gathering" | "wood_gathering" | "resting"
+  actionType: "food_gathering" | "fuel_gathering" | "resting"
 }
 
 /** Request a list of all NPCs in the world. */
@@ -76,6 +78,20 @@ export interface SetFirePitCommand {
   type: "setFirePit"
   campId: string
   state: FirePitState
+}
+
+/** Set which food type the camp automatically consumes each night. */
+export interface SetPreferredFoodCommand {
+  type: "setPreferredFood"
+  campId: string
+  foodType: FoodStoreType
+}
+
+/** Set which fuel source the fire pit burns. */
+export interface SetActiveFuelSourceCommand {
+  type: "setActiveFuelSource"
+  campId: string
+  fuelType: FuelStoreType
 }
 
 /** Toggle whether the camp automatically declines incoming join requests. */
@@ -112,6 +128,8 @@ export type ClientCommand =
   | StartNpcActionCommand
   | StopNpcActionCommand
   | SetFirePitCommand
+  | SetPreferredFoodCommand
+  | SetActiveFuelSourceCommand
   | SetSuspendJoinRequestsCommand
   | RespondJoinRequestCommand
   | ListJoinRequestsCommand
@@ -162,11 +180,13 @@ export interface ClockUpdateEvent {
   weather?: WorldWeather
 }
 
-/** Broadcast when a camp's resources or amenities change. */
+/** Broadcast when a camp's stores or amenities change. */
 export interface CampUpdateEvent {
   type: "campUpdate"
   campId: string
-  resources: Resources
+  foodStores: FoodStores
+  fuelStores: FuelStores
+  preferredFood: FoodStoreType
   amenities?: Amenities
 }
 
@@ -269,13 +289,15 @@ export interface NpcListEvent {
   npcs: NpcListItem[]
 }
 
-/** Response to getCamp — camp detail with resources and NPC roster. */
+/** Response to getCamp — camp detail with stores and NPC roster. */
 export interface CampDetailEvent {
   type: "campDetail"
   id: string
   name: string
   ownerId: string
-  resources: Resources
+  foodStores: FoodStores
+  fuelStores: FuelStores
+  preferredFood: FoodStoreType
   amenities: Amenities
   posture: CampPosture
   suspendJoinRequests: boolean

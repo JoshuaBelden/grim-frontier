@@ -8,7 +8,9 @@ import { handleListAcquaintances } from "./listAcquaintances.js"
 import { handleListJoinRequests } from "./listJoinRequests.js"
 import { handleListNpcs } from "./listNpcs.js"
 import { handleRespondJoinRequest } from "./respondJoinRequest.js"
+import { handleSetActiveFuelSource } from "./setActiveFuelSource.js"
 import { handleSetFirePit } from "./setFirePit.js"
+import { handleSetPreferredFood } from "./setPreferredFood.js"
 import { handleSetSuspendJoinRequests } from "./setSuspendJoinRequests.js"
 import { handleStartNpcAction } from "./startNpcAction.js"
 import { handleStopNpcAction } from "./stopNpcAction.js"
@@ -32,6 +34,8 @@ export const commandHandlers: Record<ClientCommandType, CommandHandler> = {
   startNpcAction: handleStartNpcAction,
   stopNpcAction: handleStopNpcAction,
   setFirePit: handleSetFirePit,
+  setPreferredFood: handleSetPreferredFood,
+  setActiveFuelSource: handleSetActiveFuelSource,
   setSuspendJoinRequests: handleSetSuspendJoinRequests,
   respondJoinRequest: handleRespondJoinRequest,
   listJoinRequests: handleListJoinRequests,

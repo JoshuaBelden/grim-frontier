@@ -25,8 +25,9 @@ export async function handleSetFirePit(context: HandlerContext, payload: unknown
     return
   }
 
-  if (command.state === "lit" && camp.resources.wood <= 0) {
-    context.send({ type: "error", command: "setFirePit", message: "No wood available to light a fire" })
+  const fuelType = camp.amenities?.activeFuelSource ?? "sticks"
+  if (command.state === "lit" && (camp.fuelStores?.[fuelType] ?? 0) <= 0) {
+    context.send({ type: "error", command: "setFirePit", message: "No fuel available to light a fire" })
     return
   }
 

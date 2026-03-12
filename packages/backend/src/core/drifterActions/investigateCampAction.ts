@@ -1,3 +1,4 @@
+import { totalFood } from "@grim-frontier/shared"
 import { acquaintances, joinRequests, npcs } from "../../models/collections.js"
 import { sendToPlayer } from "../../ws/plugin.js"
 import type { CampDocument, DrifterAction, DrifterActionContext } from "./types.js"
@@ -24,7 +25,7 @@ function scoreCampDesirability(npc: DrifterActionContext["npc"], camp: CampDocum
   if (camp.posture === "defensive") score -= 10
 
   // Camp attributes
-  score += Math.min(25, (camp.resources.food / FOOD_PER_PERSON_PER_WEEK) * 5)
+  score += Math.min(25, (totalFood(camp.foodStores) / FOOD_PER_PERSON_PER_WEEK) * 5)
   score += (camp.reputation / 100) * 15
 
   // NPC personality
@@ -50,7 +51,7 @@ export const investigateCampAction: DrifterAction = {
     let bestScore = 0
     for (const camp of context.nearbyCamps) {
       const campScore = scoreCampDesirability(context.npc, camp)
-      console.log(`[drifter] ${context.npc.name} — investigateCamp score for "${camp.name}": ${campScore.toFixed(1)} (posture: ${camp.posture}, food: ${camp.resources.food}, reputation: ${camp.reputation})`)
+      console.log(`[drifter] ${context.npc.name} — investigateCamp score for "${camp.name}": ${campScore.toFixed(1)} (posture: ${camp.posture}, food: ${totalFood(camp.foodStores)}, reputation: ${camp.reputation})`)
       if (campScore > bestScore) bestScore = campScore
     }
     return bestScore
@@ -74,7 +75,7 @@ export const investigateCampAction: DrifterAction = {
       }
 
       // Check capacity
-      const capacity = Math.floor(camp.resources.food / FOOD_PER_PERSON_PER_WEEK)
+      const capacity = Math.floor(totalFood(camp.foodStores) / FOOD_PER_PERSON_PER_WEEK)
       const population = await npcs.countDocuments({
         $or: [{ campId }, { locationId: campId, locationType: "camp" }],
       })

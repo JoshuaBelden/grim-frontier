@@ -9,6 +9,10 @@ export async function fireMoraleBoost(
   const litCamps = await camps.find({ worldId, "amenities.firePit": "lit" }).toArray()
 
   for (const camp of litCamps) {
+    // Sticks burn too poorly to lift spirits
+    const fuelSource = camp.amenities?.activeFuelSource ?? "sticks"
+    if (fuelSource === "sticks") continue
+
     const campId = camp._id!.toString()
     const campNpcs = await npcs
       .find({ $or: [{ campId }, { locationId: campId, locationType: "camp" }] })

@@ -1,4 +1,4 @@
-import type { InWorldDate, LandmarkNode, TopologyConnection } from "@grim-frontier/shared"
+import { totalFood, type InWorldDate, type LandmarkNode, type TopologyConnection } from "@grim-frontier/shared"
 import { ObjectId } from "mongodb"
 import { camps, joinRequests, npcs, towns } from "../../models/collections.js"
 import topology from "../topology.js"
@@ -99,7 +99,7 @@ async function purgeStaleRequests(worldId: string): Promise<void> {
       continue
     }
 
-    const capacity = Math.floor(camp.resources.food / FOOD_PER_PERSON_PER_WEEK)
+    const capacity = Math.floor(totalFood(camp.foodStores) / FOOD_PER_PERSON_PER_WEEK)
     const campIdStr = camp._id!.toString()
     const population = await npcs.countDocuments({
       $or: [{ campId: campIdStr }, { locationId: campIdStr, locationType: "camp" }],

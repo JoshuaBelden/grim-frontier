@@ -1,5 +1,6 @@
 <script lang="ts">
   import { goto } from "$app/navigation"
+  import { apiLogout } from "$lib/api"
   import JoinRequestModal from "$lib/components/camp/JoinRequestModal.svelte"
   import NpcAvatar from "$lib/components/npc/NpcAvatar.svelte"
   import NpcListPanel from "$lib/components/npc/NpcListPanel.svelte"
@@ -7,18 +8,15 @@
   import { authStore } from "$lib/stores/auth"
   import { campDetailStore } from "$lib/stores/camp"
   import { formatInWorldDate } from "$lib/utils/time"
-  import { apiLogout } from "$lib/api"
-  import { connectWs, disconnectWs, sendCommand, wsConnected } from "$lib/ws"
   import { formatWeatherReport } from "$lib/utils/weather"
+  import { connectWs, disconnectWs, sendCommand, wsConnected } from "$lib/ws"
   import { weatherStore, worldClock } from "$lib/wsHandler"
   import type { Snippet } from "svelte"
   import { onMount } from "svelte"
 
   let { children }: { children: Snippet } = $props()
 
-  const campNpcs = $derived(
-    ($campDetailStore?.npcs ?? []).filter(npc => npc.id !== $authStore.npcId),
-  )
+  const campNpcs = $derived(($campDetailStore?.npcs ?? []).filter(npc => npc.id !== $authStore.npcId))
   const campName = $derived($campDetailStore?.name ?? null)
 
   onMount(() => {
@@ -66,9 +64,7 @@
     <a href="/world" class="brand">Grim Frontier</a>
     <div class="world-clock">
       {#if $worldClock}
-        <div>Time: {formatInWorldDate($worldClock)}</div>
-      {:else}
-        <div>Time: —</div>
+        <div>{formatInWorldDate($worldClock)}</div>
       {/if}
       {#if $weatherStore}
         <div class="weather">{formatWeatherReport($weatherStore)}</div>
@@ -92,7 +88,9 @@
       <NpcAvatar entry={playerEntry} />
     {/if}
     {#each campNpcs as npc}
-      <NpcAvatar entry={{ key: npc.id, npcId: npc.id, name: npc.name, career: npc.career, location: campName ?? undefined }} />
+      <NpcAvatar
+        entry={{ key: npc.id, npcId: npc.id, name: npc.name, career: npc.career, location: campName ?? undefined }}
+      />
     {/each}
   </div>
 </div>

@@ -55,7 +55,11 @@ const eventHandlers: Record<string, (message: ServerEvent) => void> = {
     const event = message as CampUpdateEvent
     campDetailStore.update(current => {
       if (current && current.id === event.campId) {
-        const updates: Partial<CampDetailEvent> = { resources: event.resources }
+        const updates: Partial<CampDetailEvent> = {
+          foodStores: event.foodStores,
+          fuelStores: event.fuelStores,
+          preferredFood: event.preferredFood,
+        }
         if (event.amenities) updates.amenities = event.amenities
         return { ...current, ...updates }
       }

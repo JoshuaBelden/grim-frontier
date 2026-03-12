@@ -5,7 +5,7 @@ import { consumeFireWood } from "./core/hourlyUpdaters/consumeFireWood.js"
 import { fireMoraleBoost } from "./core/hourlyUpdaters/fireMoraleBoost.js"
 import { consumeFood } from "./core/hourlyUpdaters/consumeFood.js"
 import { gatherFood } from "./core/hourlyUpdaters/gatherFood.js"
-import { gatherWood } from "./core/hourlyUpdaters/gatherWood.js"
+import { gatherFuel } from "./core/hourlyUpdaters/gatherWood.js"
 import { drifterAI } from "./core/hourlyUpdaters/drifterAI.js"
 import { restFatigue } from "./core/hourlyUpdaters/restFatigue.js"
 import { createWeatherUpdater } from "./core/hourlyUpdaters/updateWeather.js"
@@ -71,7 +71,7 @@ async function start() {
 
   clock.registerHourlyUpdater(createWeatherUpdater(clock))
   clock.registerHourlyUpdater(gatherFood)
-  clock.registerHourlyUpdater(gatherWood)
+  clock.registerHourlyUpdater(gatherFuel)
   clock.registerHourlyUpdater(consumeFood)
   clock.registerHourlyUpdater(consumeFireWood)
   clock.registerHourlyUpdater(fireMoraleBoost)

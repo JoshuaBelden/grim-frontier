@@ -1,7 +1,7 @@
-import type { InWorldDate } from "@grim-frontier/shared"
+import type { FoodStoreType, InWorldDate } from "@grim-frontier/shared"
 import { camps, npcs } from "../../models/collections.js"
 
-/** Feeds NPCs at hour 2 each day. Fed NPCs decrease hunger and gain morale. Unfed NPCs gain hunger and suffer cascading penalties. */
+/** Feeds NPCs at hour 2 each day using the camp's preferred food type. Unfed NPCs gain hunger and suffer cascading penalties. */
 export async function consumeFood(
   worldId: string,
   newDate: InWorldDate,
@@ -19,7 +19,8 @@ export async function consumeFood(
 
     if (campNpcs.length === 0) continue
 
-    let remainingFood = camp.resources.food
+    const preferredFood: FoodStoreType = camp.preferredFood ?? "raw"
+    let remainingFood = camp.foodStores[preferredFood].count
     const now = new Date()
 
     for (const npc of campNpcs) {
@@ -28,7 +29,8 @@ export async function consumeFood(
       if (remainingFood > 0) {
         remainingFood -= 1
         const newHunger = Math.max(0, (npc.hunger ?? 0) - 1)
-        const newMorale = Math.min(10, npc.morale + 1)
+        const boostsMorale = preferredFood !== "raw"
+        const newMorale = boostsMorale ? Math.min(10, npc.morale + 1) : npc.morale
         await npcs.updateOne({ _id: npc._id }, { $set: { hunger: newHunger, morale: newMorale, updatedAt: now } })
 
         broadcast(worldId, { type: "npcUpdate", npcId, hunger: newHunger, morale: newMorale })
@@ -59,15 +61,21 @@ export async function consumeFood(
       }
     }
 
+    const foodPath = `foodStores.${preferredFood}.count`
     await camps.updateOne(
       { _id: camp._id },
-      { $set: { "resources.food": remainingFood, updatedAt: now } },
+      { $set: { [foodPath]: remainingFood, updatedAt: now } },
     )
 
-    broadcast(worldId, {
-      type: "campUpdate",
-      campId,
-      resources: { ...camp.resources, food: remainingFood },
-    })
+    const updatedCamp = await camps.findOne({ _id: camp._id })
+    if (updatedCamp) {
+      broadcast(worldId, {
+        type: "campUpdate",
+        campId,
+        foodStores: updatedCamp.foodStores,
+        fuelStores: updatedCamp.fuelStores,
+        preferredFood: updatedCamp.preferredFood,
+      })
+    }
   }
 }

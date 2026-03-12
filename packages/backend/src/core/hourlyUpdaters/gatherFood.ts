@@ -2,6 +2,7 @@ import type { InWorldDate } from "@grim-frontier/shared"
 import { ObjectId } from "mongodb"
 import { camps, npcs } from "../../models/collections.js"
 
+/** Increments camp raw food by 1 for each NPC currently gathering food (no tools = raw quality). */
 export async function gatherFood(
   worldId: string,
   newDate: InWorldDate,
@@ -20,11 +21,17 @@ export async function gatherFood(
     for (const [campId, amount] of foodByCamp) {
       const updated = await camps.findOneAndUpdate(
         { _id: new ObjectId(campId) },
-        { $inc: { "resources.food": amount }, $set: { updatedAt: new Date() } },
+        { $inc: { "foodStores.raw.count": amount }, $set: { updatedAt: new Date() } },
         { returnDocument: "after" },
       )
       if (updated) {
-        broadcast(worldId, { type: "campUpdate", campId, resources: updated.resources })
+        broadcast(worldId, {
+          type: "campUpdate",
+          campId,
+          foodStores: updated.foodStores,
+          fuelStores: updated.fuelStores,
+          preferredFood: updated.preferredFood,
+        })
       }
     }
   }

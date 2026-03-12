@@ -1,4 +1,4 @@
-import type { RespondJoinRequestCommand } from "@grim-frontier/shared"
+import { totalFood, type RespondJoinRequestCommand } from "@grim-frontier/shared"
 import { ObjectId } from "mongodb"
 import { acquaintances, camps, joinRequests, npcs, players } from "../../models/collections.js"
 import type { HandlerContext } from "./index.js"
@@ -43,7 +43,7 @@ export async function handleRespondJoinRequest(context: HandlerContext, payload:
       return
     }
 
-    const capacity = Math.floor(camp.resources.food / FOOD_PER_PERSON_PER_WEEK)
+    const capacity = Math.floor(totalFood(camp.foodStores) / FOOD_PER_PERSON_PER_WEEK)
     const campIdStr = camp._id!.toString()
     const population = await npcs.countDocuments({
       $or: [{ campId: campIdStr }, { locationId: campIdStr, locationType: "camp" }],
@@ -88,8 +88,10 @@ export async function handleRespondJoinRequest(context: HandlerContext, payload:
       id: campIdStr,
       name: camp.name,
       ownerId: camp.ownerId,
-      resources: camp.resources,
-      amenities: camp.amenities ?? { firePit: "burned_out" },
+      foodStores: camp.foodStores,
+      fuelStores: camp.fuelStores,
+      preferredFood: camp.preferredFood ?? "raw",
+      amenities: camp.amenities ?? { firePit: "burned_out", activeFuelSource: "sticks" },
       posture: camp.posture,
       suspendJoinRequests: camp.suspendJoinRequests ?? false,
       reputation: camp.reputation,

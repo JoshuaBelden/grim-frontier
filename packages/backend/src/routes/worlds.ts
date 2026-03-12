@@ -1,3 +1,4 @@
+import { emptyFoodStores, emptyFuelStores } from "@grim-frontier/shared"
 import type { FastifyInstance } from "fastify"
 import { ObjectId } from "mongodb"
 import { defaultCharacteristics, defaultNature, defaultOrigin } from "../core/character.js"
@@ -129,8 +130,10 @@ export async function worldRoutes(app: FastifyInstance) {
       name: `${player.username}'s Camp`,
       nearestLandmarkKey,
       distanceToLandmark,
-      resources: { food: 0, wood: 0 },
-      amenities: { firePit: "burned_out" },
+      foodStores: emptyFoodStores(),
+      fuelStores: emptyFuelStores(),
+      preferredFood: "raw",
+      amenities: { firePit: "burned_out", activeFuelSource: "sticks" },
       posture: "open",
       suspendJoinRequests: false,
       reputation: 0,
