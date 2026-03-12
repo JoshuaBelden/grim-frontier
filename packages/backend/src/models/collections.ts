@@ -7,6 +7,7 @@ import type {
   NPC,
   Player,
   Region,
+  Store,
   Task,
   Territory,
   Town,
@@ -35,3 +36,4 @@ export const tasks = db.collection<Doc<Task>>("tasks") as Collection<Doc<Task>>
 export const encounters = db.collection<Doc<Encounter>>("encounters") as Collection<Doc<Encounter>>
 export const joinRequests = db.collection<Doc<JoinRequest>>("joinRequests") as Collection<Doc<JoinRequest>>
 export const acquaintances = db.collection<Doc<Acquaintance>>("acquaintances") as Collection<Doc<Acquaintance>>
+export const stores = db.collection<Doc<Store>>("stores") as Collection<Doc<Store>>

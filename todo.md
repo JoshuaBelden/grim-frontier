@@ -3,12 +3,53 @@
 ## Next
 
 - Camps need protection
-- Camps increase reputation
-- NPCs build loyalty
-- NPC skills and traits improve their chores
+  - Towns
+    - Can be travelled to with their NPC
+  - Stores
+    - Can be visisted
+  - Weapons
+    - Can be purchased
+    - Can be given
+    - Camps have a weapons locker
+  - Activity to Stand watch
+
+- Making Money
+- Hunting
+
+NPC hunts animals.
+Produces:
+meat
+hides
+
+Trapping
+Produces:
+pelts
+fur
+
+NPC gathers timber.
+Produces:
+firewood
+lumber
+
+Prospecting
+NPC searches for ore.
+Produces:
+raw ore
+nuggets
+
+NPC gathers fish.
+fresh fish
+
+Odd Jobs
+repairing fences
+unloading freight
+ranch work
 
 ## Upcoming
 
+- Camps increase reputation
+- NPCs build loyalty
+- NPC skills and traits improve their chores
 - NPCs in camp will leave if their morale drops
 - NPC fatigue and health degrade in temps under 40 unless a fire is going
 - NPC can upgrade their bed rolls
@@ -25,7 +66,9 @@
 ## Ideas
 
 - Getting Money
+- Weapons
 - Camp Upgrades
+- Disease and Money
 
 ## Bugs
 

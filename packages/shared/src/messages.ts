@@ -1,13 +1,14 @@
 import type { Amenities, CampPosture, FirePitState, Resources } from "./camp"
+import type { Career } from "./careers"
 import type { Characteristics } from "./characteristics"
 import type { Nature } from "./nature"
 import type { NpcAction, NPCStatus } from "./npc"
 import type { CharacterOrigin } from "./origin"
 import type { Skills } from "./skills"
+import type { StoreItem, StoreType } from "./store"
 import type { Trait } from "./traits"
 import type { WorldWeather } from "./weather"
 import type { InWorldDate, LandmarkType, RouteClassification } from "./world"
-import type { Career } from "./careers"
 
 // ---------------------------------------------------------------------------
 // Client → Server commands
@@ -207,12 +208,23 @@ export interface WorldMapEvent {
   }
 }
 
-/** Response to getTown — basic town detail. */
+/** Summary of a store within a town detail response. */
+export interface TownDetailStore {
+  id: string
+  name: string
+  type: StoreType
+  description: string
+  proprietor: string
+  inventory: StoreItem[]
+}
+
+/** Response to getTown — town detail with stores. */
 export interface TownDetailEvent {
   type: "townDetail"
   id: string
   name: string
   territoryId: string
+  stores: TownDetailStore[]
 }
 
 /** Response to getNpc — full NPC profile. */

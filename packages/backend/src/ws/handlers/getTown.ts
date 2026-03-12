@@ -1,9 +1,9 @@
 import type { GetTownCommand } from "@grim-frontier/shared"
 import { ObjectId } from "mongodb"
-import { towns } from "../../models/collections.js"
+import { stores, towns } from "../../models/collections.js"
 import type { HandlerContext } from "./index.js"
 
-/** Resolves basic detail for a single town. */
+/** Resolves detail for a single town, including its stores. */
 export async function handleGetTown(context: HandlerContext, payload: unknown): Promise<void> {
   const command = payload as GetTownCommand
 
@@ -21,10 +21,21 @@ export async function handleGetTown(context: HandlerContext, payload: unknown): 
     return
   }
 
+  const townId = town._id!.toString()
+  const townStores = await stores.find({ townId }).toArray()
+
   context.send({
     type: "townDetail",
-    id: town._id!.toString(),
+    id: townId,
     name: town.name,
     territoryId: town.territoryId,
+    stores: townStores.map(store => ({
+      id: store._id!.toString(),
+      name: store.name,
+      type: store.type,
+      description: store.description,
+      proprietor: store.proprietor,
+      inventory: store.inventory,
+    })),
   })
 }

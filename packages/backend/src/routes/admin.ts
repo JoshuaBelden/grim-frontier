@@ -1,8 +1,8 @@
 import type { FastifyInstance } from "fastify"
+import { generateNpcPool } from "../core/npcGenerator.js"
 import worldTopology from "../core/topology.js"
 import { INITIAL_IN_WORLD_DATE, seedWorld } from "../core/world.js"
 import { WorldClock } from "../core/worldClock.js"
-import { generateNpcPool } from "../core/npcGenerator.js"
 import {
   camps,
   encounters,
@@ -10,6 +10,7 @@ import {
   npcs,
   players,
   regions,
+  stores,
   tasks,
   territories,
   towns,
@@ -52,6 +53,7 @@ export async function adminRoutes(app: FastifyInstance, opts: { clock: WorldCloc
       encounters.deleteMany({}),
       tasks.deleteMany({}),
       gameClocks.deleteMany({}),
+      stores.deleteMany({}),
       players.updateMany({}, { $unset: { campId: "" }, $set: { npcIds: [] } }),
     ])
 

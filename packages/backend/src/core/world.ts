@@ -1,6 +1,7 @@
 import type { WorldTopology } from "@grim-frontier/shared"
 import { ObjectId } from "mongodb"
-import { regions, territories, towns, worlds } from "../models/collections.js"
+import { regions, stores, territories, towns, worlds } from "../models/collections.js"
+import { storeSeedData } from "./stores.js"
 
 export const INITIAL_IN_WORLD_DATE = { year: 1893, month: 9, day: 16, hour: 6 }
 
@@ -64,6 +65,23 @@ export async function seedWorld(name: string, topology: WorldTopology): Promise<
       updatedAt: now,
     })
     landmarkIds[landmark.key] = landmarkId.toString()
+  }
+
+  const storeDocs = storeSeedData.map(seed => ({
+    _id: new ObjectId(),
+    townId: landmarkIds[seed.landmarkKey],
+    worldId: worldId.toString(),
+    name: seed.name,
+    type: seed.type,
+    description: seed.description,
+    proprietor: seed.proprietor,
+    inventory: seed.inventory,
+    createdAt: now,
+    updatedAt: now,
+  }))
+
+  if (storeDocs.length > 0) {
+    await stores.insertMany(storeDocs)
   }
 
   return {
