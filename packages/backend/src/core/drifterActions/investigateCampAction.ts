@@ -25,7 +25,6 @@ function scoreCampDesirability(npc: DrifterActionContext["npc"], camp: CampDocum
 
   // Camp attributes
   score += Math.min(25, (camp.resources.food / FOOD_PER_PERSON_PER_WEEK) * 5)
-  score += (camp.stability / 100) * 20
   score += (camp.reputation / 100) * 15
 
   // NPC personality
@@ -51,7 +50,7 @@ export const investigateCampAction: DrifterAction = {
     let bestScore = 0
     for (const camp of context.nearbyCamps) {
       const campScore = scoreCampDesirability(context.npc, camp)
-      console.log(`[drifter] ${context.npc.name} — investigateCamp score for "${camp.name}": ${campScore.toFixed(1)} (posture: ${camp.posture}, food: ${camp.resources.food}, stability: ${camp.stability}, reputation: ${camp.reputation})`)
+      console.log(`[drifter] ${context.npc.name} — investigateCamp score for "${camp.name}": ${campScore.toFixed(1)} (posture: ${camp.posture}, food: ${camp.resources.food}, reputation: ${camp.reputation})`)
       if (campScore > bestScore) bestScore = campScore
     }
     return bestScore

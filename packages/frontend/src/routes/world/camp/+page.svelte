@@ -137,16 +137,8 @@
           <span class="resource-value">{camp.resources.food}</span>
         </div>
         <div class="resource">
-          <span class="resource-label">Supplies</span>
-          <span class="resource-value">{camp.resources.supplies}</span>
-        </div>
-        <div class="resource">
           <span class="resource-label">Wood</span>
           <span class="resource-value">{camp.resources.wood}</span>
-        </div>
-        <div class="resource">
-          <span class="resource-label">Stability</span>
-          <span class="resource-value">{camp.stability}</span>
         </div>
       </div>
     </CollapsibleSection>

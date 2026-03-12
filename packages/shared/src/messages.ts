@@ -265,7 +265,6 @@ export interface CampDetailEvent {
   ownerId: string
   resources: Resources
   amenities: Amenities
-  stability: number
   posture: CampPosture
   suspendJoinRequests: boolean
   reputation: number

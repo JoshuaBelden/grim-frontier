@@ -90,7 +90,6 @@ export async function handleRespondJoinRequest(context: HandlerContext, payload:
       ownerId: camp.ownerId,
       resources: camp.resources,
       amenities: camp.amenities ?? { firePit: "burned_out" },
-      stability: camp.stability,
       posture: camp.posture,
       suspendJoinRequests: camp.suspendJoinRequests ?? false,
       reputation: camp.reputation,

@@ -12,7 +12,6 @@ export interface Amenities {
 /** Consumable resources held by a camp or task reward. */
 export interface Resources {
   food: number
-  supplies: number
   wood: number
 }
 
@@ -26,7 +25,6 @@ export interface Camp {
   distanceToLandmark: number // miles (3–5)
   resources: Resources
   amenities: Amenities
-  stability: number // 0–100
   posture: CampPosture
   suspendJoinRequests: boolean
   reputation: number // 0–100

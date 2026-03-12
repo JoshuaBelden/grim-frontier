@@ -2,17 +2,13 @@
 
 ## Next
 
-- Players can log out
-- Players can create their own npc and name it
-
-## Upcoming
-
-- Camp stability, whats it for
-- Camp supplies, what are those for
-- NPC skills and traits improve their chores
 - Camps need protection
 - Camps increase reputation
 - NPCs build loyalty
+- NPC skills and traits improve their chores
+
+## Upcoming
+
 - NPCs in camp will leave if their morale drops
 - NPC fatigue and health degrade in temps under 40 unless a fire is going
 - NPC can upgrade their bed rolls
@@ -24,7 +20,12 @@
 - NPCs have hobbies/pursuits?
 - NPCs have wardrobes for the seasons
 - Add NPCs that can start camps
-- 
+- Players can create their own npc and name it
+
+## Ideas
+
+- Getting Money
+- Camp Upgrades
 
 ## Bugs
 
