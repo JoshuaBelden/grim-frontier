@@ -10,6 +10,7 @@ interface WsClient {
   OPEN: number
   send(data: string): void
   on(event: string, listener: (...args: unknown[]) => void): void
+  off(event: string, listener: (...args: unknown[]) => void): void
   close(): void
 }
 
@@ -71,6 +72,13 @@ export async function registerWebSocket(app: FastifyInstance, clock: WorldClock)
       return
     }
 
+    // Buffer messages that arrive while session validation is in progress.
+    // The client flushes queued commands as soon as the socket opens, which
+    // can beat the async validateSession call below.
+    const earlyMessages: Buffer[] = []
+    const bufferHandler = (data: Buffer) => earlyMessages.push(data)
+    socket.on("message", bufferHandler)
+
     const session = await validateSession(app, token)
     if (!session) {
       sendToClient(socket, { type: "error", message: "Invalid or expired session" })
@@ -98,7 +106,16 @@ export async function registerWebSocket(app: FastifyInstance, clock: WorldClock)
       sendToClient(socket, { type: "clockUpdate", inWorldDate: currentDate, weather: clock.getWeather(worldId) })
     }
 
-    socket.on("message", async (data: Buffer) => {
+    const handlerContext: HandlerContext = {
+      playerId: session.playerId,
+      worldId,
+      send: event => sendToClient(socket, event),
+      broadcast: event => broadcastToWorld(worldId, event),
+      clock,
+    }
+
+    /** Processes a single incoming client command. */
+    async function processMessage(data: Buffer): Promise<void> {
       let command: ClientCommand
       try {
         command = JSON.parse(data.toString())
@@ -118,21 +135,21 @@ export async function registerWebSocket(app: FastifyInstance, clock: WorldClock)
         return
       }
 
-      const handlerContext: HandlerContext = {
-        playerId: session.playerId,
-        worldId,
-        send: event => sendToClient(socket, event),
-        broadcast: event => broadcastToWorld(worldId, event),
-        clock,
-      }
-
       try {
         await handler(handlerContext, command)
       } catch (error) {
         console.error(`Handler error for ${command.type}:`, error)
         sendToClient(socket, { type: "error", command: command.type, message: "Internal error" })
       }
-    })
+    }
+
+    // Swap in the real handler and replay anything that arrived during auth.
+    socket.off("message", bufferHandler)
+    socket.on("message", (data: unknown) => processMessage(data as Buffer))
+
+    for (const buffered of earlyMessages) {
+      await processMessage(buffered)
+    }
 
     socket.on("close", () => {
       console.log(`WebSocket client disconnected (world: ${worldId}, player: ${session.playerId})`)

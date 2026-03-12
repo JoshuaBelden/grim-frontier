@@ -4,7 +4,7 @@ import type { WithId } from "mongodb"
 import { camps, npcs } from "../../models/collections.js"
 
 /** Fatigue threshold at which camp NPCs automatically begin resting. */
-const AUTO_REST_THRESHOLD = 6
+const AUTO_REST_THRESHOLD = 8
 
 /** Converts an InWorldDate to a comparable hour count for elapsed-time checks. */
 function toTotalHours(date: InWorldDate): number {
@@ -56,8 +56,11 @@ export async function restFatigue(
 
       const resting = isRestingPeriod(newDate.hour)
 
-      // Auto-rest: owned NPCs with no current action rest during the resting period
-      if (!isCurrentlyResting && !npc.currentAction && npc.ownerId && resting) {
+      // Auto-rest: owned NPCs rest during the resting period, stopping any current action
+      if (!isCurrentlyResting && npc.ownerId && resting) {
+        if (npc.currentAction) {
+          broadcast(worldId, { type: "npcActionStopped", npcId })
+        }
         await npcs.updateOne(
           { _id: npc._id },
           { $set: { currentAction: { type: "resting", startedAt: newDate }, updatedAt: now } },
@@ -67,8 +70,11 @@ export async function restFatigue(
         continue
       }
 
-      // Auto-rest: fatigued unowned camp NPCs with no current action begin resting
-      if (!isCurrentlyResting && !npc.currentAction && !npc.ownerId && npc.fatigue >= AUTO_REST_THRESHOLD) {
+      // Auto-rest: fatigued camp NPCs stop what they're doing and begin resting
+      if (!isCurrentlyResting && npc.fatigue >= AUTO_REST_THRESHOLD) {
+        if (npc.currentAction) {
+          broadcast(worldId, { type: "npcActionStopped", npcId })
+        }
         await npcs.updateOne(
           { _id: npc._id },
           { $set: { currentAction: { type: "resting", startedAt: newDate }, updatedAt: now } },
@@ -131,7 +137,7 @@ export async function restFatigue(
       const lastRestedHours = npc.lastRestedAt ? toTotalHours(npc.lastRestedAt) : 0
       const hoursSinceRest = currentHours - lastRestedHours
 
-      if (hoursSinceRest < 6) continue
+      if (hoursSinceRest < AUTO_REST_THRESHOLD) continue
 
       const currentFatigue = npc.fatigue ?? 0
       const newFatigue = Math.min(10, currentFatigue + 1)
@@ -142,13 +148,12 @@ export async function restFatigue(
         updates.morale = Math.max(0, npc.morale - 1)
         event.morale = updates.morale as number
       } else if (newFatigue === 9) {
-        updates.health = Math.max(0, npc.health - 1)
         updates.morale = Math.max(0, npc.morale - 2)
         event.health = updates.health as number
         event.morale = updates.morale as number
       } else if (newFatigue === 10) {
-        updates.health = Math.max(0, npc.health - 2)
-        updates.morale = Math.max(0, npc.morale - 3)
+        updates.health = Math.max(0, npc.health - 1)
+        updates.morale = Math.max(0, npc.morale - 2)
         event.health = updates.health as number
         event.morale = updates.morale as number
 

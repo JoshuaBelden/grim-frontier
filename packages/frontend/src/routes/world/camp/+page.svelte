@@ -209,6 +209,8 @@
                       <button class="action-btn gather" onclick={() => startAction(npc.id, "resting")}>Rest</button>
                     {/if}
                     </div>
+                  {:else if getActionType(npc.id)}
+                    <span class="action-label">{actionLabel(getActionType(npc.id)!)}</span>
                   {/if}
                 </div>
                 <div class="npc-stats">

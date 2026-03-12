@@ -1,6 +1,5 @@
 <script lang="ts">
   import type { InWorldDate, NpcDetailEvent } from "@grim-frontier/shared"
-  import { authStore } from "$lib/stores/auth"
   import { npcPanelStore, type PanelEntry } from "$lib/stores/npcPanels"
   import { wsErrorStore } from "$lib/stores/wsError"
   import { sendCommand } from "$lib/ws"
@@ -108,9 +107,7 @@
     return `${monthName} ${date.day}, ${date.year} ${hour}${ampm}`
   }
 
-  function startResting() {
-    sendCommand({ type: "startNpcAction", npcId: entry.npcId, actionType: "resting" })
-  }
+
 </script>
 
 <div class="panel">
@@ -166,15 +163,10 @@
             <span class="vital-desc severity-text-{hungerDesc(npc.hunger).severity}">{hungerDesc(npc.hunger).label}</span>
           </div>
         </div>
-        {#if npc.status === "at_camp" && npc.ownerId === $authStore.playerId}
-          <div class="rest-action">
-            <button class="action-btn" onclick={startResting}>Rest</button>
-            {#if npc.lastRestedAt}
-              <span class="last-rested">Last rested: {formatDate(npc.lastRestedAt)}</span>
-            {:else}
-              <span class="last-rested">Never rested</span>
-            {/if}
-          </div>
+        {#if npc.lastRestedAt}
+          <span class="last-rested">Last rested: {formatDate(npc.lastRestedAt)}</span>
+        {:else}
+          <span class="last-rested">Never rested</span>
         {/if}
       </section>
 
@@ -457,29 +449,6 @@
 
   .severity-text-critical {
     color: #c04040;
-  }
-
-  .rest-action {
-    align-items: center;
-    display: flex;
-    gap: 0.75rem;
-    margin-top: 0.25rem;
-  }
-
-  .action-btn {
-    background: #2a1e0e;
-    border: 1px solid #5a4020;
-    color: #d4b896;
-    cursor: pointer;
-    font-size: 0.65rem;
-    letter-spacing: 0.1em;
-    padding: 0.3rem 0.75rem;
-    text-transform: uppercase;
-    transition: background 0.15s;
-  }
-
-  .action-btn:hover {
-    background: #3a2e1e;
   }
 
   .last-rested {
