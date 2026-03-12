@@ -23,7 +23,7 @@ export async function handleGetCamp(context: HandlerContext, payload: unknown): 
 
   const campIdStr = camp._id!.toString()
   const campNpcs = await npcs
-    .find({ $or: [{ campId: campIdStr }, { locationId: campIdStr, locationType: "camp" }] })
+    .find({ campId: campIdStr, status: { $nin: ["travelling", "in_town", "gone"] } })
     .toArray()
 
   context.send({

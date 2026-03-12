@@ -1,5 +1,5 @@
 import type { GetWorldMapCommand } from "@grim-frontier/shared"
-import { camps, regions, territories, towns } from "../../models/collections.js"
+import { camps, npcs, regions, territories, towns } from "../../models/collections.js"
 import worldTopology from "../../core/topology.js"
 import type { HandlerContext } from "./index.js"
 
@@ -21,6 +21,14 @@ export async function handleGetWorldMap(context: HandlerContext, payload: unknow
 
   const allLandmarks = await towns.find({ territoryId: territory._id!.toString() }).toArray()
   const camp = await camps.findOne({ worldId: command.worldId, ownerId: context.playerId })
+  const playerNpc = await npcs.findOne({ ownerId: context.playerId })
+
+  // Resolve NPC's current location to a landmark nodeKey
+  let npcLocationKey: string | null = null
+  if (playerNpc?.locationType === "town" && playerNpc.locationId) {
+    const locationTown = allLandmarks.find(landmark => landmark._id!.toString() === playerNpc.locationId)
+    npcLocationKey = locationTown?.nodeKey ?? null
+  }
 
   const territoryNode = worldTopology.regions
     .flatMap(region => region.territories)
@@ -51,6 +59,8 @@ export async function handleGetWorldMap(context: HandlerContext, payload: unknow
             distanceToLandmark: camp.distanceToLandmark,
           }
         : null,
+      npcTravel: playerNpc?.status === "travelling" ? (playerNpc.travelState ?? null) : null,
+      npcLocationKey,
     },
   })
 }

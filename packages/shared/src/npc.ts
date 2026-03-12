@@ -9,7 +9,7 @@ import type { Trait } from "./traits"
 import type { InWorldDate } from "./world"
 
 /** Lifecycle status of an NPC within the world simulation. */
-export type NPCStatus = "drifting" | "travelling" | "encountered" | "at_camp" | "gone"
+export type NPCStatus = "drifting" | "travelling" | "encountered" | "at_camp" | "in_town" | "gone"
 
 /** An ongoing NPC activity that runs until explicitly stopped. */
 export interface NpcAction {

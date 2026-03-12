@@ -4,6 +4,7 @@ import type { Characteristics } from "./characteristics"
 import type { Nature } from "./nature"
 import type { NpcAction, NPCStatus } from "./npc"
 import type { CharacterOrigin } from "./origin"
+import type { NpcTravelState } from "./drifter"
 import type { Skills } from "./skills"
 import type { StoreItem, StoreType } from "./store"
 import type { Trait } from "./traits"
@@ -30,6 +31,8 @@ export type ClientCommandType =
   | "respondJoinRequest"
   | "listJoinRequests"
   | "listAcquaintances"
+  | "travelToTown"
+  | "returnToCamp"
 
 /** Request the territory map for the connected world. */
 export interface GetWorldMapCommand {
@@ -118,6 +121,17 @@ export interface ListAcquaintancesCommand {
   type: "listAcquaintances"
 }
 
+/** Begin travelling from camp to a town landmark. */
+export interface TravelToTownCommand {
+  type: "travelToTown"
+  townId: string
+}
+
+/** Return the player's NPC from a town back to camp. */
+export interface ReturnToCampCommand {
+  type: "returnToCamp"
+}
+
 /** Discriminated union of all client-to-server commands. */
 export type ClientCommand =
   | GetWorldMapCommand
@@ -134,6 +148,8 @@ export type ClientCommand =
   | RespondJoinRequestCommand
   | ListJoinRequestsCommand
   | ListAcquaintancesCommand
+  | TravelToTownCommand
+  | ReturnToCampCommand
 
 // ---------------------------------------------------------------------------
 // Server → Client events
@@ -159,6 +175,8 @@ export type ServerEventType =
   | "joinRequestList"
   | "joinRequestResolved"
   | "acquaintanceList"
+  | "playerTravelStarted"
+  | "playerTravelArrived"
 
 /** Sent on initial WebSocket connection. */
 export interface ConnectedEvent {
@@ -225,6 +243,8 @@ export interface WorldMapEvent {
     landmarks: MapLandmark[]
     connections: MapConnection[]
     camp: MapCamp | null
+    npcTravel: NpcTravelState | null
+    npcLocationKey: string | null
   }
 }
 
@@ -396,6 +416,20 @@ export interface AcquaintanceListEvent {
   }>
 }
 
+/** Sent to the player when their NPC begins travelling to a town. */
+export interface PlayerTravelStartedEvent {
+  type: "playerTravelStarted"
+  travelState: NpcTravelState
+  destinationName: string
+}
+
+/** Sent to the player when they arrive at a town after travelling. */
+export interface PlayerTravelArrivedEvent {
+  type: "playerTravelArrived"
+  townId: string
+  townName: string
+}
+
 /** Discriminated union of all server-to-client events. */
 export type ServerEvent =
   | ConnectedEvent
@@ -416,3 +450,5 @@ export type ServerEvent =
   | JoinRequestListEvent
   | JoinRequestResolvedEvent
   | AcquaintanceListEvent
+  | PlayerTravelStartedEvent
+  | PlayerTravelArrivedEvent

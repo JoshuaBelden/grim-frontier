@@ -2,22 +2,21 @@
   import { goto } from "$app/navigation"
   import { apiLogout } from "$lib/api"
   import JoinRequestModal from "$lib/components/camp/JoinRequestModal.svelte"
-  import NpcAvatar from "$lib/components/npc/NpcAvatar.svelte"
   import NpcListPanel from "$lib/components/npc/NpcListPanel.svelte"
   import NpcPanels from "$lib/components/npc/NpcPanels.svelte"
   import { authStore } from "$lib/stores/auth"
   import { campDetailStore } from "$lib/stores/camp"
+  import { npcPanelStore } from "$lib/stores/npcPanels"
   import { formatInWorldDate } from "$lib/utils/time"
   import { formatWeatherReport } from "$lib/utils/weather"
   import { connectWs, disconnectWs, sendCommand, wsConnected } from "$lib/ws"
-  import { weatherStore, worldClock } from "$lib/wsHandler"
+  import { npcDetailStore, weatherStore, worldClock } from "$lib/wsHandler"
   import type { Snippet } from "svelte"
   import { onMount } from "svelte"
 
   let { children }: { children: Snippet } = $props()
 
-  const campNpcs = $derived(($campDetailStore?.npcs ?? []).filter(npc => npc.id !== $authStore.npcId))
-  const campName = $derived($campDetailStore?.name ?? null)
+  const playerNpc = $derived($authStore.npcId ? $npcDetailStore.get($authStore.npcId) ?? null : null)
 
   onMount(() => {
     if (!$authStore.token) {
@@ -26,6 +25,9 @@
     }
     if ($authStore.campId) {
       sendCommand({ type: "getCamp", campId: $authStore.campId })
+    }
+    if ($authStore.npcId) {
+      sendCommand({ type: "getNpc", npcId: $authStore.npcId })
     }
     sendCommand({ type: "listJoinRequests" })
     return disconnectWs
@@ -46,17 +48,33 @@
     goto("/login")
   }
 
-  /** The player's own avatar entry — shown in the tray when npcId is available. */
-  const playerEntry = $derived(
-    $authStore.npcId
-      ? {
-          key: $authStore.npcId,
-          npcId: $authStore.npcId,
-          name: $authStore.username ?? "Player",
-          location: campName ?? undefined,
-        }
-      : null,
-  )
+  function openPlayerPanel() {
+    if (!$authStore.npcId) return
+    npcPanelStore.open({
+      key: $authStore.npcId,
+      npcId: $authStore.npcId,
+      name: playerNpc?.name ?? $authStore.username ?? "Player",
+      career: playerNpc?.career,
+      location: playerNpc?.locationName ?? undefined,
+    })
+  }
+
+  /** Returns a severity class for a vital value (higher = better for health/morale, lower = better for fatigue/hunger). */
+  function vitalSeverity(value: number, inverted: boolean): string {
+    const effective = inverted ? 10 - value : value
+    if (effective >= 7) return "good"
+    if (effective >= 4) return "warn"
+    if (effective >= 2) return "bad"
+    return "critical"
+  }
+
+  function formatAction(action: string): string {
+    return action.replace(/_/g, " ")
+  }
+
+  function formatStatus(status: string): string {
+    return status.replace(/_/g, " ")
+  }
 </script>
 
 <div class="shell">
@@ -79,19 +97,53 @@
     </div>
   </header>
 
+  {#if playerNpc}
+    <button class="player-npc" onclick={openPlayerPanel}>
+      <div class="pn-identity">
+        <img src="/images/default-avatar.png" alt={playerNpc.name} class="pn-portrait" />
+        <div class="pn-info">
+          <span class="pn-name">{playerNpc.name}</span>
+          <span class="pn-status">{formatStatus(playerNpc.status)}</span>
+          {#if playerNpc.status === "travelling" && playerNpc.travelDestination}
+            <span class="pn-location travelling">Heading to {playerNpc.travelDestination}</span>
+          {:else if playerNpc.locationName}
+            <span class="pn-location">{playerNpc.locationName}</span>
+          {/if}
+          {#if playerNpc.status !== "travelling"}
+            {#if playerNpc.status === "at_camp" || playerNpc.status === "in_town"}
+              {@const npcInCamp = $campDetailStore?.npcs.find(npc => npc.id === playerNpc.id)}
+              {#if npcInCamp?.currentAction}
+                <span class="pn-action">{formatAction(npcInCamp.currentAction.type)}</span>
+              {:else}
+                <span class="pn-action idle">Idle</span>
+              {/if}
+            {/if}
+          {/if}
+        </div>
+      </div>
+      <div class="pn-vitals">
+        <div class="pn-vital">
+          <span class="pn-vital-label">HP</span>
+          <div class="pn-bar"><div class="pn-bar-fill severity-{vitalSeverity(playerNpc.health, false)}" style="width: {playerNpc.health * 10}%"></div></div>
+        </div>
+        <div class="pn-vital">
+          <span class="pn-vital-label">MR</span>
+          <div class="pn-bar"><div class="pn-bar-fill severity-{vitalSeverity(playerNpc.morale, false)}" style="width: {playerNpc.morale * 10}%"></div></div>
+        </div>
+        <div class="pn-vital">
+          <span class="pn-vital-label">HG</span>
+          <div class="pn-bar"><div class="pn-bar-fill severity-{vitalSeverity(playerNpc.hunger, true)}" style="width: {playerNpc.hunger * 10}%"></div></div>
+        </div>
+        <div class="pn-vital">
+          <span class="pn-vital-label">FT</span>
+          <div class="pn-bar"><div class="pn-bar-fill severity-{vitalSeverity(playerNpc.fatigue, true)}" style="width: {playerNpc.fatigue * 10}%"></div></div>
+        </div>
+      </div>
+    </button>
+  {/if}
+
   <div class="content">
     {@render children()}
-  </div>
-
-  <div class="avatar-tray">
-    {#if playerEntry}
-      <NpcAvatar entry={playerEntry} />
-    {/if}
-    {#each campNpcs as npc}
-      <NpcAvatar
-        entry={{ key: npc.id, npcId: npc.id, name: npc.name, career: npc.career, location: campName ?? undefined }}
-      />
-    {/each}
   </div>
 </div>
 
@@ -174,18 +226,139 @@
     color: #c4a882;
   }
 
+  .player-npc {
+    background: #1a1008;
+    border: none;
+    border-bottom: 1px solid #2a1e0e;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.6rem 1.5rem;
+    text-align: left;
+    transition: background 0.15s;
+  }
+
+  .player-npc:hover {
+    background: #221608;
+  }
+
+  .pn-identity {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-width: 0;
+  }
+
+  .pn-portrait {
+    height: 36px;
+    width: 36px;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+
+  .pn-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    min-width: 0;
+  }
+
+  .pn-name {
+    color: #d4b896;
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .pn-status {
+    color: #8a7060;
+    font-size: 0.55rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .pn-location {
+    color: #5a4020;
+    font-size: 0.55rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .pn-location.travelling {
+    color: #9a8a4a;
+    font-style: italic;
+  }
+
+  .pn-action {
+    color: #7a9a4a;
+    font-size: 0.55rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .pn-action.idle {
+    color: #5a4020;
+  }
+
+  .pn-vitals {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    width: 120px;
+    flex-shrink: 0;
+  }
+
+  .pn-vital {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .pn-vital-label {
+    color: #5a4020;
+    font-size: 0.5rem;
+    letter-spacing: 0.04em;
+    width: 16px;
+    text-transform: uppercase;
+  }
+
+  .pn-bar {
+    background: #1e1508;
+    border: 1px solid #2a1e0e;
+    flex: 1;
+    height: 4px;
+  }
+
+  .pn-bar-fill {
+    height: 100%;
+    transition: width 0.3s ease;
+  }
+
+  .severity-good {
+    background: #3a6b30;
+  }
+
+  .severity-warn {
+    background: #6b5a30;
+  }
+
+  .severity-bad {
+    background: #6b3a20;
+  }
+
+  .severity-critical {
+    background: #6b2020;
+  }
+
   .content {
     flex: 1;
     padding: 2rem 1.5rem;
-  }
-
-  .avatar-tray {
-    bottom: 1.25rem;
-    display: flex;
-    flex-direction: row;
-    gap: 0.5rem;
-    left: 1.25rem;
-    position: fixed;
-    z-index: 10;
   }
 </style>

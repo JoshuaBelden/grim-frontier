@@ -14,6 +14,8 @@ import type {
   NpcDetailEvent,
   NpcListEvent,
   NpcUpdateEvent,
+  PlayerTravelArrivedEvent,
+  PlayerTravelStartedEvent,
   ServerEvent,
   SuspendJoinRequestsUpdateEvent,
   TownDetailEvent,
@@ -192,6 +194,24 @@ const eventHandlers: Record<string, (message: ServerEvent) => void> = {
   acquaintanceList(message) {
     const event = message as AcquaintanceListEvent
     acquaintanceStore.set(event.acquaintances)
+  },
+
+  playerTravelStarted(message) {
+    const event = message as PlayerTravelStartedEvent
+    worldMapStore.update(current => {
+      if (!current) return current
+      return { ...current, npcTravel: event.travelState, npcLocationKey: null }
+    })
+  },
+
+  playerTravelArrived(message) {
+    const event = message as PlayerTravelArrivedEvent
+    worldMapStore.update(current => {
+      if (!current) return current
+      const arrivedLandmark = current.landmarks.find(landmark => landmark.id === event.townId)
+      const npcLocationKey = arrivedLandmark?.nodeKey ?? null
+      return { ...current, npcTravel: null, npcLocationKey }
+    })
   },
 
   error(message) {

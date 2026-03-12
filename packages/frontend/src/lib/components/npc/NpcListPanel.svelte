@@ -50,7 +50,7 @@
           <div class="npc-name">{npc.name}</div>
           <div class="npc-meta">
             <span class="npc-career">{npc.career}</span>
-            <span class="npc-status" class:drifting={npc.status === "drifting"} class:travelling={npc.status === "travelling"} class:at-camp={npc.status === "at_camp"}
+            <span class="npc-status" class:drifting={npc.status === "drifting"} class:travelling={npc.status === "travelling"} class:at-camp={npc.status === "at_camp"} class:in-town={npc.status === "in_town"}
               >{formatStatus(npc.status)}</span
             >
           </div>
@@ -198,6 +198,10 @@
 
   .npc-status.at-camp {
     color: #7a9a4a;
+  }
+
+  .npc-status.in-town {
+    color: #6a8ab0;
   }
 
   .npc-location {
