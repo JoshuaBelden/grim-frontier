@@ -2,9 +2,8 @@
 
 ## Next
 
-- Remove actions from the npc info panel
-- Players can create their own npc and name it
 - Players can log out
+- Players can create their own npc and name it
 
 ## Upcoming
 
@@ -25,6 +24,7 @@
 - NPCs have hobbies/pursuits?
 - NPCs have wardrobes for the seasons
 - Add NPCs that can start camps
+- 
 
 ## Bugs
 

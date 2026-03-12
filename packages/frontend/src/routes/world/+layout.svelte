@@ -7,6 +7,7 @@
   import { authStore } from "$lib/stores/auth"
   import { campDetailStore } from "$lib/stores/camp"
   import { formatInWorldDate } from "$lib/utils/time"
+  import { apiLogout } from "$lib/api"
   import { connectWs, disconnectWs, sendCommand, wsConnected } from "$lib/ws"
   import { formatWeatherReport } from "$lib/utils/weather"
   import { weatherStore, worldClock } from "$lib/wsHandler"
@@ -40,6 +41,13 @@
     }
   })
 
+  async function handleLogout() {
+    disconnectWs()
+    await apiLogout().catch(() => {})
+    authStore.clear()
+    goto("/login")
+  }
+
   /** The player's own avatar entry — shown in the tray when npcId is available. */
   const playerEntry = $derived(
     $authStore.npcId
@@ -71,6 +79,7 @@
         <span class="player">{$authStore.username}</span>
       {/if}
       <span class="ws-dot" class:connected={$wsConnected} title={$wsConnected ? "Connected" : "Disconnected"}></span>
+      <button class="logout-btn" onclick={handleLogout}>Logout</button>
     </div>
   </header>
 
@@ -148,6 +157,23 @@
 
   .ws-dot.connected {
     background: #7a9a4a;
+  }
+
+  .logout-btn {
+    background: none;
+    border: 1px solid #5a4020;
+    border-radius: 3px;
+    color: #8a7060;
+    cursor: pointer;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    padding: 0.2rem 0.5rem;
+    text-transform: uppercase;
+  }
+
+  .logout-btn:hover {
+    border-color: #8a7060;
+    color: #c4a882;
   }
 
   .content {

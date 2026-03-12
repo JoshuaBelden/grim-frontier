@@ -38,6 +38,17 @@ export async function apiLogin(username: string, password: string) {
   return handleResponse<{ token: string; playerId: string }>(response)
 }
 
+/** Logs out the current player by invalidating the server-side session. */
+export async function apiLogout() {
+  const response = await fetch(`${BASE}/auth/logout`, {
+    method: "POST",
+    headers: authHeaders(),
+  })
+  if (!response.ok && response.status !== 401) {
+    throw new Error("Logout failed")
+  }
+}
+
 /** Returns the current player's profile. */
 export async function apiGetMe() {
   const response = await fetch(`${BASE}/players/me`, { headers: authHeaders() })

@@ -73,6 +73,12 @@ export async function authRoutes(app: FastifyInstance) {
     return { token, playerId: player._id!.toString() }
   })
 
+  app.post("/auth/logout", { preHandler: authenticate }, async (request, reply) => {
+    const { jti } = request.user
+    await redis.del(`session:${jti}`)
+    return reply.status(204).send()
+  })
+
   app.get("/players/me", { preHandler: authenticate }, async (request, reply) => {
     const { playerId } = request.user
     const player = await players.findOne({ _id: new ObjectId(playerId) })
