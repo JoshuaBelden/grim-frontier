@@ -7,7 +7,7 @@
     children: Snippet
   }
 
-  let { title, open: initialOpen = false, children }: Props = $props()
+  let { title, open: initialOpen = true, children }: Props = $props()
   let expanded = $state(initialOpen)
 </script>
 
@@ -25,6 +25,9 @@
 
 <style>
   section {
+    background: #1e1508;
+    border: 1px solid #3a2a14;
+    border-radius: 2px;
     display: flex;
     flex-direction: column;
   }
@@ -33,13 +36,13 @@
     align-items: center;
     background: none;
     border: none;
-    border-bottom: 1px solid #2a1e0e;
+    border-bottom: 1px solid #3a2a14;
     color: inherit;
     cursor: pointer;
     display: flex;
     font-family: inherit;
     justify-content: space-between;
-    padding: 0 0 0.5rem;
+    padding: 0.6rem 1rem;
   }
 
   .section-header:hover h2,
@@ -49,7 +52,7 @@
 
   h2 {
     border: none;
-    color: #8a7060;
+    color: #b09070;
     font-size: 0.7rem;
     letter-spacing: 0.15em;
     margin: 0;
@@ -58,11 +61,11 @@
   }
 
   .toggle {
-    color: #8a7060;
+    color: #b09070;
     font-size: 0.85rem;
   }
 
   .section-content {
-    padding-top: 1rem;
+    padding: 1rem;
   }
 </style>

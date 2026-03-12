@@ -16,6 +16,8 @@
 
   let { children }: { children: Snippet } = $props()
 
+  let npcListVisible = $state(false)
+
   const playerNpc = $derived($authStore.npcId ? $npcDetailStore.get($authStore.npcId) ?? null : null)
 
   onMount(() => {
@@ -79,15 +81,60 @@
 
 <div class="shell">
   <header>
-    <a href="/world" class="brand">Grim Frontier</a>
+    {#if playerNpc}
+      <button class="player-npc" onclick={openPlayerPanel}>
+        <div class="pn-identity">
+          <img src="/images/default-avatar.png" alt={playerNpc.name} class="pn-portrait" />
+          <div class="pn-info">
+            <span class="pn-name">{playerNpc.name}</span>
+            <span class="pn-status">{formatStatus(playerNpc.status)}</span>
+            {#if playerNpc.status === "travelling" && playerNpc.travelDestination}
+              <span class="pn-location travelling">Heading to {playerNpc.travelDestination}</span>
+            {:else if playerNpc.locationName}
+              <span class="pn-location">{playerNpc.locationName}</span>
+            {/if}
+            {#if playerNpc.status !== "travelling"}
+              {#if playerNpc.status === "at_camp" || playerNpc.status === "in_town"}
+                {@const npcInCamp = $campDetailStore?.npcs.find(npc => npc.id === playerNpc.id)}
+                {#if npcInCamp?.currentAction}
+                  <span class="pn-action">{formatAction(npcInCamp.currentAction.type)}</span>
+                {:else}
+                  <span class="pn-action idle">Idle</span>
+                {/if}
+              {/if}
+            {/if}
+          </div>
+        </div>
+        <div class="pn-vitals">
+          <div class="pn-vital">
+            <span class="pn-vital-label">HP</span>
+            <div class="pn-bar"><div class="pn-bar-fill severity-{vitalSeverity(playerNpc.health, false)}" style="width: {playerNpc.health * 10}%"></div></div>
+          </div>
+          <div class="pn-vital">
+            <span class="pn-vital-label">MR</span>
+            <div class="pn-bar"><div class="pn-bar-fill severity-{vitalSeverity(playerNpc.morale, false)}" style="width: {playerNpc.morale * 10}%"></div></div>
+          </div>
+          <div class="pn-vital">
+            <span class="pn-vital-label">HG</span>
+            <div class="pn-bar"><div class="pn-bar-fill severity-{vitalSeverity(playerNpc.hunger, true)}" style="width: {playerNpc.hunger * 10}%"></div></div>
+          </div>
+          <div class="pn-vital">
+            <span class="pn-vital-label">FT</span>
+            <div class="pn-bar"><div class="pn-bar-fill severity-{vitalSeverity(playerNpc.fatigue, true)}" style="width: {playerNpc.fatigue * 10}%"></div></div>
+          </div>
+        </div>
+      </button>
+    {/if}
+
     <div class="world-clock">
       {#if $worldClock}
-        <div>{formatInWorldDate($worldClock)}</div>
+        <div class="clock-date">{formatInWorldDate($worldClock)}</div>
       {/if}
       {#if $weatherStore}
         <div class="weather">{formatWeatherReport($weatherStore)}</div>
       {/if}
     </div>
+
     <div class="meta">
       {#if $authStore.username}
         <span class="player">{$authStore.username}</span>
@@ -97,57 +144,16 @@
     </div>
   </header>
 
-  {#if playerNpc}
-    <button class="player-npc" onclick={openPlayerPanel}>
-      <div class="pn-identity">
-        <img src="/images/default-avatar.png" alt={playerNpc.name} class="pn-portrait" />
-        <div class="pn-info">
-          <span class="pn-name">{playerNpc.name}</span>
-          <span class="pn-status">{formatStatus(playerNpc.status)}</span>
-          {#if playerNpc.status === "travelling" && playerNpc.travelDestination}
-            <span class="pn-location travelling">Heading to {playerNpc.travelDestination}</span>
-          {:else if playerNpc.locationName}
-            <span class="pn-location">{playerNpc.locationName}</span>
-          {/if}
-          {#if playerNpc.status !== "travelling"}
-            {#if playerNpc.status === "at_camp" || playerNpc.status === "in_town"}
-              {@const npcInCamp = $campDetailStore?.npcs.find(npc => npc.id === playerNpc.id)}
-              {#if npcInCamp?.currentAction}
-                <span class="pn-action">{formatAction(npcInCamp.currentAction.type)}</span>
-              {:else}
-                <span class="pn-action idle">Idle</span>
-              {/if}
-            {/if}
-          {/if}
-        </div>
-      </div>
-      <div class="pn-vitals">
-        <div class="pn-vital">
-          <span class="pn-vital-label">HP</span>
-          <div class="pn-bar"><div class="pn-bar-fill severity-{vitalSeverity(playerNpc.health, false)}" style="width: {playerNpc.health * 10}%"></div></div>
-        </div>
-        <div class="pn-vital">
-          <span class="pn-vital-label">MR</span>
-          <div class="pn-bar"><div class="pn-bar-fill severity-{vitalSeverity(playerNpc.morale, false)}" style="width: {playerNpc.morale * 10}%"></div></div>
-        </div>
-        <div class="pn-vital">
-          <span class="pn-vital-label">HG</span>
-          <div class="pn-bar"><div class="pn-bar-fill severity-{vitalSeverity(playerNpc.hunger, true)}" style="width: {playerNpc.hunger * 10}%"></div></div>
-        </div>
-        <div class="pn-vital">
-          <span class="pn-vital-label">FT</span>
-          <div class="pn-bar"><div class="pn-bar-fill severity-{vitalSeverity(playerNpc.fatigue, true)}" style="width: {playerNpc.fatigue * 10}%"></div></div>
-        </div>
-      </div>
-    </button>
-  {/if}
+  <nav class="site-nav">
+    <button class="nav-btn" onclick={() => (npcListVisible = !npcListVisible)}>NPCs</button>
+  </nav>
 
   <div class="content">
     {@render children()}
   </div>
 </div>
 
-<NpcListPanel />
+<NpcListPanel bind:visible={npcListVisible} />
 <NpcPanels />
 <JoinRequestModal />
 
@@ -160,35 +166,35 @@
 
   header {
     border-bottom: 1px solid #2a1e0e;
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
+    display: flex;
     align-items: center;
-    padding: 0.75rem 1.5rem;
+    gap: 1rem;
+    padding: 0.5rem 1.5rem;
   }
 
-  .brand {
+  .world-clock {
+    flex: 1;
+    text-align: center;
+    color: #c4a882;
+    letter-spacing: 0.08em;
+  }
+
+  .clock-date {
+    font-size: 1rem;
+    color: #d4b896;
+  }
+
+  .weather {
     font-size: 0.85rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
+    margin-top: 0.2rem;
+    color: #c4a882;
   }
 
   .meta {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    justify-self: end;
-  }
-
-  .world-clock {
-    color: #8a7060;
-    font-size: 0.75rem;
-    letter-spacing: 0.08em;
-    text-align: center;
-  }
-
-  .weather {
-    font-size: 0.7rem;
-    margin-top: 0.15rem;
+    margin-left: auto;
   }
 
   .player {
@@ -227,16 +233,17 @@
   }
 
   .player-npc {
-    background: #1a1008;
+    background: none;
     border: none;
-    border-bottom: 1px solid #2a1e0e;
+    border-right: 1px solid #2a1e0e;
     cursor: pointer;
     display: flex;
     align-items: center;
     gap: 1rem;
-    padding: 0.6rem 1.5rem;
+    padding: 0.5rem 1rem 0.5rem 0;
     text-align: left;
     transition: background 0.15s;
+    flex-shrink: 0;
   }
 
   .player-npc:hover {
@@ -355,6 +362,32 @@
 
   .severity-critical {
     background: #6b2020;
+  }
+
+  .site-nav {
+    border-bottom: 1px solid #2a1e0e;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.4rem 1.5rem;
+    min-height: 2rem;
+  }
+
+  .nav-btn {
+    background: none;
+    border: none;
+    color: #8a7060;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    padding: 0.2rem 0;
+    text-transform: uppercase;
+    transition: color 0.15s;
+  }
+
+  .nav-btn:hover {
+    color: #d4b896;
   }
 
   .content {

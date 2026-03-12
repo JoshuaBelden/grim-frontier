@@ -90,7 +90,7 @@
   <p class="muted">Loading territory…</p>
 {:else}
   <div class="territory">
-    <p class="region-label">Dustercreek Valley</p>
+    <p class="region-label">{$worldMapStore.regionName}</p>
     <h1>{$worldMapStore.name}</h1>
 
     {#if npcTravel && travellingToName}
@@ -110,39 +110,7 @@
       </div>
     {/if}
 
-    <WorldMap
-      landmarks={$worldMapStore.landmarks}
-      connections={$worldMapStore.connections}
-      camp={$worldMapStore.camp}
-      onLandmarkClick={handleLandmarkClick}
-      onCampClick={handleCampClick}
-    />
-
     <div class="nodes">
-      {#each $worldMapStore.landmarks as landmark}
-        {@const isCurrentLocation = npcLocationKey === landmark.nodeKey}
-        <div class="node" class:node--current={isCurrentLocation}>
-          <span class="node-type">{landmark.type}</span>
-          <span class="node-name">{landmark.name}</span>
-          {#if isCurrentLocation}
-            <span class="node-current-label">Current Location</span>
-          {/if}
-          <div class="node-actions">
-            <a href="/world/town/{landmark.id}" class="node-action">View</a>
-            {#if !npcTravel && !isCurrentLocation}
-              <button class="node-action node-action--travel" onclick={() => handleTravel(landmark)}>
-                Travel
-              </button>
-            {/if}
-          </div>
-          {#if isCurrentLocation && !npcTravel}
-            <button class="node-action node-action--return" onclick={handleReturnToCamp}>
-              Return to Camp
-            </button>
-          {/if}
-        </div>
-      {/each}
-
       {#if $worldMapStore.camp}
         <a href="/world/camp" class="node">
           <span class="node-type">Camp</span>
@@ -155,7 +123,44 @@
           <span class="node-name muted">No camp</span>
         </div>
       {/if}
+
+      {#each $worldMapStore.landmarks as landmark}
+        {@const isCurrentLocation = npcLocationKey === landmark.nodeKey}
+        <a href="/world/town/{landmark.id}" class="node" class:node--current={isCurrentLocation}>
+          <span class="node-type">{landmark.type}</span>
+          <span class="node-name">{landmark.name}</span>
+          {#if isCurrentLocation}
+            <span class="node-current-label">Current Location</span>
+          {/if}
+          <div class="node-actions">
+            {#if !npcTravel && !isCurrentLocation}
+              <button
+                class="node-action node-action--travel"
+                onclick={event => { event.preventDefault(); handleTravel(landmark) }}
+              >
+                Travel
+              </button>
+            {/if}
+          </div>
+          {#if isCurrentLocation && !npcTravel}
+            <button
+              class="node-action node-action--return"
+              onclick={event => { event.preventDefault(); handleReturnToCamp() }}
+            >
+              Return to Camp
+            </button>
+          {/if}
+        </a>
+      {/each}
     </div>
+
+    <WorldMap
+      landmarks={$worldMapStore.landmarks}
+      connections={$worldMapStore.connections}
+      camp={$worldMapStore.camp}
+      onLandmarkClick={handleLandmarkClick}
+      onCampClick={handleCampClick}
+    />
   </div>
 {/if}
 
@@ -172,12 +177,12 @@
     font-size: 1.75rem;
     letter-spacing: 0.15em;
     text-transform: uppercase;
-    margin-bottom: 2.5rem;
+    margin-bottom: 1.5rem;
   }
 
   .travel-status {
     border: 1px solid #5a4020;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
     padding: 1.25rem 1.5rem;
   }
 
@@ -211,17 +216,19 @@
   .nodes {
     display: flex;
     gap: 1.5rem;
-    flex-wrap: wrap;
+    width: 100%;
+    margin-bottom: 2rem;
   }
 
   .node {
     border: 1px solid #5a4020;
     display: flex;
     flex-direction: column;
+    flex: 1;
     gap: 0.5rem;
+    min-width: 140px;
     padding: 1.25rem 1.5rem;
     text-decoration: none;
-    width: 200px;
     transition: border-color 0.15s;
   }
 

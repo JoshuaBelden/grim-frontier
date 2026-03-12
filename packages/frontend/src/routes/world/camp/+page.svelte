@@ -165,49 +165,55 @@
     <p class="type-label">Camp</p>
     <h1>{camp.name}</h1>
 
-    <CollapsibleSection title="Food Stores">
-      <div class="stores-grid">
-        {#each (["raw", "staple", "fresh", "prepared"] as FoodStoreType[]) as foodType}
-          {@const entry = camp.foodStores[foodType]}
-          <div class="store-item" class:active={camp.preferredFood === foodType}>
-            <div class="store-header">
-              <span class="store-label">{foodLabels[foodType]}</span>
-              <span class="store-quality">{foodQualityLabels[foodType]}</span>
-            </div>
-            <span class="store-value">{entry.count}</span>
-            <button
-              class="action-btn"
-              class:selected={camp.preferredFood === foodType}
-              onclick={() => setPreferredFood(foodType)}
-            >
-              {camp.preferredFood === foodType ? "Eating" : "Eat"}
-            </button>
+    <div class="stores-row">
+      <div class="stores-col">
+        <CollapsibleSection title="Food Stores">
+          <div class="stores-grid">
+            {#each (["raw", "staple", "fresh", "prepared"] as FoodStoreType[]) as foodType}
+              {@const entry = camp.foodStores[foodType]}
+              <div class="store-item" class:active={camp.preferredFood === foodType}>
+                <div class="store-header">
+                  <span class="store-label">{foodLabels[foodType]}</span>
+                  <span class="store-quality">{foodQualityLabels[foodType]}</span>
+                </div>
+                <span class="store-value">{entry.count}</span>
+                <button
+                  class="action-btn"
+                  class:selected={camp.preferredFood === foodType}
+                  onclick={() => setPreferredFood(foodType)}
+                >
+                  {camp.preferredFood === foodType ? "Eating" : "Eat"}
+                </button>
+              </div>
+            {/each}
           </div>
-        {/each}
+        </CollapsibleSection>
       </div>
-    </CollapsibleSection>
 
-    <CollapsibleSection title="Fuel Stores">
-      <div class="stores-grid">
-        {#each (["sticks", "splitLogs", "coal", "oil"] as FuelStoreType[]) as fuelType}
-          {@const amount = camp.fuelStores[fuelType]}
-          <div class="store-item" class:active={camp.amenities.activeFuelSource === fuelType}>
-            <div class="store-header">
-              <span class="store-label">{fuelLabels[fuelType]}</span>
-              <span class="store-quality">Burn: {FUEL_BURN_VALUES[fuelType]}</span>
-            </div>
-            <span class="store-value">{amount}</span>
-            <button
-              class="action-btn"
-              class:selected={camp.amenities.activeFuelSource === fuelType}
-              onclick={() => setActiveFuelSource(fuelType)}
-            >
-              {camp.amenities.activeFuelSource === fuelType ? "Burning" : "Burn"}
-            </button>
+      <div class="stores-col">
+        <CollapsibleSection title="Fuel Stores">
+          <div class="stores-grid">
+            {#each (["sticks", "splitLogs", "coal", "oil"] as FuelStoreType[]) as fuelType}
+              {@const amount = camp.fuelStores[fuelType]}
+              <div class="store-item" class:active={camp.amenities.activeFuelSource === fuelType}>
+                <div class="store-header">
+                  <span class="store-label">{fuelLabels[fuelType]}</span>
+                  <span class="store-quality">Burn: {FUEL_BURN_VALUES[fuelType]}</span>
+                </div>
+                <span class="store-value">{amount}</span>
+                <button
+                  class="action-btn"
+                  class:selected={camp.amenities.activeFuelSource === fuelType}
+                  onclick={() => setActiveFuelSource(fuelType)}
+                >
+                  {camp.amenities.activeFuelSource === fuelType ? "Burning" : "Burn"}
+                </button>
+              </div>
+            {/each}
           </div>
-        {/each}
+        </CollapsibleSection>
       </div>
-    </CollapsibleSection>
+    </div>
 
     <CollapsibleSection title="Amenities">
       <div class="amenities">
@@ -313,6 +319,16 @@
     font-size: 1.75rem;
     letter-spacing: 0.15em;
     text-transform: uppercase;
+  }
+
+  .stores-row {
+    display: flex;
+    gap: 2rem;
+  }
+
+  .stores-col {
+    flex: 1;
+    min-width: 0;
   }
 
   .stores-grid {

@@ -40,8 +40,8 @@
     <h1>{town.name}</h1>
 
     {#if town.stores && town.stores.length > 0}
-      <div class="store-list">
-        {#each town.stores as store}
+      <div class="store-grid">
+        {#each [...town.stores].sort((a, b) => a.name.localeCompare(b.name)) as store}
           <button class="store-card" onclick={() => (selectedStore = store)}>
             <span class="store-type-label">{formatStoreType(store.type)}</span>
             <span class="store-name">{store.name}</span>
@@ -103,11 +103,10 @@
     font-size: 0.85rem;
   }
 
-  .store-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    max-width: 560px;
+  .store-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 0.75rem;
   }
 
   .store-card {
@@ -117,6 +116,7 @@
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
+    min-height: 100px;
     padding: 1rem 1.25rem;
     text-align: left;
     text-transform: none;

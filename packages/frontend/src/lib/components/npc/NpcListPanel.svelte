@@ -3,7 +3,7 @@
   import { npcPanelStore } from "$lib/stores/npcPanels"
   import { sendCommand, wsConnected } from "$lib/ws"
 
-  let visible = $state(false)
+  let { visible = $bindable(false) }: { visible?: boolean } = $props()
   let hasFetched = $state(false)
 
   $effect(() => {
@@ -12,10 +12,6 @@
       sendCommand({ type: "listNpcs" })
     }
   })
-
-  function toggle() {
-    visible = !visible
-  }
 
   function openNpc(npc: (typeof $npcListStore)[0]) {
     npcPanelStore.open({
@@ -31,12 +27,6 @@
     return status.replace("_", " ")
   }
 </script>
-
-<div class="npc-list-toggle">
-  <button class="toggle-btn" onclick={toggle} title="NPC Debug List">
-    {visible ? "✕" : "NPCs"}
-  </button>
-</div>
 
 {#if visible}
   <div class="npc-list-panel">
@@ -72,30 +62,6 @@
 {/if}
 
 <style>
-  .npc-list-toggle {
-    position: fixed;
-    top: 0.75rem;
-    right: 5rem;
-    z-index: 20;
-  }
-
-  .toggle-btn {
-    background: #1a1008;
-    border: 1px solid #5a4020;
-    color: #8a7060;
-    cursor: pointer;
-    font-size: 0.7rem;
-    letter-spacing: 0.1em;
-    padding: 0.35rem 0.6rem;
-    text-transform: uppercase;
-    transition: border-color 0.15s;
-  }
-
-  .toggle-btn:hover {
-    border-color: #d4b896;
-    color: #d4b896;
-  }
-
   .npc-list-panel {
     background: #120c04;
     border-left: 1px solid #2a1e0e;

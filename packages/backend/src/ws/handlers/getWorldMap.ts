@@ -43,6 +43,7 @@ export async function handleGetWorldMap(context: HandlerContext, payload: unknow
     territory: {
       id: territory._id!.toString(),
       name: territory.name,
+      regionName: region.name,
       landmarks: allLandmarks.map(landmark => ({
         id: landmark._id!.toString(),
         name: landmark.name,

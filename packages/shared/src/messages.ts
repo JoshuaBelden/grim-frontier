@@ -240,6 +240,7 @@ export interface WorldMapEvent {
   territory: {
     id: string
     name: string
+    regionName: string
     landmarks: MapLandmark[]
     connections: MapConnection[]
     camp: MapCamp | null

@@ -305,10 +305,10 @@
     display: flex;
     flex-direction: column;
     height: 85vh;
-    min-width: 380px;
+    min-width: 760px;
     overflow: hidden;
     position: relative;
-    width: 420px;
+    width: 840px;
   }
 
   .close {
