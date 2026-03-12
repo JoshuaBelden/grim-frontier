@@ -2,7 +2,6 @@
 
 ## Next
 
-- Fires improve moral
 - Camps increase reputation
 - Drifters prefer to rest at night.
 - NPCs in camp will leave if their morale drops
