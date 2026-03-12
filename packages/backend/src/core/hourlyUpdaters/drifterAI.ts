@@ -137,7 +137,7 @@ async function processDecisions(
     // Skip NPCs waiting on a join request response
     if (npcIdsWithPendingRequests.has(npcId)) continue
 
-    const context = await buildActionContext(npc, npcId, worldId, broadcast)
+    const context = await buildActionContext(npc, npcId, worldId, currentDate, broadcast)
 
     // Score all actions and pick the best
     let bestAction = drifterActions[0]
@@ -183,6 +183,7 @@ async function buildActionContext(
   npc: NpcDocument,
   npcId: string,
   worldId: string,
+  currentDate: InWorldDate,
   broadcast: (worldId: string, message: object) => void,
 ): Promise<DrifterActionContext> {
   let currentLandmark: LandmarkNode | null = null
@@ -207,6 +208,7 @@ async function buildActionContext(
     npc,
     npcId,
     worldId,
+    currentDate,
     currentLandmark,
     connectedLandmarks,
     nearbyCamps,

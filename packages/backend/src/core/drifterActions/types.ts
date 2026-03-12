@@ -1,4 +1,4 @@
-import type { Camp, LandmarkNode, NPC, TopologyConnection } from "@grim-frontier/shared"
+import type { Camp, InWorldDate, LandmarkNode, NPC, TopologyConnection } from "@grim-frontier/shared"
 import type { ObjectId } from "mongodb"
 
 /** An NPC document with its MongoDB _id. */
@@ -12,6 +12,7 @@ export interface DrifterActionContext {
   npc: NpcDocument
   npcId: string
   worldId: string
+  currentDate: InWorldDate
   currentLandmark: LandmarkNode | null
   connectedLandmarks: Array<{ landmark: LandmarkNode; connection: TopologyConnection }>
   nearbyCamps: CampDocument[]

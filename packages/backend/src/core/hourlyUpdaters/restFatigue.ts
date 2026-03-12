@@ -1,4 +1,5 @@
 import type { Camp, InWorldDate, NpcAction } from "@grim-frontier/shared"
+import { isRestingPeriod } from "@grim-frontier/shared"
 import type { WithId } from "mongodb"
 import { camps, npcs } from "../../models/collections.js"
 
@@ -51,10 +52,12 @@ export async function restFatigue(
 
     for (const npc of campNpcs) {
       const npcId = npc._id!.toString()
-      const isResting = npc.currentAction?.type === "resting"
+      const isCurrentlyResting = npc.currentAction?.type === "resting"
 
-      // Auto-rest: fatigued unowned camp NPCs with no current action begin resting
-      if (!isResting && !npc.currentAction && !npc.ownerId && npc.fatigue >= AUTO_REST_THRESHOLD) {
+      const resting = isRestingPeriod(newDate.hour)
+
+      // Auto-rest: owned NPCs with no current action rest during the resting period
+      if (!isCurrentlyResting && !npc.currentAction && npc.ownerId && resting) {
         await npcs.updateOne(
           { _id: npc._id },
           { $set: { currentAction: { type: "resting", startedAt: newDate }, updatedAt: now } },
@@ -64,9 +67,20 @@ export async function restFatigue(
         continue
       }
 
-      // Auto-gather: idle unowned camp NPCs with no action and low fatigue start gathering
+      // Auto-rest: fatigued unowned camp NPCs with no current action begin resting
+      if (!isCurrentlyResting && !npc.currentAction && !npc.ownerId && npc.fatigue >= AUTO_REST_THRESHOLD) {
+        await npcs.updateOne(
+          { _id: npc._id },
+          { $set: { currentAction: { type: "resting", startedAt: newDate }, updatedAt: now } },
+        )
+
+        broadcast(worldId, { type: "npcActionStarted", npcId, action: "resting" })
+        continue
+      }
+
+      // Auto-rest or auto-gather: idle unowned camp NPCs with no action
       if (!npc.currentAction && !npc.ownerId) {
-        const action = chooseGatheringAction(camp, campNpcs.length)
+        const action = resting ? "resting" : chooseGatheringAction(camp, campNpcs.length)
         await npcs.updateOne(
           { _id: npc._id },
           { $set: { currentAction: { type: action, startedAt: newDate }, updatedAt: now } },
@@ -76,7 +90,7 @@ export async function restFatigue(
         continue
       }
 
-      if (isResting) {
+      if (isCurrentlyResting) {
         const grit = npc.characteristics?.grit ?? 5
         const strength = npc.characteristics?.strength ?? 5
         const fatigueRecovery = fatigueRecoveryRate(grit)
@@ -89,9 +103,9 @@ export async function restFatigue(
         const roundedFatigue = Math.round(newFatigue * 10) / 10
         const roundedHealth = Math.round(newHealth * 10) / 10
 
-        // Auto-wake: stop resting once fully recovered, immediately start gathering
+        // Auto-wake: stop resting once fully recovered; start gathering unless it's the resting period
         const fullyRested = roundedFatigue === 0
-        const gatherAction = fullyRested ? chooseGatheringAction(camp, campNpcs.length) : null
+        const gatherAction = fullyRested && !resting ? chooseGatheringAction(camp, campNpcs.length) : null
         const updates: Record<string, unknown> = {
           fatigue: roundedFatigue,
           health: roundedHealth,
