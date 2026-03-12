@@ -41,7 +41,7 @@ function findConnections(landmarkKey: string): Array<{ landmark: LandmarkNode; c
 
 /** Phase 1: Process arriving NPCs whose travel is complete. */
 async function processArrivals(worldId: string, currentDate: InWorldDate): Promise<void> {
-  const travellers = await npcs.find({ worldId, status: "travelling" }).toArray()
+  const travellers = await npcs.find({ worldId, status: "travelling", ownerId: { $exists: false } }).toArray()
   if (travellers.length === 0) return
 
   const currentHour = toAbsoluteHour(currentDate)

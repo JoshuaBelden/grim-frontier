@@ -2,9 +2,10 @@
 
 ## Next
 
+- Players can suspend camp requests
+- Camps increase reputation
 - Drifters prefer to rest at night.
 - NPCs in camp will leave if their morale drops
-- Players can suspend camp requests
 - NPC fatigue and health degrade in temps under 40 unless a fire is going
 - Fires improve moral
 - Players can ignore camp requests

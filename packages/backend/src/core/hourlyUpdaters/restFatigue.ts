@@ -53,8 +53,8 @@ export async function restFatigue(
       const npcId = npc._id!.toString()
       const isResting = npc.currentAction?.type === "resting"
 
-      // Auto-rest: fatigued camp NPCs with no current action begin resting
-      if (!isResting && !npc.currentAction && npc.fatigue >= AUTO_REST_THRESHOLD) {
+      // Auto-rest: fatigued unowned camp NPCs with no current action begin resting
+      if (!isResting && !npc.currentAction && !npc.ownerId && npc.fatigue >= AUTO_REST_THRESHOLD) {
         await npcs.updateOne(
           { _id: npc._id },
           { $set: { currentAction: { type: "resting", startedAt: newDate }, updatedAt: now } },
@@ -64,8 +64,8 @@ export async function restFatigue(
         continue
       }
 
-      // Auto-gather: idle camp NPCs with no action and low fatigue start gathering
-      if (!npc.currentAction) {
+      // Auto-gather: idle unowned camp NPCs with no action and low fatigue start gathering
+      if (!npc.currentAction && !npc.ownerId) {
         const action = chooseGatheringAction(camp, campNpcs.length)
         await npcs.updateOne(
           { _id: npc._id },
