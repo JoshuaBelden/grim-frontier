@@ -64,6 +64,11 @@ export const investigateCampAction: DrifterAction = {
       const campId = camp._id!.toString()
       const desirability = scoreCampDesirability(npc, camp)
 
+      if (camp.suspendJoinRequests) {
+        console.log(`[drifter] ${npc.name} skipping camp "${camp.name}" — join requests suspended`)
+        continue
+      }
+
       if (desirability < DESIRABILITY_THRESHOLD) {
         console.log(`[drifter] ${npc.name} investigated camp "${camp.name}" but found it undesirable (score: ${desirability.toFixed(1)}, threshold: ${DESIRABILITY_THRESHOLD})`)
         continue

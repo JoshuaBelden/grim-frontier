@@ -23,6 +23,7 @@ export type ClientCommandType =
   | "startNpcAction"
   | "stopNpcAction"
   | "setFirePit"
+  | "setSuspendJoinRequests"
   | "respondJoinRequest"
   | "listJoinRequests"
   | "listAcquaintances"
@@ -76,6 +77,13 @@ export interface SetFirePitCommand {
   state: FirePitState
 }
 
+/** Toggle whether the camp automatically declines incoming join requests. */
+export interface SetSuspendJoinRequestsCommand {
+  type: "setSuspendJoinRequests"
+  campId: string
+  suspended: boolean
+}
+
 /** Accept or decline a drifter's request to join the player's camp. */
 export interface RespondJoinRequestCommand {
   type: "respondJoinRequest"
@@ -103,6 +111,7 @@ export type ClientCommand =
   | StartNpcActionCommand
   | StopNpcActionCommand
   | SetFirePitCommand
+  | SetSuspendJoinRequestsCommand
   | RespondJoinRequestCommand
   | ListJoinRequestsCommand
   | ListAcquaintancesCommand
@@ -126,6 +135,7 @@ export type ServerEventType =
   | "npcActionStopped"
   | "npcUpdate"
   | "firePitUpdate"
+  | "suspendJoinRequestsUpdate"
   | "joinRequestReceived"
   | "joinRequestList"
   | "joinRequestResolved"
@@ -257,6 +267,7 @@ export interface CampDetailEvent {
   amenities: Amenities
   stability: number
   posture: CampPosture
+  suspendJoinRequests: boolean
   reputation: number
   wealth: number
   notoriety: number
@@ -304,6 +315,13 @@ export interface FirePitUpdateEvent {
   type: "firePitUpdate"
   campId: string
   state: FirePitState
+}
+
+/** Broadcast when the camp's join request suspension state changes. */
+export interface SuspendJoinRequestsUpdateEvent {
+  type: "suspendJoinRequestsUpdate"
+  campId: string
+  suspended: boolean
 }
 
 /** Sent to a player when a drifting NPC requests to join their camp. */
@@ -360,6 +378,7 @@ export type ServerEvent =
   | NpcActionStoppedEvent
   | NpcUpdateEvent
   | FirePitUpdateEvent
+  | SuspendJoinRequestsUpdateEvent
   | JoinRequestReceivedEvent
   | JoinRequestListEvent
   | JoinRequestResolvedEvent

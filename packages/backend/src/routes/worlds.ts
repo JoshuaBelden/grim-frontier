@@ -133,6 +133,7 @@ export async function worldRoutes(app: FastifyInstance) {
       amenities: { firePit: "burned_out" },
       stability: 50,
       posture: "open",
+      suspendJoinRequests: false,
       reputation: 0,
       wealth: 0,
       notoriety: 0,

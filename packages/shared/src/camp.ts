@@ -28,6 +28,7 @@ export interface Camp {
   amenities: Amenities
   stability: number // 0–100
   posture: CampPosture
+  suspendJoinRequests: boolean
   reputation: number // 0–100
   wealth: number
   notoriety: number

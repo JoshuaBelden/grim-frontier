@@ -71,7 +71,48 @@ async function processArrivals(worldId: string, currentDate: InWorldDate): Promi
   }
 }
 
-/** Phase 2: Run utility AI decisions for all idle drifters. */
+const FOOD_PER_PERSON_PER_WEEK = 7
+
+/** Phase 2: Remove pending join requests for camps that can no longer accept. */
+async function purgeStaleRequests(worldId: string): Promise<void> {
+  const pending = await joinRequests.find({ worldId, status: "pending" }).toArray()
+  if (pending.length === 0) return
+
+  const campIds = [...new Set(pending.map(request => request.campId))]
+  const campDocs = await camps
+    .find({ _id: { $in: campIds.map(id => new ObjectId(id)) } })
+    .toArray()
+
+  const campById = new Map(campDocs.map(camp => [camp._id!.toString(), camp]))
+
+  for (const request of pending) {
+    const camp = campById.get(request.campId)
+    if (!camp) {
+      await joinRequests.deleteOne({ _id: request._id })
+      console.log(`[drifter] purged join request for ${request.npcName} — camp no longer exists`)
+      continue
+    }
+
+    if (camp.suspendJoinRequests) {
+      await joinRequests.deleteOne({ _id: request._id })
+      console.log(`[drifter] purged join request for ${request.npcName} — camp "${camp.name}" suspended requests`)
+      continue
+    }
+
+    const capacity = Math.floor(camp.resources.food / FOOD_PER_PERSON_PER_WEEK)
+    const campIdStr = camp._id!.toString()
+    const population = await npcs.countDocuments({
+      $or: [{ campId: campIdStr }, { locationId: campIdStr, locationType: "camp" }],
+    })
+
+    if (population >= capacity) {
+      await joinRequests.deleteOne({ _id: request._id })
+      console.log(`[drifter] purged join request for ${request.npcName} — camp "${camp.name}" at capacity (${population}/${capacity})`)
+    }
+  }
+}
+
+/** Phase 3: Run utility AI decisions for all idle drifters. */
 async function processDecisions(
   worldId: string,
   currentDate: InWorldDate,
@@ -180,5 +221,6 @@ export async function drifterAI(
   broadcast: (worldId: string, message: object) => void,
 ): Promise<void> {
   await processArrivals(worldId, newDate)
+  await purgeStaleRequests(worldId)
   await processDecisions(worldId, newDate, broadcast)
 }

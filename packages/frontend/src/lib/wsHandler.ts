@@ -15,6 +15,7 @@ import type {
   NpcListEvent,
   NpcUpdateEvent,
   ServerEvent,
+  SuspendJoinRequestsUpdateEvent,
   TownDetailEvent,
   WorldMapEvent,
   WorldWeather,
@@ -146,6 +147,16 @@ const eventHandlers: Record<string, (message: ServerEvent) => void> = {
     campDetailStore.update(current => {
       if (current && current.id === event.campId) {
         return { ...current, amenities: { ...current.amenities, firePit: event.state } }
+      }
+      return current
+    })
+  },
+
+  suspendJoinRequestsUpdate(message) {
+    const event = message as SuspendJoinRequestsUpdateEvent
+    campDetailStore.update(current => {
+      if (current && current.id === event.campId) {
+        return { ...current, suspendJoinRequests: event.suspended }
       }
       return current
     })

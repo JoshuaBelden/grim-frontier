@@ -17,7 +17,8 @@
     $wsErrorStore?.command === "getCamp" ||
       $wsErrorStore?.command === "startNpcAction" ||
       $wsErrorStore?.command === "stopNpcAction" ||
-      $wsErrorStore?.command === "setFirePit"
+      $wsErrorStore?.command === "setFirePit" ||
+      $wsErrorStore?.command === "setSuspendJoinRequests"
       ? $wsErrorStore.message
       : null,
   )
@@ -107,6 +108,11 @@
     const newState = camp.amenities.firePit === "lit" ? "burned_out" : "lit"
     sendCommand({ type: "setFirePit", campId: camp.id, state: newState })
   }
+
+  function toggleSuspendJoinRequests() {
+    if (!camp) return
+    sendCommand({ type: "setSuspendJoinRequests", campId: camp.id, suspended: !camp.suspendJoinRequests })
+  }
 </script>
 
 <svelte:head>
@@ -154,6 +160,15 @@
           </span>
           <button class="action-btn" onclick={toggleFirePit}>
             {camp.amenities.firePit === "lit" ? "Extinguish" : "Light"}
+          </button>
+        </div>
+        <div class="amenity">
+          <span class="amenity-label">Join Requests</span>
+          <span class="amenity-status {camp.suspendJoinRequests ? 'out' : 'lit'}">
+            {camp.suspendJoinRequests ? "Suspended" : "Open"}
+          </span>
+          <button class="action-btn" onclick={toggleSuspendJoinRequests}>
+            {camp.suspendJoinRequests ? "Resume" : "Suspend"}
           </button>
         </div>
       </div>

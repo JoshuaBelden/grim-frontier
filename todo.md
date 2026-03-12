@@ -3,11 +3,11 @@
 ## Next
 
 - Players can suspend camp requests
+- Fires improve moral
 - Camps increase reputation
 - Drifters prefer to rest at night.
 - NPCs in camp will leave if their morale drops
 - NPC fatigue and health degrade in temps under 40 unless a fire is going
-- Fires improve moral
 - Players can ignore camp requests
 - NPCs build loyalty
 - Camps build reputation
@@ -26,6 +26,7 @@
 - Towns have stores and inventory
 - Add soundtrack audio
 - NPCs all have generated images
+- NPCs have hobbies/pursuits?
 
 ## Bugs
 

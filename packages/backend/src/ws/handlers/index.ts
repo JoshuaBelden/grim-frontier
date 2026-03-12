@@ -9,6 +9,7 @@ import { handleListJoinRequests } from "./listJoinRequests.js"
 import { handleListNpcs } from "./listNpcs.js"
 import { handleRespondJoinRequest } from "./respondJoinRequest.js"
 import { handleSetFirePit } from "./setFirePit.js"
+import { handleSetSuspendJoinRequests } from "./setSuspendJoinRequests.js"
 import { handleStartNpcAction } from "./startNpcAction.js"
 import { handleStopNpcAction } from "./stopNpcAction.js"
 
@@ -31,6 +32,7 @@ export const commandHandlers: Record<ClientCommandType, CommandHandler> = {
   startNpcAction: handleStartNpcAction,
   stopNpcAction: handleStopNpcAction,
   setFirePit: handleSetFirePit,
+  setSuspendJoinRequests: handleSetSuspendJoinRequests,
   respondJoinRequest: handleRespondJoinRequest,
   listJoinRequests: handleListJoinRequests,
   listAcquaintances: handleListAcquaintances,
