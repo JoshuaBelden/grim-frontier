@@ -2,7 +2,6 @@
 
 ## Next
 
-- Players can suspend camp requests
 - Fires improve moral
 - Camps increase reputation
 - Drifters prefer to rest at night.

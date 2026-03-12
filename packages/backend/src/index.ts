@@ -2,6 +2,7 @@ import fastifyJwt from "@fastify/jwt"
 import { GAME_HOUR_INTERVAL_MS } from "@grim-frontier/shared"
 import Fastify from "fastify"
 import { consumeFireWood } from "./core/hourlyUpdaters/consumeFireWood.js"
+import { fireMoraleBoost } from "./core/hourlyUpdaters/fireMoraleBoost.js"
 import { consumeFood } from "./core/hourlyUpdaters/consumeFood.js"
 import { gatherFood } from "./core/hourlyUpdaters/gatherFood.js"
 import { gatherWood } from "./core/hourlyUpdaters/gatherWood.js"
@@ -73,6 +74,7 @@ async function start() {
   clock.registerHourlyUpdater(gatherWood)
   clock.registerHourlyUpdater(consumeFood)
   clock.registerHourlyUpdater(consumeFireWood)
+  clock.registerHourlyUpdater(fireMoraleBoost)
   clock.registerHourlyUpdater(restFatigue)
   clock.registerHourlyUpdater(drifterAI)
   clock.start(broadcastToWorld, GAME_HOUR_INTERVAL_MS)
