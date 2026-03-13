@@ -97,6 +97,8 @@ export async function worldRoutes(app: FastifyInstance) {
       skills: {},
       origin: defaultOrigin(),
       relationships: [],
+      inventory: [],
+      money: 50,
       status: "drifting" as const,
       createdAt: now,
       updatedAt: now,

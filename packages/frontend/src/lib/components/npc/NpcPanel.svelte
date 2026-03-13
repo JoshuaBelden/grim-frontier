@@ -110,14 +110,15 @@
   }
 
   /** Returns a display label for an inventory item. */
-  function inventoryItemLabel(item: { type: string; subtype: string; quality?: string }): string {
+  function inventoryItemLabel(item: { type: string; subtype?: string; quality?: string; name?: string }): string {
     if (item.type === "food") {
-      const subtypeLabel = formatKey(item.subtype)
+      const subtypeLabel = formatKey(item.subtype ?? "")
       const qualityLabel = item.quality ? formatKey(item.quality) : ""
       return qualityLabel ? `${subtypeLabel} (${qualityLabel})` : subtypeLabel
     }
-    if (item.type === "fuel") return formatKey(item.subtype)
-    return formatKey(item.subtype)
+    if (item.type === "fuel") return formatKey(item.subtype ?? "")
+    if (item.type === "purchased") return item.name ?? "Unknown"
+    return formatKey(item.subtype ?? "")
   }
 
 </script>

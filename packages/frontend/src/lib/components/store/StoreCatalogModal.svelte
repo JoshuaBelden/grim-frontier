@@ -1,7 +1,13 @@
 <script lang="ts">
   import type { TownDetailStore } from "@grim-frontier/shared"
+  import { sendCommand } from "$lib/ws"
 
-  let { store, onClose }: { store: TownDetailStore; onClose: () => void } = $props()
+  let {
+    store,
+    npcId,
+    npcMoney,
+    onClose,
+  }: { store: TownDetailStore; npcId?: string; npcMoney?: number; onClose: () => void } = $props()
 
   let groupedItems = $derived(() => {
     const groups: Record<string, typeof store.inventory> = {}
@@ -26,6 +32,21 @@
 
   function handleOverlayClick(event: MouseEvent) {
     if (event.target === event.currentTarget) onClose()
+  }
+
+  function canAfford(price: number): boolean {
+    return npcMoney !== undefined && npcMoney >= price
+  }
+
+  let confirmedItem: string | null = $state(null)
+  let confirmTimer: ReturnType<typeof setTimeout> | null = null
+
+  function handleBuy(itemName: string) {
+    if (!npcId) return
+    sendCommand({ type: "buyItem", npcId, storeId: store.id, itemName })
+    if (confirmTimer) clearTimeout(confirmTimer)
+    confirmedItem = itemName
+    confirmTimer = setTimeout(() => (confirmedItem = null), 2500)
   }
 </script>
 
@@ -54,18 +75,30 @@
               <li class="item-row">
                 <span class="item-name">
                   {item.name}
+                  {#if item.traits && item.traits.length > 0}
+                    {#each item.traits as trait}
+                      <span class="item-trait">{trait}</span>
+                    {/each}
+                  {/if}
                   {#if item.description}
                     <span class="item-note">{item.description}</span>
                   {/if}
                 </span>
                 <span class="item-dots"></span>
                 <span class="item-price">{formatPrice(item.price)}</span>
+                {#if npcId && canAfford(item.price)}
+                  <button class="buy-btn" onclick={() => handleBuy(item.name)}>Buy</button>
+                {/if}
               </li>
             {/each}
           </ul>
         </div>
       {/each}
     </div>
+
+    {#if confirmedItem}
+      <div class="purchase-toast" role="status">{confirmedItem} — purchased</div>
+    {/if}
   </div>
 </div>
 
@@ -196,6 +229,17 @@
     flex-shrink: 0;
   }
 
+  .item-trait {
+    border: 1px solid #3a2a18;
+    color: #8a7060;
+    font-size: 0.55rem;
+    letter-spacing: 0.1em;
+    margin-left: 0.35rem;
+    padding: 0.1rem 0.35rem;
+    text-transform: uppercase;
+    vertical-align: middle;
+  }
+
   .item-note {
     color: #6a5040;
     font-size: 0.7rem;
@@ -215,5 +259,47 @@
     font-size: 0.8rem;
     letter-spacing: 0.04em;
     text-align: right;
+  }
+
+  .buy-btn {
+    background: #1a1208;
+    border: 1px solid #4a3418;
+    color: #c8a050;
+    cursor: pointer;
+    flex-shrink: 0;
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    padding: 0.15rem 0.5rem;
+    text-transform: uppercase;
+    transition: background 0.15s, border-color 0.15s;
+  }
+
+  .buy-btn:hover {
+    background: #2a1e0c;
+    border-color: #c8a050;
+  }
+
+  .purchase-toast {
+    animation: toast-in 0.2s ease;
+    background: #1a2010;
+    border-top: 1px solid #3a5020;
+    color: #8ab060;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    padding: 0.6rem 1.5rem;
+    position: sticky;
+    bottom: 0;
+    text-transform: uppercase;
+  }
+
+  @keyframes toast-in {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 </style>

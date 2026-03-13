@@ -15,5 +15,13 @@ export interface FuelInventoryItem {
   count: number
 }
 
+/** A store-purchased item in an NPC's personal inventory. */
+export interface PurchasedInventoryItem {
+  type: "purchased"
+  name: string
+  count: number
+  traits?: string[]
+}
+
 /** Discriminated union of all inventory item types. Extend with new members as new item categories are added. */
-export type InventoryItem = FoodInventoryItem | FuelInventoryItem
+export type InventoryItem = FoodInventoryItem | FuelInventoryItem | PurchasedInventoryItem

@@ -1,5 +1,6 @@
 import type {
   AcquaintanceListEvent,
+  BuyConfirmedEvent,
   CampDetailEvent,
   CampUpdateEvent,
   ClockUpdateEvent,
@@ -107,6 +108,17 @@ const eventHandlers: Record<string, (message: ServerEvent) => void> = {
 
   sellConfirmed(message) {
     const event = message as SellConfirmedEvent
+    npcDetailStore.update(current => {
+      const existing = current.get(event.npcId)
+      if (!existing) return current
+      const updated = new Map(current)
+      updated.set(event.npcId, { ...existing, inventory: event.inventory, money: event.money })
+      return updated
+    })
+  },
+
+  buyConfirmed(message) {
+    const event = message as BuyConfirmedEvent
     npcDetailStore.update(current => {
       const existing = current.get(event.npcId)
       if (!existing) return current

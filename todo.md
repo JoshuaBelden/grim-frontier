@@ -2,7 +2,6 @@
 
 ## Next
 
-- NPCs can buy items
 
 ## Upcoming
 

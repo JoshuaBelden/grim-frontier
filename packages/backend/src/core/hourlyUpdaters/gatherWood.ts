@@ -1,8 +1,12 @@
-import type { InWorldDate } from "@grim-frontier/shared"
+import type { InWorldDate, PurchasedInventoryItem } from "@grim-frontier/shared"
 import { ObjectId } from "mongodb"
 import { camps, npcs } from "../../models/collections.js"
 
-/** Increments camp sticks by 1 for each NPC currently gathering fuel (no tools = sticks). */
+function hasChopWoodTool(inventory: PurchasedInventoryItem[]): boolean {
+  return inventory.some(item => item.traits?.includes("Chop Wood"))
+}
+
+/** Increments camp fuel by 1 per NPC gathering fuel. NPCs with a chop wood tool collect splitLogs; others collect sticks. */
 export async function gatherFuel(
   worldId: string,
   newDate: InWorldDate,
@@ -11,17 +15,30 @@ export async function gatherFuel(
   const gatherers = await npcs.find({ worldId, "currentAction.type": "fuel_gathering" }).toArray()
 
   if (gatherers.length > 0) {
-    const fuelByCamp = new Map<string, number>()
+    const sticksByCamp = new Map<string, number>()
+    const logsByCamp = new Map<string, number>()
+
     for (const npc of gatherers) {
       const campId = npc.campId ?? npc.locationId
       if (!campId) continue
-      fuelByCamp.set(campId, (fuelByCamp.get(campId) ?? 0) + 1)
+      const purchasedItems = npc.inventory.filter((item): item is PurchasedInventoryItem => item.type === "purchased")
+      if (hasChopWoodTool(purchasedItems)) {
+        logsByCamp.set(campId, (logsByCamp.get(campId) ?? 0) + 1)
+      } else {
+        sticksByCamp.set(campId, (sticksByCamp.get(campId) ?? 0) + 1)
+      }
     }
 
-    for (const [campId, amount] of fuelByCamp) {
+    const affectedCampIds = new Set([...sticksByCamp.keys(), ...logsByCamp.keys()])
+
+    for (const campId of affectedCampIds) {
+      const inc: Record<string, number> = {}
+      if (sticksByCamp.has(campId)) inc["fuelStores.sticks"] = sticksByCamp.get(campId)!
+      if (logsByCamp.has(campId)) inc["fuelStores.splitLogs"] = logsByCamp.get(campId)!
+
       const updated = await camps.findOneAndUpdate(
         { _id: new ObjectId(campId) },
-        { $inc: { "fuelStores.sticks": amount }, $set: { updatedAt: new Date() } },
+        { $inc: inc, $set: { updatedAt: new Date() } },
         { returnDocument: "after" },
       )
       if (updated) {

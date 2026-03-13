@@ -18,6 +18,7 @@ export interface StoreItem {
   price: number
   category: string
   description?: string
+  traits?: string[]
 }
 
 /** A store or business establishment within a town. */

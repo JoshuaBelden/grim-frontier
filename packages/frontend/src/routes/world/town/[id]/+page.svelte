@@ -5,7 +5,7 @@
   import { authStore } from "$lib/stores/auth"
   import { wsErrorStore } from "$lib/stores/wsError"
   import { sendCommand } from "$lib/ws"
-  import { townDetailStore } from "$lib/wsHandler"
+  import { townDetailStore, npcDetailStore } from "$lib/wsHandler"
   import { worldMapStore } from "$lib/stores/worldMap"
   import type { TownDetailStore } from "@grim-frontier/shared"
   import { onMount } from "svelte"
@@ -21,6 +21,10 @@
   )
   let npcIsHere = $derived(
     $worldMapStore?.npcLocationKey !== null && $worldMapStore?.npcLocationKey === currentLandmark?.nodeKey,
+  )
+
+  let npcMoney = $derived(
+    npcIsHere && $authStore.npcId ? ($npcDetailStore.get($authStore.npcId)?.money ?? undefined) : undefined,
   )
 
   onMount(() => {
@@ -81,7 +85,12 @@
 </div>
 
 {#if selectedStore}
-  <StoreCatalogModal store={selectedStore} onClose={() => (selectedStore = null)} />
+  <StoreCatalogModal
+    store={selectedStore}
+    npcId={npcIsHere && $authStore.npcId ? $authStore.npcId : undefined}
+    npcMoney={npcMoney}
+    onClose={() => (selectedStore = null)}
+  />
 {/if}
 
 {#if sellStore && $authStore.npcId}

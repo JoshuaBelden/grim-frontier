@@ -58,7 +58,7 @@ export const storeSeedData: StoreSeed[] = [
       { name: "Wagon wheel rim, replace", price: 2.25, category: "services" },
       { name: "Wagon axle repair", price: 1.75, category: "services" },
       { name: "Single bit felling axe", price: 1.1, category: "tools" },
-      { name: "Double bit axe", price: 1.65, category: "tools" },
+      { name: "Double bit axe", price: 1.65, category: "tools", traits: ["Chop Wood"] },
       { name: "Pick mattock", price: 1.4, category: "tools" },
       { name: "Miner's pickaxe", price: 1.2, category: "tools" },
       { name: "Hay fork", price: 0.9, category: "tools" },

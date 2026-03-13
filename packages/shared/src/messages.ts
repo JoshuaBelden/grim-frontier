@@ -37,6 +37,7 @@ export type ClientCommandType =
   | "transferToNpc"
   | "transferToCamp"
   | "sellItems"
+  | "buyItem"
 
 /** Request the territory map for the connected world. */
 export interface GetWorldMapCommand {
@@ -158,6 +159,14 @@ export interface SellItemsCommand {
   items: InventoryItem[]
 }
 
+/** Purchase a single item from a store, deducting the price from the NPC's money. */
+export interface BuyItemCommand {
+  type: "buyItem"
+  npcId: string
+  storeId: string
+  itemName: string
+}
+
 /** Discriminated union of all client-to-server commands. */
 export type ClientCommand =
   | GetWorldMapCommand
@@ -179,6 +188,7 @@ export type ClientCommand =
   | TransferToNpcCommand
   | TransferToCampCommand
   | SellItemsCommand
+  | BuyItemCommand
 
 // ---------------------------------------------------------------------------
 // Server → Client events
@@ -208,6 +218,7 @@ export type ServerEventType =
   | "playerTravelArrived"
   | "inventoryUpdate"
   | "sellConfirmed"
+  | "buyConfirmed"
 
 /** Sent on initial WebSocket connection. */
 export interface ConnectedEvent {
@@ -480,6 +491,15 @@ export interface SellConfirmedEvent {
   earned: number
 }
 
+/** Sent after a successful store purchase — contains updated inventory, money balance, and amount spent. */
+export interface BuyConfirmedEvent {
+  type: "buyConfirmed"
+  npcId: string
+  inventory: InventoryItem[]
+  money: number
+  spent: number
+}
+
 /** Discriminated union of all server-to-client events. */
 export type ServerEvent =
   | ConnectedEvent
@@ -504,3 +524,4 @@ export type ServerEvent =
   | PlayerTravelArrivedEvent
   | InventoryUpdateEvent
   | SellConfirmedEvent
+  | BuyConfirmedEvent
