@@ -35,7 +35,11 @@ export async function handleGetCamp(context: HandlerContext, payload: unknown): 
     fuelStores: camp.fuelStores,
     storage: camp.storage ?? [],
     preferredFood: camp.preferredFood ?? "raw",
-    amenities: camp.amenities ?? { firePit: "burned_out", activeFuelSource: "sticks" },
+    amenities: {
+      firePit: camp.amenities?.firePit ?? "burned_out",
+      activeFuelSource: camp.amenities?.activeFuelSource ?? "sticks",
+      protection: camp.amenities?.protection ?? 0,
+    },
     posture: camp.posture,
     suspendJoinRequests: camp.suspendJoinRequests ?? false,
     reputation: camp.reputation,

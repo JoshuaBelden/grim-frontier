@@ -27,6 +27,7 @@ function scoreCampDesirability(npc: DrifterActionContext["npc"], camp: CampDocum
   // Camp attributes
   score += Math.min(25, (totalFood(camp.foodStores) / FOOD_PER_PERSON_PER_WEEK) * 5)
   score += (camp.reputation / 100) * 15
+  score += Math.min(10, camp.amenities?.protection ?? 0)
 
   // NPC personality
   score += (npc.hunger / 10) * 20

@@ -66,7 +66,7 @@ export interface GetCampCommand {
 export interface StartNpcActionCommand {
   type: "startNpcAction"
   npcId: string
-  actionType: "food_gathering" | "fuel_gathering" | "resting"
+  actionType: "food_gathering" | "fuel_gathering" | "resting" | "stand_watch"
 }
 
 /** Request a list of all NPCs in the world. */

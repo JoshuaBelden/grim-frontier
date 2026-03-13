@@ -27,13 +27,6 @@
       goto("/login")
       return disconnectWs
     }
-    if ($authStore.campId) {
-      sendCommand({ type: "getCamp", campId: $authStore.campId })
-    }
-    if ($authStore.npcId) {
-      sendCommand({ type: "getNpc", npcId: $authStore.npcId })
-    }
-    sendCommand({ type: "listJoinRequests" })
     return disconnectWs
   })
 
@@ -43,6 +36,17 @@
     } else {
       disconnectWs()
     }
+  })
+
+  $effect(() => {
+    if (!$wsConnected) return
+    if ($authStore.campId) {
+      sendCommand({ type: "getCamp", campId: $authStore.campId })
+    }
+    if ($authStore.npcId) {
+      sendCommand({ type: "getNpc", npcId: $authStore.npcId })
+    }
+    sendCommand({ type: "listJoinRequests" })
   })
 
   async function handleLogout() {

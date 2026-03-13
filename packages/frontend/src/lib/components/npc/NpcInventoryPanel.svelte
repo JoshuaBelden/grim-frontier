@@ -107,7 +107,7 @@
         name,
         npcCount: npcEntry?.count ?? 0,
         campCount: campEntry?.count ?? 0,
-        item: { type: "purchased" as const, name, count: 1, weight: baseItem.weight, traits: baseItem.traits },
+        item: { type: "purchased" as const, name, count: 1, weight: baseItem.weight, traits: baseItem.traits, category: baseItem.category },
       }
     })
   })

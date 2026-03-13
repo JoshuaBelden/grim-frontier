@@ -8,13 +8,15 @@ export async function gatherFood(
   newDate: InWorldDate,
   broadcast: (worldId: string, message: object) => void,
 ): Promise<void> {
-  const gatherers = await npcs.find({ worldId, "currentAction.type": "food_gathering" }).toArray()
+  const gatherers = await npcs
+    .find({ worldId, "currentAction.type": "food_gathering" })
+    .toArray()
+    .then(all => all.filter(npc => npc.campId && npc.locationId === npc.campId))
 
   if (gatherers.length > 0) {
     const foodByCamp = new Map<string, number>()
     for (const npc of gatherers) {
-      const campId = npc.campId ?? npc.locationId
-      if (!campId) continue
+      const campId = npc.locationId!
       foodByCamp.set(campId, (foodByCamp.get(campId) ?? 0) + 1)
     }
 

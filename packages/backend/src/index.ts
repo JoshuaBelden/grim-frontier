@@ -9,6 +9,7 @@ import { gatherFuel } from "./core/hourlyUpdaters/gatherWood.js"
 import { drifterAI } from "./core/hourlyUpdaters/drifterAI.js"
 import { npcTravel } from "./core/hourlyUpdaters/npcTravel.js"
 import { restFatigue } from "./core/hourlyUpdaters/restFatigue.js"
+import { standWatch } from "./core/hourlyUpdaters/standWatch.js"
 import { createWeatherUpdater } from "./core/hourlyUpdaters/updateWeather.js"
 import { generateDailyWeather } from "./core/weatherGenerator.js"
 import { WorldClock } from "./core/worldClock.js"
@@ -77,6 +78,7 @@ async function start() {
   clock.registerHourlyUpdater(consumeFireWood)
   clock.registerHourlyUpdater(fireMoraleBoost)
   clock.registerHourlyUpdater(restFatigue)
+  clock.registerHourlyUpdater(standWatch)
   clock.registerHourlyUpdater(drifterAI)
   clock.registerHourlyUpdater(npcTravel)
   clock.start(broadcastToWorld, GAME_HOUR_INTERVAL_MS)

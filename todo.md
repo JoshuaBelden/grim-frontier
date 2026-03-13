@@ -2,8 +2,6 @@
 
 ## Next
 
-- NPCs can stand watch
-- Camps have a protection value
 - Camps increase reputation
 - NPCs build loyalty, stats reveal
   - NPCs in camp will leave if their morale drops

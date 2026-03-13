@@ -14,7 +14,7 @@ export type NPCStatus = "drifting" | "travelling" | "encountered" | "at_camp" | 
 
 /** An ongoing NPC activity that runs until explicitly stopped. */
 export interface NpcAction {
-  type: "food_gathering" | "fuel_gathering" | "resting"
+  type: "food_gathering" | "fuel_gathering" | "resting" | "stand_watch"
   startedAt: InWorldDate
 }
 

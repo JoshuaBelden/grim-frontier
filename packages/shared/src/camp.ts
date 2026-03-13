@@ -49,6 +49,7 @@ export const FUEL_BURN_VALUES: Record<FuelStoreType, number> = {
 export interface Amenities {
   firePit: FirePitState
   activeFuelSource: FuelStoreType
+  protection: number
 }
 
 /** A player-owned base of operations within a territory. */

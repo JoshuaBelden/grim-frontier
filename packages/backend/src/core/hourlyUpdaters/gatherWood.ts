@@ -12,15 +12,17 @@ export async function gatherFuel(
   newDate: InWorldDate,
   broadcast: (worldId: string, message: object) => void,
 ): Promise<void> {
-  const gatherers = await npcs.find({ worldId, "currentAction.type": "fuel_gathering" }).toArray()
+  const gatherers = await npcs
+    .find({ worldId, "currentAction.type": "fuel_gathering" })
+    .toArray()
+    .then(all => all.filter(npc => npc.campId && npc.locationId === npc.campId))
 
   if (gatherers.length > 0) {
     const sticksByCamp = new Map<string, number>()
     const logsByCamp = new Map<string, number>()
 
     for (const npc of gatherers) {
-      const campId = npc.campId ?? npc.locationId
-      if (!campId) continue
+      const campId = npc.locationId!
       const purchasedItems = npc.inventory.filter((item): item is PurchasedInventoryItem => item.type === "purchased")
       if (hasChopWoodTool(purchasedItems)) {
         logsByCamp.set(campId, (logsByCamp.get(campId) ?? 0) + 1)

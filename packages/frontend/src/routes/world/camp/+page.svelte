@@ -55,7 +55,7 @@
     return npc?.currentAction?.type ?? null
   }
 
-  function startAction(npcId: string, actionType: "food_gathering" | "fuel_gathering" | "resting") {
+  function startAction(npcId: string, actionType: "food_gathering" | "fuel_gathering" | "resting" | "stand_watch") {
     sendCommand({ type: "startNpcAction", npcId, actionType })
   }
 
@@ -67,6 +67,7 @@
     if (actionType === "food_gathering") return "Food"
     if (actionType === "fuel_gathering") return "Fuel"
     if (actionType === "resting") return "Resting"
+    if (actionType === "stand_watch") return "Watching"
     return actionType
   }
 
@@ -157,6 +158,16 @@
     <p class="type-label">Camp</p>
     <h1>{camp.name}</h1>
 
+    <div class="join-requests-row">
+      <span class="join-requests-label">Join Requests</span>
+      <span class="join-requests-status {camp.suspendJoinRequests ? 'out' : 'lit'}">
+        {camp.suspendJoinRequests ? "Suspended" : "Open"}
+      </span>
+      <button class="action-btn" onclick={toggleSuspendJoinRequests}>
+        {camp.suspendJoinRequests ? "Resume" : "Suspend"}
+      </button>
+    </div>
+
     <div class="stores-row">
       <div class="stores-col">
         <CollapsibleSection title="Food Stores">
@@ -206,24 +217,19 @@
     </div>
 
     <CollapsibleSection title="Amenities">
-      <div class="amenities">
-        <div class="amenity">
+      <div class="amenities-grid">
+        <div class="amenity-item" class:active={camp.amenities.firePit === "lit"}>
           <span class="amenity-label">Fire Pit</span>
-          <span class="amenity-status {camp.amenities.firePit === 'lit' ? 'lit' : 'out'}">
+          <span class="amenity-value {camp.amenities.firePit === 'lit' ? 'lit' : 'out'}">
             {camp.amenities.firePit === "lit" ? "Lit" : "Burned Out"}
           </span>
           <button class="action-btn" onclick={toggleFirePit}>
             {camp.amenities.firePit === "lit" ? "Extinguish" : "Light"}
           </button>
         </div>
-        <div class="amenity">
-          <span class="amenity-label">Join Requests</span>
-          <span class="amenity-status {camp.suspendJoinRequests ? 'out' : 'lit'}">
-            {camp.suspendJoinRequests ? "Suspended" : "Open"}
-          </span>
-          <button class="action-btn" onclick={toggleSuspendJoinRequests}>
-            {camp.suspendJoinRequests ? "Resume" : "Suspend"}
-          </button>
+        <div class="amenity-item">
+          <span class="amenity-label">Protection</span>
+          <span class="amenity-value">{camp.amenities.protection}</span>
         </div>
       </div>
     </CollapsibleSection>
@@ -264,6 +270,9 @@
                         >
                         <button class="action-btn gather" onclick={() => startAction(npc.id, "fuel_gathering")}
                           >Gather Fuel</button
+                        >
+                        <button class="action-btn gather" onclick={() => startAction(npc.id, "stand_watch")}
+                          >Stand Watch</button
                         >
                         <button class="action-btn gather" onclick={() => startAction(npc.id, "resting")}>Rest</button>
                       {/if}
@@ -370,15 +379,48 @@
     letter-spacing: 0.05em;
   }
 
-  .amenities {
-    display: flex;
-    gap: 2rem;
-  }
-
-  .amenity {
+  .join-requests-row {
     display: flex;
     align-items: center;
     gap: 1rem;
+  }
+
+  .join-requests-label {
+    color: #5a4020;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .join-requests-status {
+    font-size: 0.85rem;
+  }
+
+  .join-requests-status.lit {
+    color: #c89040;
+  }
+
+  .join-requests-status.out {
+    color: #8a7060;
+  }
+
+  .amenities-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+  }
+
+  .amenity-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.5rem;
+    border: 1px solid #2a1e0e;
+    border-radius: 2px;
+  }
+
+  .amenity-item.active {
+    border-color: #5a4020;
   }
 
   .amenity-label {
@@ -388,15 +430,16 @@
     text-transform: uppercase;
   }
 
-  .amenity-status {
-    font-size: 0.85rem;
+  .amenity-value {
+    font-size: 1.5rem;
+    letter-spacing: 0.05em;
   }
 
-  .amenity-status.lit {
+  .amenity-value.lit {
     color: #c89040;
   }
 
-  .amenity-status.out {
+  .amenity-value.out {
     color: #8a7060;
   }
 
