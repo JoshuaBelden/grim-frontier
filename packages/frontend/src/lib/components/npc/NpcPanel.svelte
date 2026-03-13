@@ -135,6 +135,7 @@
       {:else if npc.locationName}
         <span class="location">{npc.locationName}</span>
       {/if}
+      <span class="money">${(npc.money ?? 0).toFixed(2)}</span>
     {/if}
   </div>
 
@@ -408,6 +409,13 @@
   .location.travelling {
     color: #9a8a4a;
     font-style: italic;
+  }
+
+  .money {
+    color: #c8a050;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    margin-top: 0.15rem;
   }
 
   .panel-content {

@@ -23,7 +23,7 @@ export async function npcTravel(
 
     // Check if this NPC is returning to camp
     const camp = npc.campId ? await camps.findOne({ _id: new ObjectId(npc.campId) }) : null
-    const isReturningToCamp = camp && npc.travelState.toLandmarkKey === camp.nearestLandmarkKey
+    const isReturningToCamp = camp && npc.travelState.returningToCamp === true
 
     if (isReturningToCamp) {
       const campIdStr = camp._id!.toString()

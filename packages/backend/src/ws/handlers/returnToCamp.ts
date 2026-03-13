@@ -67,6 +67,7 @@ export async function handleReturnToCamp(context: HandlerContext): Promise<void>
     departedHour,
     arrivalHour: departedHour + travelHours,
     distanceMiles: totalDistance,
+    returningToCamp: true,
   }
 
   await npcs.updateOne(

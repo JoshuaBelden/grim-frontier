@@ -2,7 +2,6 @@
 
 ## Next
 
-- NPCs can sell food
 - NPCs can buy items
 
 ## Upcoming

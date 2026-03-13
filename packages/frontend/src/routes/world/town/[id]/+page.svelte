@@ -1,26 +1,45 @@
 <script lang="ts">
   import { page } from "$app/stores"
   import StoreCatalogModal from "$lib/components/store/StoreCatalogModal.svelte"
+  import SellModal from "$lib/components/store/SellModal.svelte"
+  import { authStore } from "$lib/stores/auth"
   import { wsErrorStore } from "$lib/stores/wsError"
   import { sendCommand } from "$lib/ws"
   import { townDetailStore } from "$lib/wsHandler"
+  import { worldMapStore } from "$lib/stores/worldMap"
   import type { TownDetailStore } from "@grim-frontier/shared"
   import { onMount } from "svelte"
 
   let town = $derived($townDetailStore)
   let selectedStore: TownDetailStore | null = $state(null)
+  let sellStore: TownDetailStore | null = $state(null)
 
   const error = $derived($wsErrorStore?.command === "getTown" ? $wsErrorStore.message : null)
+
+  let currentLandmark = $derived(
+    $worldMapStore?.landmarks.find(landmark => landmark.id === $page.params.id) ?? null,
+  )
+  let npcIsHere = $derived(
+    $worldMapStore?.npcLocationKey !== null && $worldMapStore?.npcLocationKey === currentLandmark?.nodeKey,
+  )
 
   onMount(() => {
     const townId = $page.params.id
     if (!townId) return
     townDetailStore.set(null)
     sendCommand({ type: "getTown", townId })
+    if (npcIsHere && $authStore.npcId) {
+      sendCommand({ type: "getNpc", npcId: $authStore.npcId })
+    }
   })
 
   function formatStoreType(type: string): string {
     return type.replace(/_/g, " ")
+  }
+
+  function openSell(event: MouseEvent, store: TownDetailStore) {
+    event.stopPropagation()
+    sellStore = store
   }
 </script>
 
@@ -42,12 +61,17 @@
     {#if town.stores && town.stores.length > 0}
       <div class="store-grid">
         {#each [...town.stores].sort((a, b) => a.name.localeCompare(b.name)) as store}
-          <button class="store-card" onclick={() => (selectedStore = store)}>
-            <span class="store-type-label">{formatStoreType(store.type)}</span>
-            <span class="store-name">{store.name}</span>
-            <span class="store-description">{store.description}</span>
-            <span class="store-proprietor">{store.proprietor}</span>
-          </button>
+          <div class="store-slot">
+            <button class="store-card" onclick={() => (selectedStore = store)}>
+              <span class="store-type-label">{formatStoreType(store.type)}</span>
+              <span class="store-name">{store.name}</span>
+              <span class="store-description">{store.description}</span>
+              <span class="store-proprietor">{store.proprietor}</span>
+            </button>
+            {#if npcIsHere && store.type === "general_store" && $authStore.npcId}
+              <button class="sell-btn" onclick={event => openSell(event, store)}>Sell Goods</button>
+            {/if}
+          </div>
         {/each}
       </div>
     {:else}
@@ -58,6 +82,10 @@
 
 {#if selectedStore}
   <StoreCatalogModal store={selectedStore} onClose={() => (selectedStore = null)} />
+{/if}
+
+{#if sellStore && $authStore.npcId}
+  <SellModal store={sellStore} npcId={$authStore.npcId} onClose={() => (sellStore = null)} />
 {/if}
 
 <style>
@@ -109,12 +137,19 @@
     gap: 0.75rem;
   }
 
+  .store-slot {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
   .store-card {
     background: #120c04;
     border: 1px solid #2a1e0e;
     cursor: pointer;
     display: flex;
     flex-direction: column;
+    flex: 1;
     gap: 0.25rem;
     min-height: 100px;
     padding: 1rem 1.25rem;
@@ -161,5 +196,23 @@
     font-family: "Corinthia", cursive;
     font-size: 1.1rem;
     margin-top: 0.15rem;
+  }
+
+  .sell-btn {
+    background: #1a1208;
+    border: 1px solid #4a3418;
+    color: #c8a050;
+    cursor: pointer;
+    font-size: 0.6rem;
+    letter-spacing: 0.16em;
+    padding: 0.4rem 0.75rem;
+    text-align: center;
+    text-transform: uppercase;
+    transition: background 0.15s, border-color 0.15s;
+  }
+
+  .sell-btn:hover {
+    background: #2a1e0c;
+    border-color: #c8a050;
   }
 </style>

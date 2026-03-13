@@ -36,6 +36,7 @@ export type ClientCommandType =
   | "returnToCamp"
   | "transferToNpc"
   | "transferToCamp"
+  | "sellItems"
 
 /** Request the territory map for the connected world. */
 export interface GetWorldMapCommand {
@@ -149,6 +150,14 @@ export interface TransferToCampCommand {
   item: InventoryItem
 }
 
+/** Sell a set of items from the NPC's inventory to a general store. */
+export interface SellItemsCommand {
+  type: "sellItems"
+  npcId: string
+  storeId: string
+  items: InventoryItem[]
+}
+
 /** Discriminated union of all client-to-server commands. */
 export type ClientCommand =
   | GetWorldMapCommand
@@ -169,6 +178,7 @@ export type ClientCommand =
   | ReturnToCampCommand
   | TransferToNpcCommand
   | TransferToCampCommand
+  | SellItemsCommand
 
 // ---------------------------------------------------------------------------
 // Server → Client events
@@ -197,6 +207,7 @@ export type ServerEventType =
   | "playerTravelStarted"
   | "playerTravelArrived"
   | "inventoryUpdate"
+  | "sellConfirmed"
 
 /** Sent on initial WebSocket connection. */
 export interface ConnectedEvent {
@@ -312,6 +323,7 @@ export interface NpcDetailEvent {
   skills: Skills
   origin: CharacterOrigin
   inventory: InventoryItem[]
+  money: number
 }
 
 /** A thin NPC summary for the list view. */
@@ -459,6 +471,15 @@ export interface InventoryUpdateEvent {
   inventory: InventoryItem[]
 }
 
+/** Sent after a successful sale at a general store — contains updated inventory, money balance, and amount earned. */
+export interface SellConfirmedEvent {
+  type: "sellConfirmed"
+  npcId: string
+  inventory: InventoryItem[]
+  money: number
+  earned: number
+}
+
 /** Discriminated union of all server-to-client events. */
 export type ServerEvent =
   | ConnectedEvent
@@ -482,3 +503,4 @@ export type ServerEvent =
   | PlayerTravelStartedEvent
   | PlayerTravelArrivedEvent
   | InventoryUpdateEvent
+  | SellConfirmedEvent

@@ -17,6 +17,7 @@ import type {
   NpcUpdateEvent,
   PlayerTravelArrivedEvent,
   PlayerTravelStartedEvent,
+  SellConfirmedEvent,
   ServerEvent,
   SuspendJoinRequestsUpdateEvent,
   TownDetailEvent,
@@ -100,6 +101,17 @@ const eventHandlers: Record<string, (message: ServerEvent) => void> = {
       if (!existing) return current
       const updated = new Map(current)
       updated.set(event.npcId, { ...existing, inventory: event.inventory })
+      return updated
+    })
+  },
+
+  sellConfirmed(message) {
+    const event = message as SellConfirmedEvent
+    npcDetailStore.update(current => {
+      const existing = current.get(event.npcId)
+      if (!existing) return current
+      const updated = new Map(current)
+      updated.set(event.npcId, { ...existing, inventory: event.inventory, money: event.money })
       return updated
     })
   },

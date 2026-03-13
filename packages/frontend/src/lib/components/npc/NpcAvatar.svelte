@@ -1,7 +1,10 @@
 <script lang="ts">
   import { npcPanelStore, type PanelEntry } from "$lib/stores/npcPanels"
+  import { npcDetailStore } from "$lib/wsHandler"
 
   let { entry }: { entry: PanelEntry } = $props()
+
+  let money = $derived($npcDetailStore.get(entry.npcId)?.money)
 
   function handleClick() {
     npcPanelStore.open(entry)
@@ -13,6 +16,9 @@
   <span class="name">{entry.name}</span>
   {#if entry.location}
     <span class="location">{entry.location}</span>
+  {/if}
+  {#if money !== undefined}
+    <span class="money">${money.toFixed(2)}</span>
   {/if}
 </button>
 
@@ -61,6 +67,14 @@
     text-overflow: ellipsis;
     text-transform: uppercase;
     white-space: nowrap;
+    width: 100%;
+  }
+
+  .money {
+    color: #c8a050;
+    font-size: 0.5rem;
+    letter-spacing: 0.04em;
+    text-align: center;
     width: 100%;
   }
 </style>

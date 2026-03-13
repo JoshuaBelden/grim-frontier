@@ -42,6 +42,7 @@ export interface NPC {
   currentAction?: NpcAction
   relationships: Relationship[]
   inventory: InventoryItem[]
+  money?: number
   createdAt: Date
   updatedAt: Date
 }

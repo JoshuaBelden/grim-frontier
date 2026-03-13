@@ -95,6 +95,7 @@
             {:else if playerNpc.locationName}
               <span class="pn-location">{playerNpc.locationName}</span>
             {/if}
+            <span class="pn-money">${(playerNpc.money ?? 0).toFixed(2)}</span>
             {#if playerNpc.status !== "travelling"}
               {#if playerNpc.status === "at_camp" || playerNpc.status === "in_town"}
                 {@const npcInCamp = $campDetailStore?.npcs.find(npc => npc.id === playerNpc.id)}
@@ -148,7 +149,7 @@
 
   <nav class="site-nav">
     <button class="nav-btn" onclick={() => (npcListVisible = !npcListVisible)}>NPCs</button>
-    {#if $authStore.npcId}
+    {#if playerNpc?.status === "at_camp"}
       <button class="nav-btn" onclick={() => (inventoryVisible = !inventoryVisible)}>Camp Inventory</button>
     {/if}
   </nav>
@@ -307,6 +308,12 @@
   .pn-location.travelling {
     color: #9a8a4a;
     font-style: italic;
+  }
+
+  .pn-money {
+    color: #c8a050;
+    font-size: 0.65rem;
+    letter-spacing: 0.06em;
   }
 
   .pn-action {

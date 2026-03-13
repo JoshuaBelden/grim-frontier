@@ -104,6 +104,7 @@ export async function handleTravelToTown(context: HandlerContext, payload: unkno
     departedHour,
     arrivalHour: departedHour + travelHours,
     distanceMiles: totalDistance,
+    returningToCamp: false,
   }
 
   await npcs.updateOne(

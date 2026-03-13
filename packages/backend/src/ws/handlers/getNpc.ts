@@ -61,5 +61,6 @@ export async function handleGetNpc(context: HandlerContext, payload: unknown): P
     skills: npc.skills,
     origin: npc.origin,
     inventory: npc.inventory ?? [],
+    money: npc.money ?? 0,
   })
 }

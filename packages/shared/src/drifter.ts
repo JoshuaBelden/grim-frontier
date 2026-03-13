@@ -8,6 +8,8 @@ export interface NpcTravelState {
   departedHour: number
   arrivalHour: number
   distanceMiles: number
+  /** True when the NPC is heading back to their camp rather than to a town. Absent on drifter travel. */
+  returningToCamp?: boolean
 }
 
 /** Status of a join request from a drifter to a camp. */

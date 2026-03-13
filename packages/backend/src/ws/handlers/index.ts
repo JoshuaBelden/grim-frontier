@@ -18,6 +18,7 @@ import { handleReturnToCamp } from "./returnToCamp.js"
 import { handleTravelToTown } from "./travelToTown.js"
 import { handleTransferToNpc } from "./transferToNpc.js"
 import { handleTransferToCamp } from "./transferToCamp.js"
+import { handleSellItems } from "./sellItems.js"
 
 export interface HandlerContext {
   playerId: string
@@ -48,4 +49,5 @@ export const commandHandlers: Record<ClientCommandType, CommandHandler> = {
   returnToCamp: handleReturnToCamp,
   transferToNpc: handleTransferToNpc,
   transferToCamp: handleTransferToCamp,
+  sellItems: handleSellItems,
 }
