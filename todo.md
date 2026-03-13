@@ -21,7 +21,7 @@
 ## Systems Ideas
 
 - Wardrobes
-- Weight
+- Encumbrence
 - Making Money
 - Fishing & Hunting
 - Camp Upgrades

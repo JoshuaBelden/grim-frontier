@@ -22,6 +22,11 @@
     return "$" + price.toFixed(2)
   }
 
+  function formatWeight(weight: number | undefined): string {
+    if (weight === undefined) return ""
+    return weight % 1 === 0 ? weight.toFixed(0) + " lb" : weight.toFixed(1) + " lb"
+  }
+
   function formatCategory(category: string): string {
     return category.replace(/_/g, " ")
   }
@@ -85,6 +90,9 @@
                   {/if}
                 </span>
                 <span class="item-dots"></span>
+                {#if item.weight !== undefined}
+                  <span class="item-weight">{formatWeight(item.weight)}</span>
+                {/if}
                 <span class="item-price">{formatPrice(item.price)}</span>
                 {#if npcId && canAfford(item.price)}
                   <button class="buy-btn" onclick={() => handleBuy(item.name)}>Buy</button>
@@ -251,6 +259,15 @@
     flex: 1;
     margin-bottom: 0.25em;
     min-width: 1rem;
+  }
+
+  .item-weight {
+    color: #6a5040;
+    flex-shrink: 0;
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+    text-align: right;
+    white-space: nowrap;
   }
 
   .item-price {

@@ -121,6 +121,21 @@
     return formatKey(item.subtype ?? "")
   }
 
+  /** Returns the total weight carried by an NPC across all inventory items. */
+  function totalWeightCarried(inventory: { type: string; count: number; weight?: number }[]): number {
+    return inventory.reduce((sum, item) => {
+      if (item.type === "purchased" && item.weight !== undefined) {
+        return sum + item.weight * item.count
+      }
+      return sum
+    }, 0)
+  }
+
+  /** Formats a weight in lbs for display. */
+  function formatWeightLbs(lbs: number): string {
+    return lbs % 1 === 0 ? lbs.toFixed(0) + " lb" : lbs.toFixed(1) + " lb"
+  }
+
 </script>
 
 <div class="panel">
@@ -329,10 +344,21 @@
                 {#each npc.inventory as item}
                   <li class="inventory-item">
                     <span class="inv-label">{inventoryItemLabel(item)}</span>
+                    <span class="inv-weight">
+                      {#if item.type === "purchased" && item.weight !== undefined}
+                        {formatWeightLbs(item.weight * item.count)}
+                      {:else}
+                        —
+                      {/if}
+                    </span>
                     <span class="inv-count">×{item.count}</span>
                   </li>
                 {/each}
               </ul>
+              <div class="inventory-total">
+                <span class="inv-total-label">Carried</span>
+                <span class="inv-total-weight">{formatWeightLbs(totalWeightCarried(npc.inventory))}</span>
+              </div>
             {/if}
           </div>
         {/if}
@@ -500,8 +526,17 @@
 
   .inv-label {
     color: #c8b08a;
+    flex: 1;
     font-size: 0.7rem;
     letter-spacing: 0.04em;
+  }
+
+  .inv-weight {
+    color: #6a5040;
+    font-size: 0.65rem;
+    letter-spacing: 0.04em;
+    text-align: right;
+    white-space: nowrap;
   }
 
   .inv-count {
@@ -509,6 +544,28 @@
     font-size: 0.65rem;
     letter-spacing: 0.04em;
     white-space: nowrap;
+  }
+
+  .inventory-total {
+    align-items: baseline;
+    border-top: 1px solid #1e1508;
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.5rem;
+    padding-top: 0.4rem;
+  }
+
+  .inv-total-label {
+    color: #5a4020;
+    font-size: 0.55rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .inv-total-weight {
+    color: #c8b08a;
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
   }
 
   section {

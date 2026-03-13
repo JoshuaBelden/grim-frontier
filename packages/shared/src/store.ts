@@ -17,6 +17,7 @@ export interface StoreItem {
   name: string
   price: number
   category: string
+  weight?: number
   description?: string
   traits?: string[]
 }

@@ -20,6 +20,7 @@ export interface PurchasedInventoryItem {
   type: "purchased"
   name: string
   count: number
+  weight?: number
   traits?: string[]
 }
 

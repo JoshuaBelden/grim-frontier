@@ -54,7 +54,7 @@ export async function handleBuyItem(context: HandlerContext, payload: unknown): 
     return
   }
 
-  const updatedInventory = addToInventory(npc.inventory ?? [], storeItem.name, storeItem.traits)
+  const updatedInventory = addToInventory(npc.inventory ?? [], storeItem.name, storeItem.weight, storeItem.traits)
   const spent = Math.round(storeItem.price * 100) / 100
 
   await npcs.updateOne(
@@ -75,7 +75,7 @@ export async function handleBuyItem(context: HandlerContext, payload: unknown): 
 }
 
 /** Adds one unit of a purchased item to inventory, stacking with an existing entry if present. */
-function addToInventory(inventory: InventoryItem[], name: string, traits?: string[]): InventoryItem[] {
+function addToInventory(inventory: InventoryItem[], name: string, weight?: number, traits?: string[]): InventoryItem[] {
   const existingIndex = inventory.findIndex(
     item => item.type === "purchased" && (item as PurchasedInventoryItem).name === name,
   )
@@ -83,6 +83,7 @@ function addToInventory(inventory: InventoryItem[], name: string, traits?: strin
     return inventory.map((item, index) => (index === existingIndex ? { ...item, count: item.count + 1 } : item))
   }
   const entry: PurchasedInventoryItem = { type: "purchased", name, count: 1 }
+  if (weight !== undefined) entry.weight = weight
   if (traits && traits.length > 0) entry.traits = traits
   return [...inventory, entry]
 }
