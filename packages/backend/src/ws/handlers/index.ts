@@ -14,8 +14,7 @@ import { handleSetPreferredFood } from "./setPreferredFood.js"
 import { handleSetSuspendJoinRequests } from "./setSuspendJoinRequests.js"
 import { handleStartNpcAction } from "./startNpcAction.js"
 import { handleStopNpcAction } from "./stopNpcAction.js"
-import { handleReturnToCamp } from "./returnToCamp.js"
-import { handleTravelToTown } from "./travelToTown.js"
+import { handleTravelTo } from "./travelTo.js"
 import { handleTransferToNpc } from "./transferToNpc.js"
 import { handleTransferToCamp } from "./transferToCamp.js"
 import { handleSellItems } from "./sellItems.js"
@@ -46,8 +45,7 @@ export const commandHandlers: Record<ClientCommandType, CommandHandler> = {
   respondJoinRequest: handleRespondJoinRequest,
   listJoinRequests: handleListJoinRequests,
   listAcquaintances: handleListAcquaintances,
-  travelToTown: handleTravelToTown,
-  returnToCamp: handleReturnToCamp,
+  travelTo: handleTravelTo,
   transferToNpc: handleTransferToNpc,
   transferToCamp: handleTransferToCamp,
   sellItems: handleSellItems,

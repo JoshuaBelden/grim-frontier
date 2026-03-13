@@ -4,12 +4,14 @@ import type { Career } from "./careers"
 export interface NpcTravelState {
   fromLandmarkKey: string
   toLandmarkKey: string
+  /** MongoDB _id of the destination town or camp. */
+  toLocationId: string
+  /** Whether the destination is a town or camp. */
+  toLocationType: "town" | "camp"
   routeName: string
   departedHour: number
   arrivalHour: number
   distanceMiles: number
-  /** True when the NPC is heading back to their camp rather than to a town. Absent on drifter travel. */
-  returningToCamp?: boolean
 }
 
 /** Status of a join request from a drifter to a camp. */

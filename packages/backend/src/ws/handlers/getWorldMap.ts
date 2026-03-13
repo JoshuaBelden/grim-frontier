@@ -25,7 +25,7 @@ export async function handleGetWorldMap(context: HandlerContext, payload: unknow
 
   // Resolve NPC's current location to a landmark nodeKey
   let npcLocationKey: string | null = null
-  if (playerNpc?.locationType === "town" && playerNpc.locationId) {
+  if (playerNpc?.status === "in_town" && playerNpc.locationId) {
     const locationTown = allLandmarks.find(landmark => landmark._id!.toString() === playerNpc.locationId)
     npcLocationKey = locationTown?.nodeKey ?? null
   }

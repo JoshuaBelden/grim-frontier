@@ -238,15 +238,47 @@ const eventHandlers: Record<string, (message: ServerEvent) => void> = {
       if (!current) return current
       return { ...current, npcTravel: event.travelState, npcLocationKey: null }
     })
+    npcDetailStore.update(current => {
+      const existing = current.get(event.npcId)
+      if (!existing) return current
+      const updated = new Map(current)
+      updated.set(event.npcId, {
+        ...existing,
+        status: "travelling",
+        locationId: null,
+        locationType: null,
+        locationName: null,
+        travelDestination: event.destinationName,
+      })
+      return updated
+    })
+    campDetailStore.update(current => {
+      if (!current) return current
+      return { ...current, npcs: current.npcs.filter(npc => npc.id !== event.npcId) }
+    })
   },
 
   playerTravelArrived(message) {
     const event = message as PlayerTravelArrivedEvent
     worldMapStore.update(current => {
       if (!current) return current
-      const arrivedLandmark = current.landmarks.find(landmark => landmark.id === event.townId)
+      const arrivedLandmark = current.landmarks.find(landmark => landmark.id === event.locationId)
       const npcLocationKey = arrivedLandmark?.nodeKey ?? null
       return { ...current, npcTravel: null, npcLocationKey }
+    })
+    npcDetailStore.update(current => {
+      const existing = current.get(event.npcId)
+      if (!existing) return current
+      const updated = new Map(current)
+      updated.set(event.npcId, {
+        ...existing,
+        status: event.locationType === "camp" ? "at_camp" : "in_town",
+        locationId: event.locationId,
+        locationType: event.locationType,
+        locationName: event.locationName,
+        travelDestination: null,
+      })
+      return updated
     })
   },
 

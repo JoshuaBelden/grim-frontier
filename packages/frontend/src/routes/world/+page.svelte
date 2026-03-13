@@ -5,7 +5,7 @@
   import { authStore } from "$lib/stores/auth"
   import { worldMapStore } from "$lib/stores/worldMap"
   import { wsErrorStore } from "$lib/stores/wsError"
-  import { worldClock } from "$lib/wsHandler"
+  import { worldClock, npcDetailStore } from "$lib/wsHandler"
   import { sendCommand } from "$lib/ws"
   import { onMount } from "svelte"
   import { toAbsoluteHour } from "$lib/clock"
@@ -35,8 +35,14 @@
   const npcTravel = $derived($worldMapStore?.npcTravel ?? null)
   const npcLocationKey = $derived($worldMapStore?.npcLocationKey ?? null)
 
+  const playerNpc = $derived($authStore.npcId ? ($npcDetailStore.get($authStore.npcId) ?? null) : null)
+  const npcAtCamp = $derived(playerNpc?.status === "at_camp")
+
   const travellingToName = $derived.by(() => {
     if (!npcTravel || !$worldMapStore) return null
+    if (npcTravel.toLocationType === "camp") {
+      return $worldMapStore.camp?.name ?? null
+    }
     const landmark = $worldMapStore.landmarks.find(
       landmark => landmark.nodeKey === npcTravel.toLandmarkKey,
     )
@@ -67,11 +73,11 @@
   }
 
   function handleTravel(landmark: MapLandmark) {
-    sendCommand({ type: "travelToTown", townId: landmark.id })
+    sendCommand({ type: "travelTo", destinationId: landmark.id, destinationType: "town" })
   }
 
-  function handleReturnToCamp() {
-    sendCommand({ type: "returnToCamp" })
+  function handleTravelToCamp(campId: string) {
+    sendCommand({ type: "travelTo", destinationId: campId, destinationType: "camp" })
   }
 </script>
 
@@ -112,10 +118,23 @@
 
     <div class="nodes">
       {#if $worldMapStore.camp}
-        <a href="/world/camp" class="node">
+        {@const camp = $worldMapStore.camp}
+        <a href="/world/camp" class="node" class:node--current={npcAtCamp}>
           <span class="node-type">Camp</span>
-          <span class="node-name">{$worldMapStore.camp.name}</span>
-          <span class="node-hint">Enter →</span>
+          <span class="node-name">{camp.name}</span>
+          {#if npcAtCamp}
+            <span class="node-current-label">Current Location</span>
+          {/if}
+          <div class="node-actions">
+            {#if !npcTravel && !npcAtCamp}
+              <button
+                class="node-action node-action--travel"
+                onclick={event => { event.preventDefault(); handleTravelToCamp(camp.id) }}
+              >
+                Travel
+              </button>
+            {/if}
+          </div>
         </a>
       {:else}
         <div class="node node--empty">
@@ -142,14 +161,6 @@
               </button>
             {/if}
           </div>
-          {#if isCurrentLocation && !npcTravel}
-            <button
-              class="node-action node-action--return"
-              onclick={event => { event.preventDefault(); handleReturnToCamp() }}
-            >
-              Return to Camp
-            </button>
-          {/if}
         </a>
       {/each}
     </div>
@@ -252,13 +263,6 @@
     letter-spacing: 0.05em;
   }
 
-  .node-hint {
-    color: #8a7060;
-    font-size: 0.7rem;
-    letter-spacing: 0.1em;
-    margin-top: 0.25rem;
-  }
-
   .node-actions {
     display: flex;
     gap: 0.75rem;
@@ -294,24 +298,6 @@
     font-size: 0.6rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-  }
-
-  .node-action--return {
-    background: none;
-    border: 1px solid #5a4020;
-    color: #8a7060;
-    cursor: pointer;
-    font-family: inherit;
-    font-size: 0.7rem;
-    letter-spacing: 0.1em;
-    margin-top: 0.25rem;
-    padding: 0.3rem 0.6rem;
-    transition: border-color 0.15s, color 0.15s;
-  }
-
-  .node-action--return:hover {
-    border-color: #d4b896;
-    color: #d4b896;
   }
 
   .muted {

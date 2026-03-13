@@ -21,11 +21,10 @@ export async function npcTravel(
     if (!npc.travelState) continue
     if (currentHour < npc.travelState.arrivalHour) continue
 
-    // Check if this NPC is returning to camp
-    const camp = npc.campId ? await camps.findOne({ _id: new ObjectId(npc.campId) }) : null
-    const isReturningToCamp = camp && npc.travelState.returningToCamp === true
+    if (npc.travelState.toLocationType === "camp") {
+      const camp = await camps.findOne({ _id: new ObjectId(npc.travelState.toLocationId) })
+      if (!camp) continue
 
-    if (isReturningToCamp) {
       const campIdStr = camp._id!.toString()
 
       await npcs.updateOne(
@@ -44,17 +43,19 @@ export async function npcTravel(
       if (npc.ownerId) {
         sendToPlayer(worldId, npc.ownerId, {
           type: "playerTravelArrived",
-          townId: campIdStr,
-          townName: camp.name,
+          npcId: npc._id!.toString(),
+          locationId: campIdStr,
+          locationName: camp.name,
+          locationType: "camp" as const,
         })
       }
 
       console.log(`[travel] ${npc.name} arrived at camp ${camp.name}`)
     } else {
-      const destinationTown = await towns.findOne({ nodeKey: npc.travelState.toLandmarkKey })
-      if (!destinationTown) continue
+      const town = await towns.findOne({ _id: new ObjectId(npc.travelState.toLocationId) })
+      if (!town) continue
 
-      const townIdStr = destinationTown._id!.toString()
+      const townIdStr = town._id!.toString()
 
       await npcs.updateOne(
         { _id: npc._id },
@@ -72,12 +73,14 @@ export async function npcTravel(
       if (npc.ownerId) {
         sendToPlayer(worldId, npc.ownerId, {
           type: "playerTravelArrived",
-          townId: townIdStr,
-          townName: destinationTown.name,
+          npcId: npc._id!.toString(),
+          locationId: townIdStr,
+          locationName: town.name,
+          locationType: "town" as const,
         })
       }
 
-      console.log(`[travel] ${npc.name} arrived at ${destinationTown.name}`)
+      console.log(`[travel] ${npc.name} arrived at ${town.name}`)
     }
   }
 }

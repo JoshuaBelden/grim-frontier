@@ -32,8 +32,7 @@ export type ClientCommandType =
   | "respondJoinRequest"
   | "listJoinRequests"
   | "listAcquaintances"
-  | "travelToTown"
-  | "returnToCamp"
+  | "travelTo"
   | "transferToNpc"
   | "transferToCamp"
   | "sellItems"
@@ -126,15 +125,11 @@ export interface ListAcquaintancesCommand {
   type: "listAcquaintances"
 }
 
-/** Begin travelling from camp to a town landmark. */
-export interface TravelToTownCommand {
-  type: "travelToTown"
-  townId: string
-}
-
-/** Return the player's NPC from a town back to camp. */
-export interface ReturnToCampCommand {
-  type: "returnToCamp"
+/** Send the player's NPC to a town or camp. */
+export interface TravelToCommand {
+  type: "travelTo"
+  destinationId: string
+  destinationType: "town" | "camp"
 }
 
 /** Move one stack of items from the player's camp stores into the NPC's personal inventory. */
@@ -183,8 +178,7 @@ export type ClientCommand =
   | RespondJoinRequestCommand
   | ListJoinRequestsCommand
   | ListAcquaintancesCommand
-  | TravelToTownCommand
-  | ReturnToCampCommand
+  | TravelToCommand
   | TransferToNpcCommand
   | TransferToCampCommand
   | SellItemsCommand
@@ -461,18 +455,21 @@ export interface AcquaintanceListEvent {
   }>
 }
 
-/** Sent to the player when their NPC begins travelling to a town. */
+/** Sent to the player when their NPC begins travelling. */
 export interface PlayerTravelStartedEvent {
   type: "playerTravelStarted"
+  npcId: string
   travelState: NpcTravelState
   destinationName: string
 }
 
-/** Sent to the player when they arrive at a town after travelling. */
+/** Sent to the player when their NPC arrives at a destination. */
 export interface PlayerTravelArrivedEvent {
   type: "playerTravelArrived"
-  townId: string
-  townName: string
+  npcId: string
+  locationId: string
+  locationName: string
+  locationType: "town" | "camp"
 }
 
 /** Sent after a successful transfer to/from NPC inventory — contains the NPC's full updated inventory. */

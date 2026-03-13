@@ -2,27 +2,25 @@
 
 ## Next
 
-
-## Upcoming
-
 - NPCs can store items at camp
-- NPCs can give/take items
 - NPCs can stand watch
 - Camps have a protection value
 - Camps increase reputation
-- NPCs build loyalty
+- NPCs build loyalty, stats reveal
+  - NPCs in camp will leave if their morale drops
 - NPC skills and traits improve their chores
-- NPCs in camp will leave if their morale drops
-- NPC fatigue and health degrade in temps under 40 unless a fire is going
+
+## Upcoming
+
+- NPCs can give/take items
 - NPCs all have generated images
 - Add soundtrack audio
-- NPCs have hobbies/pursuits?
-- NPCs have wardrobes for the seasons
 - Add NPCs that can start camps
 - Players can create their own npc and name it
 
 ## Systems Ideas
 
+- Wardrobes
 - Weight
 - Making Money
 - Fishing & Hunting

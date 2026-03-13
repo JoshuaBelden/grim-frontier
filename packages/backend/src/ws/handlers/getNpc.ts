@@ -34,8 +34,13 @@ export async function handleGetNpc(context: HandlerContext, payload: unknown): P
 
   let travelDestination: string | null = null
   if (npc.status === "travelling" && npc.travelState) {
-    const destinationTown = await towns.findOne({ nodeKey: npc.travelState.toLandmarkKey })
-    travelDestination = destinationTown?.name ?? npc.travelState.toLandmarkKey
+    if (npc.travelState.toLocationType === "camp") {
+      const camp = await camps.findOne({ _id: new ObjectId(npc.travelState.toLocationId) })
+      travelDestination = camp?.name ?? null
+    } else {
+      const town = await towns.findOne({ _id: new ObjectId(npc.travelState.toLocationId) })
+      travelDestination = town?.name ?? npc.travelState.toLandmarkKey
+    }
   }
 
   context.send({

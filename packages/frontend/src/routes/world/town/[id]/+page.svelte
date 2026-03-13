@@ -6,7 +6,6 @@
   import { wsErrorStore } from "$lib/stores/wsError"
   import { sendCommand } from "$lib/ws"
   import { townDetailStore, npcDetailStore } from "$lib/wsHandler"
-  import { worldMapStore } from "$lib/stores/worldMap"
   import type { TownDetailStore } from "@grim-frontier/shared"
   import { onMount } from "svelte"
 
@@ -16,25 +15,16 @@
 
   const error = $derived($wsErrorStore?.command === "getTown" ? $wsErrorStore.message : null)
 
-  let currentLandmark = $derived(
-    $worldMapStore?.landmarks.find(landmark => landmark.id === $page.params.id) ?? null,
-  )
-  let npcIsHere = $derived(
-    $worldMapStore?.npcLocationKey !== null && $worldMapStore?.npcLocationKey === currentLandmark?.nodeKey,
-  )
+  let playerNpc = $derived($authStore.npcId ? ($npcDetailStore.get($authStore.npcId) ?? null) : null)
+  let npcIsHere = $derived(playerNpc?.locationId === $page.params.id && playerNpc?.locationType === "town")
 
-  let npcMoney = $derived(
-    npcIsHere && $authStore.npcId ? ($npcDetailStore.get($authStore.npcId)?.money ?? undefined) : undefined,
-  )
+  let npcMoney = $derived(npcIsHere ? (playerNpc?.money ?? undefined) : undefined)
 
   onMount(() => {
     const townId = $page.params.id
     if (!townId) return
     townDetailStore.set(null)
     sendCommand({ type: "getTown", townId })
-    if (npcIsHere && $authStore.npcId) {
-      sendCommand({ type: "getNpc", npcId: $authStore.npcId })
-    }
   })
 
   function formatStoreType(type: string): string {

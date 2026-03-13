@@ -1,5 +1,5 @@
 import type { InWorldDate } from "@grim-frontier/shared"
-import { npcs } from "../../models/collections.js"
+import { npcs, towns } from "../../models/collections.js"
 import type { DrifterAction, DrifterActionContext } from "./types.js"
 
 /** Converts an InWorldDate to an absolute hour count for duration comparisons. */
@@ -36,6 +36,9 @@ export const travelAction: DrifterAction = {
     const destination = connectedLandmarks[Math.floor(Math.random() * connectedLandmarks.length)]
     const travelHours = Math.ceil(destination.connection.distance / WALKING_SPEED_MPH)
 
+    const destinationTown = await towns.findOne({ nodeKey: destination.landmark.key })
+    if (!destinationTown) return
+
     // We need the current world date to compute arrival time. The NPC's updatedAt reflects
     // the current tick, but we need the InWorldDate. We'll import the clock indirectly via
     // the worldClock module. For now, we store departedHour as 0 and arrivalHour as the
@@ -43,6 +46,8 @@ export const travelAction: DrifterAction = {
     const travelState = {
       fromLandmarkKey: context.currentLandmark!.key,
       toLandmarkKey: destination.landmark.key,
+      toLocationId: destinationTown._id!.toString(),
+      toLocationType: "town" as const,
       routeName: destination.connection.name,
       departedHour: 0,
       arrivalHour: travelHours,
