@@ -75,7 +75,7 @@
 
   onMount(() => {
     const width = container.clientWidth
-    const height = 400
+    const height = container.clientHeight
 
     const scene = new THREE.Scene()
     scene.background = new THREE.Color(0x1a1208)
@@ -252,9 +252,10 @@
 
     function handleResize() {
       const newWidth = container.clientWidth
-      camera.aspect = newWidth / height
+      const newHeight = container.clientHeight
+      camera.aspect = newWidth / newHeight
       camera.updateProjectionMatrix()
-      renderer.setSize(newWidth, height)
+      renderer.setSize(newWidth, newHeight)
     }
     window.addEventListener("resize", handleResize)
 
@@ -273,9 +274,9 @@
 <style>
   .world-map {
     width: 100%;
-    height: 400px;
+    flex: 1;
+    min-height: 200px;
     border: 1px solid #5a4020;
-    margin-bottom: 2rem;
   }
 
   .world-map :global(canvas) {

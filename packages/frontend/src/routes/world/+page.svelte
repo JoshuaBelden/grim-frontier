@@ -323,6 +323,13 @@
     font-size: 0.85rem;
   }
 
+  .territory {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+  }
+
   .gone {
     display: flex;
     flex-direction: column;

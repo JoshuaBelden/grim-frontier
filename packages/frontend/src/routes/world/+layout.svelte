@@ -258,8 +258,8 @@
   }
 
   .pn-portrait {
-    height: 36px;
-    width: 36px;
+    height: 44px;
+    width: 44px;
     object-fit: cover;
     flex-shrink: 0;
   }
@@ -267,13 +267,13 @@
   .pn-info {
     display: flex;
     flex-direction: column;
-    gap: 0.1rem;
+    gap: 0.15rem;
     min-width: 0;
   }
 
   .pn-name {
     color: #d4b896;
-    font-size: 0.75rem;
+    font-size: 0.85rem;
     letter-spacing: 0.06em;
     text-transform: uppercase;
     overflow: hidden;
@@ -283,14 +283,14 @@
 
   .pn-status {
     color: #8a7060;
-    font-size: 0.55rem;
+    font-size: 0.65rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
   }
 
   .pn-location {
     color: #5a4020;
-    font-size: 0.55rem;
+    font-size: 0.65rem;
     letter-spacing: 0.06em;
     text-transform: uppercase;
     overflow: hidden;
@@ -305,7 +305,7 @@
 
   .pn-action {
     color: #7a9a4a;
-    font-size: 0.55rem;
+    font-size: 0.65rem;
     letter-spacing: 0.06em;
     text-transform: uppercase;
   }
@@ -318,7 +318,7 @@
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
-    width: 120px;
+    width: 140px;
     flex-shrink: 0;
   }
 
@@ -330,9 +330,9 @@
 
   .pn-vital-label {
     color: #5a4020;
-    font-size: 0.5rem;
+    font-size: 0.6rem;
     letter-spacing: 0.04em;
-    width: 16px;
+    width: 18px;
     text-transform: uppercase;
   }
 
@@ -340,7 +340,7 @@
     background: #1e1508;
     border: 1px solid #2a1e0e;
     flex: 1;
-    height: 4px;
+    height: 5px;
   }
 
   .pn-bar-fill {
@@ -393,5 +393,8 @@
   .content {
     flex: 1;
     padding: 2rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
   }
 </style>

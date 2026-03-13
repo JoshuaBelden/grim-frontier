@@ -2,17 +2,10 @@
 
 ## Next
 
-- Remove the logo
-- Date and Weather need to be bigger
-- Location panels should fill the screen, Camp is always first.
-- NPC Panel is wider
-- NPCs have inventory, inventory shows in the info panel
-- 
 - NPCs can transfer food and wood to their inventory
+- NPCs have inventory, inventory shows in the info panel
 - NPCs can sell food
 - NPCs can buy items
-- Collapse the npc avatar
-- Roster background is too dark
 
 ## Upcoming
 
