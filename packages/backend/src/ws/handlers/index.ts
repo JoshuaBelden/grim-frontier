@@ -16,6 +16,8 @@ import { handleStartNpcAction } from "./startNpcAction.js"
 import { handleStopNpcAction } from "./stopNpcAction.js"
 import { handleReturnToCamp } from "./returnToCamp.js"
 import { handleTravelToTown } from "./travelToTown.js"
+import { handleTransferToNpc } from "./transferToNpc.js"
+import { handleTransferToCamp } from "./transferToCamp.js"
 
 export interface HandlerContext {
   playerId: string
@@ -44,4 +46,6 @@ export const commandHandlers: Record<ClientCommandType, CommandHandler> = {
   listAcquaintances: handleListAcquaintances,
   travelToTown: handleTravelToTown,
   returnToCamp: handleReturnToCamp,
+  transferToNpc: handleTransferToNpc,
+  transferToCamp: handleTransferToCamp,
 }

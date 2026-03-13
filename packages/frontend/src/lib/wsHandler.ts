@@ -6,6 +6,7 @@ import type {
   ErrorEvent,
   FirePitUpdateEvent,
   InWorldDate,
+  InventoryUpdateEvent,
   JoinRequestListEvent,
   JoinRequestReceivedEvent,
   JoinRequestResolvedEvent,
@@ -87,7 +88,18 @@ const eventHandlers: Record<string, (message: ServerEvent) => void> = {
     const event = message as NpcDetailEvent
     npcDetailStore.update(current => {
       const updated = new Map(current)
-      updated.set(event.id, event)
+      updated.set(event.id, { ...(current.get(event.id) ?? {}), ...event })
+      return updated
+    })
+  },
+
+  inventoryUpdate(message) {
+    const event = message as InventoryUpdateEvent
+    npcDetailStore.update(current => {
+      const existing = current.get(event.npcId)
+      if (!existing) return current
+      const updated = new Map(current)
+      updated.set(event.npcId, { ...existing, inventory: event.inventory })
       return updated
     })
   },

@@ -10,6 +10,8 @@
 
   let npc = $derived($npcDetailStore.get(entry.npcId) ?? null)
 
+  let inventoryExpanded = $state(true)
+
   const error = $derived(
     $wsErrorStore?.command === "getNpc" ? $wsErrorStore.message : null,
   )
@@ -107,6 +109,16 @@
     return `${monthName} ${date.day}, ${date.year} ${hour}${ampm}`
   }
 
+  /** Returns a display label for an inventory item. */
+  function inventoryItemLabel(item: { type: string; subtype: string; quality?: string }): string {
+    if (item.type === "food") {
+      const subtypeLabel = formatKey(item.subtype)
+      const qualityLabel = item.quality ? formatKey(item.quality) : ""
+      return qualityLabel ? `${subtypeLabel} (${qualityLabel})` : subtypeLabel
+    }
+    if (item.type === "fuel") return formatKey(item.subtype)
+    return formatKey(item.subtype)
+  }
 
 </script>
 
@@ -126,175 +138,204 @@
     {/if}
   </div>
 
-  <div class="panel-body">
-    {#if error}
-      <p class="error">{error}</p>
-    {:else if !npc}
-      <p class="muted">Loading…</p>
-    {:else}
-      <section>
-        <div class="vitals">
-          <div class="vital">
-            <span class="vital-label">Health</span>
-            <div class="bar-track">
-              <div class="bar-fill severity-{healthDesc(npc.health).severity}" style="width: {npc.health * 10}%"></div>
-            </div>
-            <span class="vital-desc severity-text-{healthDesc(npc.health).severity}">{healthDesc(npc.health).label}</span>
-          </div>
-          <div class="vital">
-            <span class="vital-label">Morale</span>
-            <div class="bar-track">
-              <div class="bar-fill severity-{moraleDesc(npc.morale).severity}" style="width: {npc.morale * 10}%"></div>
-            </div>
-            <span class="vital-desc severity-text-{moraleDesc(npc.morale).severity}">{moraleDesc(npc.morale).label}</span>
-          </div>
-          <div class="vital">
-            <span class="vital-label">Fatigue</span>
-            <div class="bar-track">
-              <div class="bar-fill severity-{fatigueDesc(npc.fatigue).severity}" style="width: {npc.fatigue * 10}%"></div>
-            </div>
-            <span class="vital-desc severity-text-{fatigueDesc(npc.fatigue).severity}">{fatigueDesc(npc.fatigue).label}</span>
-          </div>
-          <div class="vital">
-            <span class="vital-label">Hunger</span>
-            <div class="bar-track">
-              <div class="bar-fill severity-{hungerDesc(npc.hunger).severity}" style="width: {npc.hunger * 10}%"></div>
-            </div>
-            <span class="vital-desc severity-text-{hungerDesc(npc.hunger).severity}">{hungerDesc(npc.hunger).label}</span>
-          </div>
-        </div>
-        {#if npc.lastRestedAt}
-          <span class="last-rested">Last rested: {formatDate(npc.lastRestedAt)}</span>
-        {:else}
-          <span class="last-rested">Never rested</span>
-        {/if}
-      </section>
-
-      <section>
-        <h3 class="section-heading">Characteristics</h3>
-        <div class="characteristics">
-          {#each Object.entries(characteristicLabels) as [key, label]}
-            {@const value = npc.characteristics[key as keyof typeof npc.characteristics]}
-            <div class="characteristic">
-              <span class="char-label">{label}</span>
+  <div class="panel-content">
+    <div class="panel-left">
+      {#if error}
+        <p class="error">{error}</p>
+      {:else if !npc}
+        <p class="muted">Loading…</p>
+      {:else}
+        <section>
+          <div class="vitals">
+            <div class="vital">
+              <span class="vital-label">Health</span>
               <div class="bar-track">
-                <div class="bar-fill" style="width: {value * 10}%"></div>
+                <div class="bar-fill severity-{healthDesc(npc.health).severity}" style="width: {npc.health * 10}%"></div>
               </div>
-              <span class="char-value">{value}</span>
+              <span class="vital-desc severity-text-{healthDesc(npc.health).severity}">{healthDesc(npc.health).label}</span>
             </div>
-          {/each}
-        </div>
-      </section>
-
-      <section>
-        <h3 class="section-heading">Disposition</h3>
-        <div class="axes">
-          {#each Object.entries(dispositionLabels) as [key, poles]}
-            {@const value = npc.nature.disposition[key as keyof typeof npc.nature.disposition]}
-            <div class="axis">
-              <span class="axis-key">{formatKey(key)}</span>
-              <span class="axis-value">{axisLabel(poles, value)}</span>
-              <span class="axis-raw">({value > 0 ? "+" : ""}{value})</span>
+            <div class="vital">
+              <span class="vital-label">Morale</span>
+              <div class="bar-track">
+                <div class="bar-fill severity-{moraleDesc(npc.morale).severity}" style="width: {npc.morale * 10}%"></div>
+              </div>
+              <span class="vital-desc severity-text-{moraleDesc(npc.morale).severity}">{moraleDesc(npc.morale).label}</span>
             </div>
-          {/each}
-        </div>
-      </section>
-
-      <section>
-        <h3 class="section-heading">Outlook</h3>
-        <div class="axes">
-          {#each Object.entries(outlookLabels) as [key, poles]}
-            {@const value = npc.nature.outlook[key as keyof typeof npc.nature.outlook]}
-            <div class="axis">
-              <span class="axis-key">{formatKey(key)}</span>
-              <span class="axis-value">{axisLabel(poles, value)}</span>
-              <span class="axis-raw">({value > 0 ? "+" : ""}{value})</span>
+            <div class="vital">
+              <span class="vital-label">Fatigue</span>
+              <div class="bar-track">
+                <div class="bar-fill severity-{fatigueDesc(npc.fatigue).severity}" style="width: {npc.fatigue * 10}%"></div>
+              </div>
+              <span class="vital-desc severity-text-{fatigueDesc(npc.fatigue).severity}">{fatigueDesc(npc.fatigue).label}</span>
             </div>
-          {/each}
-        </div>
-      </section>
-
-      <section>
-        <h3 class="section-heading">Traits</h3>
-        {#if npc.traits.length === 0}
-          <p class="muted">None</p>
-        {:else}
-          <div class="tags">
-            {#each npc.traits as trait}
-              <span class="tag">{formatKey(trait)}</span>
-            {/each}
+            <div class="vital">
+              <span class="vital-label">Hunger</span>
+              <div class="bar-track">
+                <div class="bar-fill severity-{hungerDesc(npc.hunger).severity}" style="width: {npc.hunger * 10}%"></div>
+              </div>
+              <span class="vital-desc severity-text-{hungerDesc(npc.hunger).severity}">{hungerDesc(npc.hunger).label}</span>
+            </div>
           </div>
-        {/if}
-      </section>
+          {#if npc.lastRestedAt}
+            <span class="last-rested">Last rested: {formatDate(npc.lastRestedAt)}</span>
+          {:else}
+            <span class="last-rested">Never rested</span>
+          {/if}
+        </section>
 
-      <section>
-        <h3 class="section-heading">Skills</h3>
-        {#if Object.keys(npc.skills).length === 0}
-          <p class="muted">None</p>
-        {:else}
-          <div class="skills">
-            {#each Object.entries(npc.skills) as [skillName, level]}
-              <div class="skill">
-                <span class="skill-name">{formatKey(skillName)}</span>
+        <section>
+          <h3 class="section-heading">Characteristics</h3>
+          <div class="characteristics">
+            {#each Object.entries(characteristicLabels) as [key, label]}
+              {@const value = npc.characteristics[key as keyof typeof npc.characteristics]}
+              <div class="characteristic">
+                <span class="char-label">{label}</span>
                 <div class="bar-track">
-                  <div class="bar-fill" style="width: {(level ?? 0) * 10}%"></div>
+                  <div class="bar-fill" style="width: {value * 10}%"></div>
                 </div>
-                <span class="skill-value">{level}</span>
+                <span class="char-value">{value}</span>
               </div>
             {/each}
           </div>
-        {/if}
-      </section>
-
-      <section>
-        <h3 class="section-heading">Origin</h3>
-        <div class="origin-grid">
-          <span class="origin-label">From</span>
-          <span>{formatKey(npc.origin.background.origin)}</span>
-          <span class="origin-label">Family</span>
-          <span>{formatKey(npc.origin.background.family)}</span>
-          <span class="origin-label">Formative Event</span>
-          <span>{npc.origin.background.formativeEvent}</span>
-        </div>
-      </section>
-
-      {#if npc.origin.scars.length > 0}
-        <section>
-          <h3 class="section-heading">Scars</h3>
-          <ul class="scars">
-            {#each npc.origin.scars as scar}
-              <li>
-                <span class="scar-type">{formatKey(scar.type)}</span>
-                <span class="scar-desc">{scar.description}</span>
-                {#if scar.triggerCondition}
-                  <span class="scar-trigger">Trigger: {scar.triggerCondition}</span>
-                {/if}
-              </li>
-            {/each}
-          </ul>
         </section>
-      {/if}
 
-      {#if npc.origin.pursuits.shortTerm || npc.origin.pursuits.longTerm || npc.origin.pursuits.secret}
         <section>
-          <h3 class="section-heading">Pursuits</h3>
-          <div class="origin-grid">
-            {#if npc.origin.pursuits.shortTerm}
-              <span class="origin-label">Near</span>
-              <span>{npc.origin.pursuits.shortTerm}</span>
-            {/if}
-            {#if npc.origin.pursuits.longTerm}
-              <span class="origin-label">Far</span>
-              <span>{npc.origin.pursuits.longTerm}</span>
-            {/if}
-            {#if npc.origin.pursuits.secret}
-              <span class="origin-label">Secret</span>
-              <span class="secret">{npc.origin.pursuits.secret}</span>
-            {/if}
+          <h3 class="section-heading">Disposition</h3>
+          <div class="axes">
+            {#each Object.entries(dispositionLabels) as [key, poles]}
+              {@const value = npc.nature.disposition[key as keyof typeof npc.nature.disposition]}
+              <div class="axis">
+                <span class="axis-key">{formatKey(key)}</span>
+                <span class="axis-value">{axisLabel(poles, value)}</span>
+                <span class="axis-raw">({value > 0 ? "+" : ""}{value})</span>
+              </div>
+            {/each}
           </div>
         </section>
+
+        <section>
+          <h3 class="section-heading">Outlook</h3>
+          <div class="axes">
+            {#each Object.entries(outlookLabels) as [key, poles]}
+              {@const value = npc.nature.outlook[key as keyof typeof npc.nature.outlook]}
+              <div class="axis">
+                <span class="axis-key">{formatKey(key)}</span>
+                <span class="axis-value">{axisLabel(poles, value)}</span>
+                <span class="axis-raw">({value > 0 ? "+" : ""}{value})</span>
+              </div>
+            {/each}
+          </div>
+        </section>
+
+        <section>
+          <h3 class="section-heading">Traits</h3>
+          {#if npc.traits.length === 0}
+            <p class="muted">None</p>
+          {:else}
+            <div class="tags">
+              {#each npc.traits as trait}
+                <span class="tag">{formatKey(trait)}</span>
+              {/each}
+            </div>
+          {/if}
+        </section>
+
+        <section>
+          <h3 class="section-heading">Skills</h3>
+          {#if Object.keys(npc.skills).length === 0}
+            <p class="muted">None</p>
+          {:else}
+            <div class="skills">
+              {#each Object.entries(npc.skills) as [skillName, level]}
+                <div class="skill">
+                  <span class="skill-name">{formatKey(skillName)}</span>
+                  <div class="bar-track">
+                    <div class="bar-fill" style="width: {(level ?? 0) * 10}%"></div>
+                  </div>
+                  <span class="skill-value">{level}</span>
+                </div>
+              {/each}
+            </div>
+          {/if}
+        </section>
+
+        <section>
+          <h3 class="section-heading">Origin</h3>
+          <div class="origin-grid">
+            <span class="origin-label">From</span>
+            <span>{formatKey(npc.origin.background.origin)}</span>
+            <span class="origin-label">Family</span>
+            <span>{formatKey(npc.origin.background.family)}</span>
+            <span class="origin-label">Formative Event</span>
+            <span>{npc.origin.background.formativeEvent}</span>
+          </div>
+        </section>
+
+        {#if npc.origin.scars.length > 0}
+          <section>
+            <h3 class="section-heading">Scars</h3>
+            <ul class="scars">
+              {#each npc.origin.scars as scar}
+                <li>
+                  <span class="scar-type">{formatKey(scar.type)}</span>
+                  <span class="scar-desc">{scar.description}</span>
+                  {#if scar.triggerCondition}
+                    <span class="scar-trigger">Trigger: {scar.triggerCondition}</span>
+                  {/if}
+                </li>
+              {/each}
+            </ul>
+          </section>
+        {/if}
+
+        {#if npc.origin.pursuits.shortTerm || npc.origin.pursuits.longTerm || npc.origin.pursuits.secret}
+          <section>
+            <h3 class="section-heading">Pursuits</h3>
+            <div class="origin-grid">
+              {#if npc.origin.pursuits.shortTerm}
+                <span class="origin-label">Near</span>
+                <span>{npc.origin.pursuits.shortTerm}</span>
+              {/if}
+              {#if npc.origin.pursuits.longTerm}
+                <span class="origin-label">Far</span>
+                <span>{npc.origin.pursuits.longTerm}</span>
+              {/if}
+              {#if npc.origin.pursuits.secret}
+                <span class="origin-label">Secret</span>
+                <span class="secret">{npc.origin.pursuits.secret}</span>
+              {/if}
+            </div>
+          </section>
+        {/if}
       {/if}
-    {/if}
+    </div>
+
+    <div class="panel-sidebar">
+      <div class="sidebar-section">
+        <button class="sidebar-section-header" onclick={() => (inventoryExpanded = !inventoryExpanded)}>
+          <span>Inventory</span>
+          <span class="chevron">{inventoryExpanded ? "▲" : "▼"}</span>
+        </button>
+        {#if inventoryExpanded}
+          <div class="sidebar-section-body">
+            {#if !npc}
+              <p class="sidebar-empty">Loading…</p>
+            {:else if !npc.inventory || npc.inventory.length === 0}
+              <p class="sidebar-empty">Nothing carried</p>
+            {:else}
+              <ul class="inventory-list">
+                {#each npc.inventory as item}
+                  <li class="inventory-item">
+                    <span class="inv-label">{inventoryItemLabel(item)}</span>
+                    <span class="inv-count">×{item.count}</span>
+                  </li>
+                {/each}
+              </ul>
+            {/if}
+          </div>
+        {/if}
+      </div>
+    </div>
   </div>
 </div>
 
@@ -305,10 +346,10 @@
     display: flex;
     flex-direction: column;
     height: 85vh;
-    min-width: 760px;
+    min-width: 900px;
     overflow: hidden;
     position: relative;
-    width: 840px;
+    width: 1100px;
   }
 
   .close {
@@ -369,12 +410,96 @@
     font-style: italic;
   }
 
-  .panel-body {
+  .panel-content {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .panel-left {
     display: flex;
     flex-direction: column;
+    flex: 1;
     gap: 1.5rem;
+    min-width: 0;
     overflow-y: auto;
     padding: 1.25rem;
+  }
+
+  .panel-sidebar {
+    border-left: 1px solid #2a1e0e;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    width: 320px;
+    flex-shrink: 0;
+  }
+
+  .sidebar-section {
+    border-bottom: 1px solid #1e1508;
+  }
+
+  .sidebar-section-header {
+    align-items: center;
+    background: none;
+    border: none;
+    color: #8a7060;
+    cursor: pointer;
+    display: flex;
+    font-family: inherit;
+    font-size: 0.6rem;
+    justify-content: space-between;
+    letter-spacing: 0.15em;
+    padding: 0.6rem 0.85rem;
+    text-transform: uppercase;
+    transition: color 0.15s;
+    width: 100%;
+  }
+
+  .sidebar-section-header:hover {
+    color: #d4b896;
+  }
+
+  .chevron {
+    font-size: 0.5rem;
+    opacity: 0.6;
+  }
+
+  .sidebar-section-body {
+    padding: 0.25rem 0.85rem 0.75rem;
+  }
+
+  .sidebar-empty {
+    color: #3a2e1e;
+    font-size: 0.7rem;
+    font-style: italic;
+  }
+
+  .inventory-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    list-style: none;
+  }
+
+  .inventory-item {
+    align-items: baseline;
+    display: flex;
+    gap: 0.5rem;
+    justify-content: space-between;
+  }
+
+  .inv-label {
+    color: #c8b08a;
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+  }
+
+  .inv-count {
+    color: #8a7060;
+    font-size: 0.65rem;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
   }
 
   section {

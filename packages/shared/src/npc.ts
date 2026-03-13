@@ -1,6 +1,7 @@
 import type { Career } from "./careers"
 import type { Characteristics } from "./characteristics"
 import type { NpcTravelState } from "./drifter"
+import type { InventoryItem } from "./inventory"
 import type { Nature } from "./nature"
 import type { CharacterOrigin } from "./origin"
 import type { Relationship } from "./relationships"
@@ -40,6 +41,7 @@ export interface NPC {
   travelState?: NpcTravelState
   currentAction?: NpcAction
   relationships: Relationship[]
+  inventory: InventoryItem[]
   createdAt: Date
   updatedAt: Date
 }

@@ -2,6 +2,7 @@
   import { goto } from "$app/navigation"
   import { apiLogout } from "$lib/api"
   import JoinRequestModal from "$lib/components/camp/JoinRequestModal.svelte"
+  import NpcInventoryPanel from "$lib/components/npc/NpcInventoryPanel.svelte"
   import NpcListPanel from "$lib/components/npc/NpcListPanel.svelte"
   import NpcPanels from "$lib/components/npc/NpcPanels.svelte"
   import { authStore } from "$lib/stores/auth"
@@ -17,6 +18,7 @@
   let { children }: { children: Snippet } = $props()
 
   let npcListVisible = $state(false)
+  let inventoryVisible = $state(false)
 
   const playerNpc = $derived($authStore.npcId ? $npcDetailStore.get($authStore.npcId) ?? null : null)
 
@@ -146,6 +148,9 @@
 
   <nav class="site-nav">
     <button class="nav-btn" onclick={() => (npcListVisible = !npcListVisible)}>NPCs</button>
+    {#if $authStore.npcId}
+      <button class="nav-btn" onclick={() => (inventoryVisible = !inventoryVisible)}>Camp Inventory</button>
+    {/if}
   </nav>
 
   <div class="content">
@@ -154,6 +159,7 @@
 </div>
 
 <NpcListPanel bind:visible={npcListVisible} />
+<NpcInventoryPanel bind:visible={inventoryVisible} />
 <NpcPanels />
 <JoinRequestModal />
 

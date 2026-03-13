@@ -2,8 +2,6 @@
 
 ## Next
 
-- NPCs can transfer food and wood to their inventory
-- NPCs have inventory, inventory shows in the info panel
 - NPCs can sell food
 - NPCs can buy items
 

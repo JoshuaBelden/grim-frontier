@@ -1,6 +1,7 @@
 import type { Amenities, CampPosture, FirePitState, FoodStores, FoodStoreType, FuelStores, FuelStoreType } from "./camp"
 import type { Career } from "./careers"
 import type { Characteristics } from "./characteristics"
+import type { InventoryItem } from "./inventory"
 import type { Nature } from "./nature"
 import type { NpcAction, NPCStatus } from "./npc"
 import type { CharacterOrigin } from "./origin"
@@ -33,6 +34,8 @@ export type ClientCommandType =
   | "listAcquaintances"
   | "travelToTown"
   | "returnToCamp"
+  | "transferToNpc"
+  | "transferToCamp"
 
 /** Request the territory map for the connected world. */
 export interface GetWorldMapCommand {
@@ -132,6 +135,20 @@ export interface ReturnToCampCommand {
   type: "returnToCamp"
 }
 
+/** Move one stack of items from the player's camp stores into the NPC's personal inventory. */
+export interface TransferToNpcCommand {
+  type: "transferToNpc"
+  npcId: string
+  item: InventoryItem
+}
+
+/** Move one stack of items from the NPC's personal inventory back into the player's camp stores. */
+export interface TransferToCampCommand {
+  type: "transferToCamp"
+  npcId: string
+  item: InventoryItem
+}
+
 /** Discriminated union of all client-to-server commands. */
 export type ClientCommand =
   | GetWorldMapCommand
@@ -150,6 +167,8 @@ export type ClientCommand =
   | ListAcquaintancesCommand
   | TravelToTownCommand
   | ReturnToCampCommand
+  | TransferToNpcCommand
+  | TransferToCampCommand
 
 // ---------------------------------------------------------------------------
 // Server → Client events
@@ -177,6 +196,7 @@ export type ServerEventType =
   | "acquaintanceList"
   | "playerTravelStarted"
   | "playerTravelArrived"
+  | "inventoryUpdate"
 
 /** Sent on initial WebSocket connection. */
 export interface ConnectedEvent {
@@ -291,6 +311,7 @@ export interface NpcDetailEvent {
   traits: Trait[]
   skills: Skills
   origin: CharacterOrigin
+  inventory: InventoryItem[]
 }
 
 /** A thin NPC summary for the list view. */
@@ -431,6 +452,13 @@ export interface PlayerTravelArrivedEvent {
   townName: string
 }
 
+/** Sent after a successful transfer to/from NPC inventory — contains the NPC's full updated inventory. */
+export interface InventoryUpdateEvent {
+  type: "inventoryUpdate"
+  npcId: string
+  inventory: InventoryItem[]
+}
+
 /** Discriminated union of all server-to-client events. */
 export type ServerEvent =
   | ConnectedEvent
@@ -453,3 +481,4 @@ export type ServerEvent =
   | AcquaintanceListEvent
   | PlayerTravelStartedEvent
   | PlayerTravelArrivedEvent
+  | InventoryUpdateEvent
