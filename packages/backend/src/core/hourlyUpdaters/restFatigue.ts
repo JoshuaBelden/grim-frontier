@@ -21,12 +21,12 @@ function healthRecoveryRate(strength: number): number {
   return 0.5 + (strength / 10)
 }
 
-/** Chooses food or fuel gathering based on camp resource needs. Prefers whichever resource has fewer days of supply. */
+/** Chooses food or fuel gathering based on camp resource needs. Prefers whichever resource has fewer days of supply. Fuel need is always 24 units/day so NPCs restock even when the fire pit is burned out. */
 function chooseGatheringAction(camp: WithId<Camp>, npcCount: number): NpcAction["type"] {
   const dailyFoodNeed = Math.max(1, npcCount)
-  const dailyFuelNeed = camp.amenities.firePit === "lit" ? 24 : 0
-  const foodDaysSupply = dailyFoodNeed > 0 ? totalFood(camp.foodStores) / dailyFoodNeed : Infinity
-  const fuelDaysSupply = dailyFuelNeed > 0 ? totalFuel(camp.fuelStores) / dailyFuelNeed : Infinity
+  const dailyFuelNeed = 24
+  const foodDaysSupply = totalFood(camp.foodStores) / dailyFoodNeed
+  const fuelDaysSupply = totalFuel(camp.fuelStores) / dailyFuelNeed
 
   return foodDaysSupply <= fuelDaysSupply ? "food_gathering" : "fuel_gathering"
 }

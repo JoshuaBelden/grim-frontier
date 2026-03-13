@@ -1,8 +1,5 @@
 import type { PurchasedInventoryItem } from "./inventory"
 
-/** How a camp presents itself to outsiders. */
-export type CampPosture = "open" | "closed" | "aggressive" | "defensive"
-
 /** Whether the camp fire pit is currently burning. */
 export type FirePitState = "burned_out" | "lit"
 
@@ -59,17 +56,15 @@ export interface Camp {
   territoryId: string
   name: string
   nearestLandmarkKey: string
-  distanceToLandmark: number // miles (3–5)
+  distanceToLandmark: number 
   foodStores: FoodStores
   fuelStores: FuelStores
   preferredFood: FoodStoreType
   amenities: Amenities
   storage: PurchasedInventoryItem[]
-  posture: CampPosture
   suspendJoinRequests: boolean
-  reputation: number // 0–100
-  wealth: number
   notoriety: number
+  money: number
   createdAt: Date
   updatedAt: Date
 }

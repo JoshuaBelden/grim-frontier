@@ -40,11 +40,9 @@ export async function handleGetCamp(context: HandlerContext, payload: unknown): 
       activeFuelSource: camp.amenities?.activeFuelSource ?? "sticks",
       protection: camp.amenities?.protection ?? 0,
     },
-    posture: camp.posture,
     suspendJoinRequests: camp.suspendJoinRequests ?? false,
-    reputation: camp.reputation,
-    wealth: camp.wealth,
     notoriety: camp.notoriety,
+    money: camp.money,
     npcs: campNpcs.map(npc => ({
       id: npc._id!.toString(),
       ownerId: npc.ownerId ?? null,

@@ -92,11 +92,9 @@ export async function handleRespondJoinRequest(context: HandlerContext, payload:
       fuelStores: camp.fuelStores,
       preferredFood: camp.preferredFood ?? "raw",
       amenities: camp.amenities ?? { firePit: "burned_out", activeFuelSource: "sticks" },
-      posture: camp.posture,
       suspendJoinRequests: camp.suspendJoinRequests ?? false,
-      reputation: camp.reputation,
-      wealth: camp.wealth,
       notoriety: camp.notoriety,
+      money: camp.money,
       npcs: campNpcs.map(npc => ({
         id: npc._id!.toString(),
         ownerId: npc.ownerId ?? null,

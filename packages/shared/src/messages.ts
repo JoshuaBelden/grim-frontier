@@ -1,4 +1,4 @@
-import type { Amenities, CampPosture, FirePitState, FoodStores, FoodStoreType, FuelStores, FuelStoreType } from "./camp"
+import type { Amenities, FirePitState, FoodStores, FoodStoreType, FuelStores, FuelStoreType } from "./camp"
 import type { Career } from "./careers"
 import type { Characteristics } from "./characteristics"
 import type { InventoryItem, PurchasedInventoryItem } from "./inventory"
@@ -360,11 +360,9 @@ export interface CampDetailEvent {
   preferredFood: FoodStoreType
   storage: PurchasedInventoryItem[]
   amenities: Amenities
-  posture: CampPosture
   suspendJoinRequests: boolean
-  reputation: number
-  wealth: number
   notoriety: number
+  money: number
   npcs: CampDetailNpc[]
 }
 

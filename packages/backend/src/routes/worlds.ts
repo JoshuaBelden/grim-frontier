@@ -137,11 +137,9 @@ export async function worldRoutes(app: FastifyInstance) {
       storage: [],
       preferredFood: "raw",
       amenities: { firePit: "burned_out", activeFuelSource: "sticks" },
-      posture: "open",
       suspendJoinRequests: false,
-      reputation: 0,
-      wealth: 0,
       notoriety: 0,
+      money: 0,
       createdAt: now,
       updatedAt: now,
     })

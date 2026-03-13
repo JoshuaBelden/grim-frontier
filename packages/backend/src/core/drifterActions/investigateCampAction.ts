@@ -16,17 +16,11 @@ function buildOriginSummary(npc: DrifterActionContext["npc"]): string {
 
 /** Scores how desirable a specific camp is to the NPC. */
 function scoreCampDesirability(npc: DrifterActionContext["npc"], camp: CampDocument): number {
-  // Posture filter
-  if (camp.posture === "closed") return 0
-  if (camp.posture === "aggressive" && npc.nature.disposition.courage < 3) return 0
-
   let score = 0
-
-  if (camp.posture === "defensive") score -= 10
 
   // Camp attributes
   score += Math.min(25, (totalFood(camp.foodStores) / FOOD_PER_PERSON_PER_WEEK) * 5)
-  score += (camp.reputation / 100) * 15
+  score += (camp.notoriety / 100) * 15
   score += Math.min(10, camp.amenities?.protection ?? 0)
 
   // NPC personality
@@ -52,7 +46,7 @@ export const investigateCampAction: DrifterAction = {
     let bestScore = 0
     for (const camp of context.nearbyCamps) {
       const campScore = scoreCampDesirability(context.npc, camp)
-      console.log(`[drifter] ${context.npc.name} — investigateCamp score for "${camp.name}": ${campScore.toFixed(1)} (posture: ${camp.posture}, food: ${totalFood(camp.foodStores)}, reputation: ${camp.reputation})`)
+      console.log(`[drifter] ${context.npc.name} — investigateCamp score for "${camp.name}": ${campScore.toFixed(1)} (food: ${totalFood(camp.foodStores)}, notoriety: ${camp.notoriety})`)
       if (campScore > bestScore) bestScore = campScore
     }
     return bestScore
