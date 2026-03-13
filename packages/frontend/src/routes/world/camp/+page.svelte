@@ -9,9 +9,8 @@
   import { wsErrorStore } from "$lib/stores/wsError"
   import { sendCommand } from "$lib/ws"
   import { lastClockUpdateAt } from "$lib/wsHandler"
-  import { onDestroy, onMount } from "svelte"
   import type { FoodStoreType, FuelStoreType } from "@grim-frontier/shared"
-  import { FUEL_BURN_VALUES } from "@grim-frontier/shared"
+  import { onDestroy, onMount } from "svelte"
 
   let camp = $derived($campDetailStore)
 
@@ -135,13 +134,6 @@
     prepared: "Prepared",
   }
 
-  const foodQualityLabels: Record<FoodStoreType, string> = {
-    raw: "Poor",
-    staple: "Basic",
-    fresh: "Good",
-    prepared: "Hearty",
-  }
-
   const fuelLabels: Record<FuelStoreType, string> = {
     sticks: "Sticks",
     splitLogs: "Split Logs",
@@ -169,12 +161,11 @@
       <div class="stores-col">
         <CollapsibleSection title="Food Stores">
           <div class="stores-grid">
-            {#each (["raw", "staple", "fresh", "prepared"] as FoodStoreType[]) as foodType}
+            {#each ["raw", "staple", "fresh", "prepared"] as FoodStoreType[] as foodType}
               {@const entry = camp.foodStores[foodType]}
               <div class="store-item" class:active={camp.preferredFood === foodType}>
                 <div class="store-header">
                   <span class="store-label">{foodLabels[foodType]}</span>
-                  <span class="store-quality">{foodQualityLabels[foodType]}</span>
                 </div>
                 <span class="store-value">{entry.count}</span>
                 <button
@@ -193,12 +184,11 @@
       <div class="stores-col">
         <CollapsibleSection title="Fuel Stores">
           <div class="stores-grid">
-            {#each (["sticks", "splitLogs", "coal", "oil"] as FuelStoreType[]) as fuelType}
+            {#each ["sticks", "splitLogs", "coal", "oil"] as FuelStoreType[] as fuelType}
               {@const amount = camp.fuelStores[fuelType]}
               <div class="store-item" class:active={camp.amenities.activeFuelSource === fuelType}>
                 <div class="store-header">
                   <span class="store-label">{fuelLabels[fuelType]}</span>
-                  <span class="store-quality">Burn: {FUEL_BURN_VALUES[fuelType]}</span>
                 </div>
                 <span class="store-value">{amount}</span>
                 <button
@@ -249,7 +239,8 @@
                 <div class="roster-row">
                   <button
                     class="roster-btn"
-                    onclick={() => npcPanelStore.open({ key: npc.id, npcId: npc.id, name: npc.name, career: npc.career })}
+                    onclick={() =>
+                      npcPanelStore.open({ key: npc.id, npcId: npc.id, name: npc.name, career: npc.career })}
                   >
                     <span class="npc-name">{npc.name}</span>
                     <span class="npc-career">{npc.career.replace(/_/g, " ")}</span>
@@ -257,21 +248,25 @@
 
                   {#if npc.ownerId === $authStore.playerId}
                     <div class="npc-actions">
-                    {#if getActionType(npc.id)}
-                      <div class="gather-status">
-                        <span class="action-label">{actionLabel(getActionType(npc.id)!)}</span>
-                        {#if getActionType(npc.id) !== "resting"}
-                          <div class="progress-track">
-                            <div class="progress-fill" style="width: {gatherProgress * 100}%"></div>
-                          </div>
-                        {/if}
-                        <button class="action-btn stop" onclick={() => stopAction(npc.id)}>Stop</button>
-                      </div>
-                    {:else}
-                      <button class="action-btn gather" onclick={() => startAction(npc.id, "food_gathering")}>Gather Food</button>
-                      <button class="action-btn gather" onclick={() => startAction(npc.id, "fuel_gathering")}>Gather Fuel</button>
-                      <button class="action-btn gather" onclick={() => startAction(npc.id, "resting")}>Rest</button>
-                    {/if}
+                      {#if getActionType(npc.id)}
+                        <div class="gather-status">
+                          <span class="action-label">{actionLabel(getActionType(npc.id)!)}</span>
+                          {#if getActionType(npc.id) !== "resting"}
+                            <div class="progress-track">
+                              <div class="progress-fill" style="width: {gatherProgress * 100}%"></div>
+                            </div>
+                          {/if}
+                          <button class="action-btn stop" onclick={() => stopAction(npc.id)}>Stop</button>
+                        </div>
+                      {:else}
+                        <button class="action-btn gather" onclick={() => startAction(npc.id, "food_gathering")}
+                          >Gather Food</button
+                        >
+                        <button class="action-btn gather" onclick={() => startAction(npc.id, "fuel_gathering")}
+                          >Gather Fuel</button
+                        >
+                        <button class="action-btn gather" onclick={() => startAction(npc.id, "resting")}>Rest</button>
+                      {/if}
                     </div>
                   {:else if getActionType(npc.id)}
                     <span class="action-label">{actionLabel(getActionType(npc.id)!)}</span>

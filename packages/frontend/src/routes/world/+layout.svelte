@@ -99,7 +99,7 @@
             {#if playerNpc.status !== "travelling"}
               {#if playerNpc.status === "at_camp" || playerNpc.status === "in_town"}
                 {@const npcInCamp = $campDetailStore?.npcs.find(npc => npc.id === playerNpc.id)}
-                {#if npcInCamp?.currentAction}
+                {#if npcInCamp?.currentAction?.type}
                   <span class="pn-action">{formatAction(npcInCamp.currentAction.type)}</span>
                 {:else}
                   <span class="pn-action idle">Idle</span>
