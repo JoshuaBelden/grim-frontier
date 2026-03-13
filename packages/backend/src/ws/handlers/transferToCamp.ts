@@ -1,4 +1,4 @@
-import type { FoodInventoryItem, FuelInventoryItem, InventoryItem, TransferToCampCommand } from "@grim-frontier/shared"
+import type { FoodInventoryItem, FuelInventoryItem, InventoryItem, PurchasedInventoryItem, TransferToCampCommand } from "@grim-frontier/shared"
 import { ObjectId } from "mongodb"
 import { camps, npcs } from "../../models/collections.js"
 import type { HandlerContext } from "./index.js"
@@ -60,6 +60,10 @@ export async function handleTransferToCamp(context: HandlerContext, payload: unk
       { _id: camp._id },
       { $inc: { [`fuelStores.${fuelItem.subtype}`]: fuelItem.count }, $set: { updatedAt: new Date() } },
     )
+  } else if (item.type === "purchased") {
+    const purchasedItem = item as PurchasedInventoryItem
+    const updatedStorage = mergeIntoStorage(camp.storage ?? [], purchasedItem)
+    await camps.updateOne({ _id: camp._id }, { $set: { storage: updatedStorage, updatedAt: new Date() } })
   }
 
   const updatedCamp = await camps.findOne({ _id: camp._id })
@@ -70,6 +74,7 @@ export async function handleTransferToCamp(context: HandlerContext, payload: unk
       foodStores: updatedCamp.foodStores,
       fuelStores: updatedCamp.fuelStores,
       preferredFood: updatedCamp.preferredFood,
+      storage: updatedCamp.storage ?? [],
     })
   }
 
@@ -92,5 +97,17 @@ function isMatch(entry: InventoryItem, incoming: InventoryItem): boolean {
   if (entry.type === "fuel" && incoming.type === "fuel") {
     return entry.subtype === incoming.subtype
   }
+  if (entry.type === "purchased" && incoming.type === "purchased") {
+    return entry.name === incoming.name
+  }
   return false
+}
+
+/** Merges a purchased item into the camp storage array, incrementing count if a match exists. */
+function mergeIntoStorage(storage: PurchasedInventoryItem[], incoming: PurchasedInventoryItem): PurchasedInventoryItem[] {
+  const existing = storage.find(entry => entry.name === incoming.name)
+  if (existing) {
+    return storage.map(entry => (entry.name === incoming.name ? { ...entry, count: entry.count + incoming.count } : entry))
+  }
+  return [...storage, { ...incoming }]
 }

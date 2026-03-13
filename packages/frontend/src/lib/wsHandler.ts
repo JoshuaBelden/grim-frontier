@@ -66,6 +66,7 @@ const eventHandlers: Record<string, (message: ServerEvent) => void> = {
           preferredFood: event.preferredFood,
         }
         if (event.amenities) updates.amenities = event.amenities
+        if (event.storage !== undefined) updates.storage = event.storage
         return { ...current, ...updates }
       }
       return current

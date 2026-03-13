@@ -134,6 +134,7 @@ export async function worldRoutes(app: FastifyInstance) {
       distanceToLandmark,
       foodStores: emptyFoodStores(),
       fuelStores: emptyFuelStores(),
+      storage: [],
       preferredFood: "raw",
       amenities: { firePit: "burned_out", activeFuelSource: "sticks" },
       posture: "open",

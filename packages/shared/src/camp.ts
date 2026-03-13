@@ -1,3 +1,5 @@
+import type { PurchasedInventoryItem } from "./inventory"
+
 /** How a camp presents itself to outsiders. */
 export type CampPosture = "open" | "closed" | "aggressive" | "defensive"
 
@@ -61,6 +63,7 @@ export interface Camp {
   fuelStores: FuelStores
   preferredFood: FoodStoreType
   amenities: Amenities
+  storage: PurchasedInventoryItem[]
   posture: CampPosture
   suspendJoinRequests: boolean
   reputation: number // 0–100

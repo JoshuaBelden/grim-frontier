@@ -3,7 +3,7 @@
   import { campDetailStore } from "$lib/stores/camp"
   import { sendCommand } from "$lib/ws"
   import { npcDetailStore } from "$lib/wsHandler"
-  import type { FoodInventoryItem, FoodStoreType, FuelInventoryItem, FuelStoreType, InventoryItem } from "@grim-frontier/shared"
+  import type { FoodInventoryItem, FoodStoreType, FuelInventoryItem, FuelStoreType, InventoryItem, PurchasedInventoryItem } from "@grim-frontier/shared"
 
   let { visible = $bindable(false) }: { visible?: boolean } = $props()
 
@@ -87,6 +87,40 @@
     if (row.kind === "food") return `${row.label} (${row.qualityLabel})`
     return row.label
   }
+
+  interface StorageRow {
+    name: string
+    npcCount: number
+    campCount: number
+    item: PurchasedInventoryItem
+  }
+
+  const storageRows = $derived.by(() => {
+    const npcItems = (playerNpc?.inventory ?? []).filter(item => item.type === "purchased") as PurchasedInventoryItem[]
+    const campItems = ($campDetailStore?.storage ?? []) as PurchasedInventoryItem[]
+    const names = new Set([...npcItems.map(item => item.name), ...campItems.map(item => item.name)])
+    return [...names].sort().map(name => {
+      const npcEntry = npcItems.find(item => item.name === name)
+      const campEntry = campItems.find(item => item.name === name)
+      const baseItem = npcEntry ?? campEntry!
+      return {
+        name,
+        npcCount: npcEntry?.count ?? 0,
+        campCount: campEntry?.count ?? 0,
+        item: { type: "purchased" as const, name, count: 1, weight: baseItem.weight, traits: baseItem.traits },
+      }
+    })
+  })
+
+  function transferStorageToNpc(row: StorageRow) {
+    if (!playerNpc) return
+    sendCommand({ type: "transferToNpc", npcId: playerNpc.id, item: row.item })
+  }
+
+  function transferStorageToCamp(row: StorageRow) {
+    if (!playerNpc) return
+    sendCommand({ type: "transferToCamp", npcId: playerNpc.id, item: row.item })
+  }
 </script>
 
 {#if visible}
@@ -151,6 +185,29 @@
           <span class="count camp-count" class:zero={camp === 0}>{camp}</span>
         </div>
       {/each}
+
+      {#if storageRows.length > 0}
+        <div class="section-label">Storage</div>
+        {#each storageRows as row}
+          <div class="item-row">
+            <span class="count npc-count" class:zero={row.npcCount === 0}>{row.npcCount}</span>
+            <button
+              class="transfer-btn"
+              onclick={() => transferStorageToCamp(row)}
+              disabled={row.npcCount === 0}
+              title="Transfer to camp"
+            >→</button>
+            <span class="item-label">{row.name}</span>
+            <button
+              class="transfer-btn"
+              onclick={() => transferStorageToNpc(row)}
+              disabled={row.campCount === 0}
+              title="Transfer to NPC"
+            >←</button>
+            <span class="count camp-count" class:zero={row.campCount === 0}>{row.campCount}</span>
+          </div>
+        {/each}
+      {/if}
     </div>
   </div>
 {/if}

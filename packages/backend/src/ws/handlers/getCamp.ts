@@ -33,6 +33,7 @@ export async function handleGetCamp(context: HandlerContext, payload: unknown): 
     ownerId: camp.ownerId,
     foodStores: camp.foodStores,
     fuelStores: camp.fuelStores,
+    storage: camp.storage ?? [],
     preferredFood: camp.preferredFood ?? "raw",
     amenities: camp.amenities ?? { firePit: "burned_out", activeFuelSource: "sticks" },
     posture: camp.posture,

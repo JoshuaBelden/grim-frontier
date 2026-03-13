@@ -2,7 +2,6 @@
 
 ## Next
 
-- NPCs can store items at camp
 - NPCs can stand watch
 - Camps have a protection value
 - Camps increase reputation

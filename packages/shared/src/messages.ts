@@ -1,7 +1,7 @@
 import type { Amenities, CampPosture, FirePitState, FoodStores, FoodStoreType, FuelStores, FuelStoreType } from "./camp"
 import type { Career } from "./careers"
 import type { Characteristics } from "./characteristics"
-import type { InventoryItem } from "./inventory"
+import type { InventoryItem, PurchasedInventoryItem } from "./inventory"
 import type { Nature } from "./nature"
 import type { NpcAction, NPCStatus } from "./npc"
 import type { CharacterOrigin } from "./origin"
@@ -242,6 +242,7 @@ export interface CampUpdateEvent {
   fuelStores: FuelStores
   preferredFood: FoodStoreType
   amenities?: Amenities
+  storage?: PurchasedInventoryItem[]
 }
 
 /** A landmark on the territory map. */
@@ -357,6 +358,7 @@ export interface CampDetailEvent {
   foodStores: FoodStores
   fuelStores: FuelStores
   preferredFood: FoodStoreType
+  storage: PurchasedInventoryItem[]
   amenities: Amenities
   posture: CampPosture
   suspendJoinRequests: boolean

@@ -1,4 +1,4 @@
-import type { FoodInventoryItem, FuelInventoryItem, InventoryItem, TransferToNpcCommand } from "@grim-frontier/shared"
+import type { FoodInventoryItem, FuelInventoryItem, InventoryItem, PurchasedInventoryItem, TransferToNpcCommand } from "@grim-frontier/shared"
 import { ObjectId } from "mongodb"
 import { camps, npcs } from "../../models/collections.js"
 import type { HandlerContext } from "./index.js"
@@ -60,6 +60,16 @@ export async function handleTransferToNpc(context: HandlerContext, payload: unkn
       { _id: camp._id },
       { $inc: { [`fuelStores.${fuelItem.subtype}`]: -fuelItem.count }, $set: { updatedAt: new Date() } },
     )
+  } else if (item.type === "purchased") {
+    const purchasedItem = item as PurchasedInventoryItem
+    const currentStorage = camp.storage ?? []
+    const storageEntry = currentStorage.find(entry => entry.name === purchasedItem.name)
+    if (!storageEntry || storageEntry.count < purchasedItem.count) {
+      context.send({ type: "error", command: "transferToNpc", message: "Not enough items in camp storage" })
+      return
+    }
+    const updatedStorage = deductFromStorage(currentStorage, purchasedItem)
+    await camps.updateOne({ _id: camp._id }, { $set: { storage: updatedStorage, updatedAt: new Date() } })
   } else {
     context.send({ type: "error", command: "transferToNpc", message: "Unknown item type" })
     return
@@ -76,6 +86,7 @@ export async function handleTransferToNpc(context: HandlerContext, payload: unkn
       foodStores: updatedCamp.foodStores,
       fuelStores: updatedCamp.fuelStores,
       preferredFood: updatedCamp.preferredFood,
+      storage: updatedCamp.storage ?? [],
     })
   }
 
@@ -100,5 +111,15 @@ function isMatch(entry: InventoryItem, incoming: InventoryItem): boolean {
   if (entry.type === "fuel" && incoming.type === "fuel") {
     return entry.subtype === incoming.subtype
   }
+  if (entry.type === "purchased" && incoming.type === "purchased") {
+    return entry.name === incoming.name
+  }
   return false
+}
+
+/** Deducts count from the matching storage entry; removes the entry if count reaches zero. */
+function deductFromStorage(storage: PurchasedInventoryItem[], item: PurchasedInventoryItem): PurchasedInventoryItem[] {
+  return storage
+    .map(entry => (entry.name === item.name ? { ...entry, count: entry.count - item.count } : entry))
+    .filter(entry => entry.count > 0)
 }
