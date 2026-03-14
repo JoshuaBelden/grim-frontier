@@ -4,7 +4,9 @@
 
   let { entry }: { entry: PanelEntry } = $props()
 
-  let money = $derived($npcDetailStore.get(entry.npcId)?.money)
+  let npcDetail = $derived($npcDetailStore.get(entry.npcId))
+  let money = $derived(npcDetail?.money)
+  let portraitUrl = $derived(npcDetail?.portraitUrl ?? "/images/default-avatar.png")
 
   function handleClick() {
     npcPanelStore.open(entry)
@@ -12,7 +14,7 @@
 </script>
 
 <button class="avatar" onclick={handleClick} title={entry.name}>
-  <img src="/images/default-avatar.png" alt={entry.name} class="portrait" />
+  <img src={portraitUrl} alt={entry.name} class="portrait" />
   <span class="name">{entry.name}</span>
   {#if entry.location}
     <span class="location">{entry.location}</span>

@@ -13,6 +13,18 @@ services:
       - "6379:6379"
     restart: unless-stopped
 
+  sd-service:
+    build: ./services/sd-service
+    ports:
+      - "8000:8000"
+    volumes:
+      - sd_models:/models
+      - portrait_images:/images
+    environment:
+      - MODEL_ID=runwayml/stable-diffusion-v1-5
+      - HF_HOME=/models
+    restart: unless-stopped
+
   backend:
     build:
       context: .
@@ -30,6 +42,7 @@ services:
     volumes:
       - ./packages/backend/src:/app/packages/backend/src
       - ./packages/shared/src:/app/packages/shared/src
+      - portrait_images:/portraits
     depends_on:
       - mongo
       - redis
@@ -52,3 +65,5 @@ services:
 
 volumes:
   mongo_data:
+  sd_models:
+  portrait_images:

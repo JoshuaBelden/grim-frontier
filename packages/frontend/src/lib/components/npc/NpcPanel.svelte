@@ -328,6 +328,13 @@
     </div>
 
     <div class="panel-sidebar">
+      <div class="portrait-container">
+        <img
+          src={npc?.portraitUrl ?? "/images/default-avatar.png"}
+          alt={entry.name}
+          class="portrait"
+        />
+      </div>
       <div class="sidebar-section">
         <button class="sidebar-section-header" onclick={() => (inventoryExpanded = !inventoryExpanded)}>
           <span>Inventory</span>
@@ -468,6 +475,20 @@
     overflow-y: auto;
     width: 320px;
     flex-shrink: 0;
+  }
+
+  .portrait-container {
+    border-bottom: 1px solid #2a1e0e;
+    flex-shrink: 0;
+    width: 100%;
+  }
+
+  .portrait {
+    display: block;
+    height: 320px;
+    object-fit: cover;
+    object-position: top;
+    width: 100%;
   }
 
   .sidebar-section {

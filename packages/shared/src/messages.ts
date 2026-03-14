@@ -330,6 +330,7 @@ export interface NpcDetailEvent {
   origin: CharacterOrigin
   inventory: InventoryItem[]
   money: number
+  portraitUrl: string | null
 }
 
 /** A thin NPC summary for the list view. */

@@ -1,4 +1,5 @@
 import type { FastifyInstance } from "fastify"
+import { ObjectId } from "mongodb"
 import { generateNpcPool } from "../core/npcGenerator.js"
 import worldTopology from "../core/topology.js"
 import { INITIAL_IN_WORLD_DATE, seedWorld } from "../core/world.js"
@@ -20,6 +21,11 @@ import {
 /** Request body for NPC pool generation. */
 interface GenerateNpcsBody {
   count?: number
+}
+
+/** Request body for NPC portrait generation. */
+interface GeneratePortraitsBody {
+  npcId?: string
 }
 
 /** Request body for world creation. */
@@ -113,4 +119,53 @@ export async function adminRoutes(app: FastifyInstance, opts: { clock: WorldCloc
 
     return reply.status(201).send({ generated: count, ids })
   })
+
+  app.post<{ Body: GeneratePortraitsBody }>("/admin/npcs/generate-portraits", async (request, reply) => {
+    const { npcId } = request.body ?? {}
+    const sdServiceUrl = process.env.SD_SERVICE_URL ?? "http://sd-service:8000"
+
+    const query = npcId
+      ? { _id: new ObjectId(npcId) }
+      : { portraitUrl: { $exists: false }, portraitDescription: { $exists: true } }
+
+    const targets = await npcs.find(query).toArray()
+
+    if (targets.length === 0) {
+      return reply.status(200).send({ generated: 0, ids: [], reason: "no matching npcs" })
+    }
+
+    const generated: string[] = []
+    const errors: string[] = []
+
+    for (const npc of targets) {
+      const npcIdStr = npc._id.toString()
+      const prompt = buildPortraitPrompt(npc.portraitDescription!)
+
+      try {
+        const response = await fetch(`${sdServiceUrl}/generate`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt, npc_id: npcIdStr }),
+        })
+
+        if (!response.ok) {
+          errors.push(`${npcIdStr}: sd-service returned ${response.status}`)
+          continue
+        }
+
+        const { filename } = (await response.json()) as { filename: string }
+        await npcs.updateOne({ _id: npc._id }, { $set: { portraitUrl: `/portraits/${filename}`, updatedAt: new Date() } })
+        generated.push(npcIdStr)
+      } catch (error) {
+        errors.push(`${npcIdStr}: ${error instanceof Error ? error.message : String(error)}`)
+      }
+    }
+
+    return reply.status(200).send({ generated: generated.length, ids: generated, errors })
+  })
+}
+
+/** Builds an image generation prompt from a portrait description. */
+function buildPortraitPrompt(portraitDescription: string): string {
+  return `${portraitDescription}, old west portrait, dramatic lighting, highly detailed, photorealistic, weathered`
 }

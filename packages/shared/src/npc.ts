@@ -34,6 +34,7 @@ export interface NPC {
   skills: Skills
   origin: CharacterOrigin
   portraitDescription?: string
+  portraitUrl?: string
   status: NPCStatus
   locationId?: string
   locationType?: "town" | "camp"

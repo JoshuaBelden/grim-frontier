@@ -1,4 +1,5 @@
 import fastifyJwt from "@fastify/jwt"
+import fastifyStatic from "@fastify/static"
 import { GAME_HOUR_INTERVAL_MS } from "@grim-frontier/shared"
 import Fastify from "fastify"
 import { consumeFireWood } from "./core/hourlyUpdaters/consumeFireWood.js"
@@ -27,6 +28,7 @@ const port = Number(process.env.PORT ?? 3000)
 const jwtSecret = process.env.JWT_SECRET ?? "dev-secret-change-in-production"
 
 await app.register(fastifyJwt, { secret: jwtSecret })
+await app.register(fastifyStatic, { root: "/portraits", prefix: "/portraits/" })
 await registerWebSocket(app, clock)
 
 app.get("/health", async () => {
