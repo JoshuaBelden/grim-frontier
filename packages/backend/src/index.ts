@@ -44,7 +44,7 @@ app.get("/health", async () => {
 })
 
 await app.register(authRoutes)
-await app.register(adminRoutes, { clock })
+await app.register(adminRoutes, { clock, broadcast: broadcastToWorld, intervalMs: GAME_HOUR_INTERVAL_MS })
 await app.register(worldRoutes)
 
 app.addHook("onReady", async () => {
@@ -83,7 +83,6 @@ async function start() {
   clock.registerHourlyUpdater(standWatch)
   clock.registerHourlyUpdater(drifterAI)
   clock.registerHourlyUpdater(npcTravel)
-  clock.start(broadcastToWorld, GAME_HOUR_INTERVAL_MS)
 
   await app.listen({ port, host: "0.0.0.0" })
 }

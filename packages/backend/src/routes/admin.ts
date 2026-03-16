@@ -5,9 +5,11 @@ import worldTopology from "../core/topology.js"
 import { INITIAL_IN_WORLD_DATE, seedWorld } from "../core/world.js"
 import { WorldClock } from "../core/worldClock.js"
 import {
+  acquaintances,
   camps,
   encounters,
   gameClocks,
+  joinRequests,
   npcs,
   players,
   regions,
@@ -34,8 +36,27 @@ interface CreateWorldBody {
 }
 
 /** Admin routes for world management. No auth required in MVP — admin ops via curl. */
-export async function adminRoutes(app: FastifyInstance, opts: { clock: WorldClock }) {
-  const { clock } = opts
+export async function adminRoutes(
+  app: FastifyInstance,
+  opts: { clock: WorldClock; broadcast: (worldId: string, message: object) => void; intervalMs: number },
+) {
+  const { clock, broadcast, intervalMs } = opts
+
+  app.post("/admin/tick/start", async (_request, reply) => {
+    if (clock.isRunning) {
+      return reply.status(200).send({ status: "already running" })
+    }
+    clock.start(broadcast, intervalMs)
+    return reply.status(200).send({ status: "started" })
+  })
+
+  app.post("/admin/tick/pause", async (_request, reply) => {
+    if (!clock.isRunning) {
+      return reply.status(200).send({ status: "already paused" })
+    }
+    clock.pause()
+    return reply.status(200).send({ status: "paused" })
+  })
   app.post<{ Body: CreateWorldBody }>("/admin/worlds", async (request, reply) => {
     const { name } = request.body
 
@@ -60,6 +81,8 @@ export async function adminRoutes(app: FastifyInstance, opts: { clock: WorldCloc
       tasks.deleteMany({}),
       gameClocks.deleteMany({}),
       stores.deleteMany({}),
+      joinRequests.deleteMany({}),
+      acquaintances.deleteMany({}),
       players.updateMany({}, { $unset: { campId: "" }, $set: { npcIds: [] } }),
     ])
 

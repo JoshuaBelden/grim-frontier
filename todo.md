@@ -2,29 +2,28 @@
 
 ## Next
 
-- NPCs will use tools in inventory
-- Camps increase noteriety
-- Improve npc info panel layout
+- All stats go from 0 to 10,
 - NPCs track their age
-- All stats go from 0 to 10, 
-- NPCs build loyalty, stats reveal
-  - NPCs in camp will leave if their morale drops
+- Improve npc info panel layout
+- NPCs will use tools in inventory
 - NPC skills and traits improve their chores
-
-## Upcoming
-
-- NPCs can give/take items
-- NPCs all have generated images
-- Add NPCs that can start camps
 - Players can create their own npc and name it
-- Add soundtrack audio
+
+## Bugs
+
+- Gather actions don't actually take a game hour. If you start it right before the hour, it will automatically add it.
+- Resting from the NPC Info Panel causes "already taking an action" error. Rest action button should toggle to Resting
+- Hunger and Fatigue should happen globally, not just to npcs at camp.
 
 ## Systems Ideas
 
+- NPC Loyalty
+- Audio & SFX
 - Wardrobes
 - Encumbrence
 - Making Money
 - Fishing & Hunting
+- Camp Noteriety
 - Camp Upgrades
 - Disease and Money
 - Wagons and storage
@@ -39,12 +38,4 @@
 - Death
 - Taxes
 - Crafting
-
-## Bugs
-
-- NPCs aren't gathering fuel.
-- Gather actions don't actually take a game hour. If you start it right before the hour, it will automatically add it.
-- Resting from the NPC Info Panel causes "already taking an action" error. Rest action button should toggle to Resting
-- NPC avatar always says "At Camp"
-- Hunger and Fatigue should happen globally, not just to npcs at camp.
-- Traveling back to camp shows the wrong location
+- NPC Driven Camps

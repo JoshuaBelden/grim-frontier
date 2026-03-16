@@ -15,6 +15,13 @@ export class WorldClock {
   private worldDates = new Map<string, InWorldDate>()
   private worldWeather = new Map<string, WorldWeather>()
   private hourlyUpdater: HourlyUpdater[] = []
+  private intervalHandle: ReturnType<typeof setInterval> | null = null
+  private broadcastFn: ((worldId: string, message: object) => void) | null = null
+  private intervalMs: number = 0
+
+  get isRunning(): boolean {
+    return this.intervalHandle !== null
+  }
 
   getDate(worldId: string): InWorldDate | undefined {
     return this.worldDates.get(worldId)
@@ -42,11 +49,15 @@ export class WorldClock {
   }
 
   /**
-   * Starts the game clock tick loop. Advances each active world's clock by one game hour per interval.
+   * Starts the game clock tick loop. No-op if already running.
    * @param broadcast Function to push updates to clients connected to a specific world.
    */
   start(broadcast: (worldId: string, message: object) => void, intervalMs: number): void {
-    setInterval(async () => {
+    if (this.intervalHandle !== null) return
+
+    this.broadcastFn = broadcast
+    this.intervalMs = intervalMs
+    this.intervalHandle = setInterval(async () => {
       for (const [worldId, date] of this.worldDates) {
         const nextDate = this.advanceOneHour(date)
         this.worldDates.set(worldId, nextDate)
@@ -60,6 +71,19 @@ export class WorldClock {
         }
       }
     }, intervalMs)
+  }
+
+  /** Pauses the tick loop. State is preserved — call start() to resume. No-op if not running. */
+  pause(): void {
+    if (this.intervalHandle === null) return
+    clearInterval(this.intervalHandle)
+    this.intervalHandle = null
+  }
+
+  /** Resumes the tick loop using the broadcast function and interval from the last start() call. */
+  resume(): void {
+    if (this.broadcastFn === null || this.intervalMs === 0) return
+    this.start(this.broadcastFn, this.intervalMs)
   }
 
   private advanceOneHour(date: InWorldDate): InWorldDate {
