@@ -31,18 +31,24 @@ class GenerateRequest(BaseModel):
     seed: int | None = None
 
 
-@app.post("/generate")
-def generate(request: GenerateRequest):
+class GenerateCustomRequest(BaseModel):
+    prompt: str
+    image_id: str
+    negative_prompt: str | None = None
+    seed: int | None = None
+
+
+def run_pipeline(prompt: str, negative_prompt: str, seed: int | None) -> Image.Image:
     if pipeline is None:
         raise HTTPException(status_code=503, detail="Model not loaded")
 
     generator = torch.Generator("cpu")
-    if request.seed is not None:
-        generator.manual_seed(request.seed)
+    if seed is not None:
+        generator.manual_seed(seed)
 
-    image = pipeline(
-        prompt=request.prompt,
-        negative_prompt=NEGATIVE_PROMPT,
+    return pipeline(
+        prompt=prompt,
+        negative_prompt=negative_prompt,
         num_inference_steps=25,
         guidance_scale=7.5,
         width=512,
@@ -50,7 +56,24 @@ def generate(request: GenerateRequest):
         generator=generator,
     ).images[0]
 
+
+@app.post("/generate")
+def generate(request: GenerateRequest):
+    image = run_pipeline(request.prompt, NEGATIVE_PROMPT, request.seed)
+
     filename = f"npc-{request.npc_id}.jpg"
+    path = os.path.join(IMAGES_DIR, filename)
+    image.save(path, "JPEG", quality=85)
+
+    return {"filename": filename}
+
+
+@app.post("/generate/custom")
+def generate_custom(request: GenerateCustomRequest):
+    negative_prompt = request.negative_prompt if request.negative_prompt is not None else NEGATIVE_PROMPT
+    image = run_pipeline(request.prompt, negative_prompt, request.seed)
+
+    filename = f"img-{request.image_id}.jpg"
     path = os.path.join(IMAGES_DIR, filename)
     image.save(path, "JPEG", quality=85)
 

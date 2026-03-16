@@ -2,7 +2,11 @@
 
 ## Next
 
+- NPCs will use tools in inventory
 - Camps increase noteriety
+- Improve npc info panel layout
+- NPCs track their age
+- All stats go from 0 to 10, 
 - NPCs build loyalty, stats reveal
   - NPCs in camp will leave if their morale drops
 - NPC skills and traits improve their chores
@@ -28,13 +32,13 @@
 - Pursuits
 - Hobbies and Games
 - NPC Interactions and Needs
+  - Add Ollama to docker-compose for local NPC conversation LLM (use llama3.2 or mistral, OpenAI-compatible API at port 11434, add ollama_models volume). Keep Claude for NPC generation, use Ollama for cheaper conversation turns.
 - AI
   - NPC travel
   - NPC purchasing
 - Death
 - Taxes
 - Crafting
-- What are we doing with redis
 
 ## Bugs
 
