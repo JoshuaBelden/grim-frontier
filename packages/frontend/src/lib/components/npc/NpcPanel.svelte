@@ -10,7 +10,7 @@
 
   let npc = $derived($npcDetailStore.get(entry.npcId) ?? null)
 
-  let inventoryExpanded = $state(true)
+  let activeTab = $state<"profile" | "inventory">("profile")
 
   const error = $derived(
     $wsErrorStore?.command === "getNpc" ? $wsErrorStore.message : null,
@@ -135,35 +135,53 @@
   function formatWeightLbs(lbs: number): string {
     return lbs % 1 === 0 ? lbs.toFixed(0) + " lb" : lbs.toFixed(1) + " lb"
   }
-
 </script>
 
 <div class="panel">
   <button class="close" onclick={close} aria-label="Close">✕</button>
 
   <div class="panel-header">
-    <p class="career-label">{entry.career ? formatKey(entry.career) : "Player"}</p>
-    <h2 class="name">{entry.name}</h2>
-    {#if npc}
-      <span class="age">{npc.age} years old</span>
-      <span class="status">{npc.status.replace(/_/g, " ")}</span>
-      {#if npc.status === "travelling" && npc.travelDestination}
-        <span class="location travelling">Heading to {npc.travelDestination}</span>
-      {:else if npc.locationName}
-        <span class="location">{npc.locationName}</span>
+    <div class="header-text">
+      <p class="career-label">{entry.career ? formatKey(entry.career) : "Player"}</p>
+      <h2 class="name">{entry.name}</h2>
+      {#if npc}
+        <span class="age">{npc.age} years old</span>
+        <span class="status">{npc.status.replace(/_/g, " ")}</span>
+        {#if npc.status === "travelling" && npc.travelDestination}
+          <span class="location travelling">Heading to {npc.travelDestination}</span>
+        {:else if npc.locationName}
+          <span class="location">{npc.locationName}</span>
+        {/if}
+        <span class="money">${(npc.money ?? 0).toFixed(2)}</span>
       {/if}
-      <span class="money">${(npc.money ?? 0).toFixed(2)}</span>
-    {/if}
+    </div>
+    <div class="portrait-container">
+      <img
+        src={npc?.portraitUrl ?? "/images/default-avatar.png"}
+        alt={entry.name}
+        class="portrait"
+      />
+    </div>
   </div>
 
+  <nav class="tab-bar">
+    <button class="tab" class:tab-active={activeTab === "profile"} onclick={() => (activeTab = "profile")}>
+      Profile
+    </button>
+    <button class="tab" class:tab-active={activeTab === "inventory"} onclick={() => (activeTab = "inventory")}>
+      Inventory
+    </button>
+  </nav>
+
   <div class="panel-content">
-    <div class="panel-left">
+    {#if activeTab === "profile"}
       {#if error}
-        <p class="error">{error}</p>
+        <p class="state-message error">{error}</p>
       {:else if !npc}
-        <p class="muted">Loading…</p>
+        <p class="state-message muted">Loading…</p>
       {:else}
         <section>
+          <h3 class="section-heading">Condition</h3>
           <div class="vitals">
             <div class="vital">
               <span class="vital-label">Health</span>
@@ -217,33 +235,35 @@
           </div>
         </section>
 
-        <section>
-          <h3 class="section-heading">Disposition</h3>
-          <div class="axes">
-            {#each Object.entries(dispositionLabels) as [key, poles]}
-              {@const value = npc.nature.disposition[key as keyof typeof npc.nature.disposition]}
-              <div class="axis">
-                <span class="axis-key">{formatKey(key)}</span>
-                <span class="axis-value">{axisLabel(poles, value)}</span>
-                <span class="axis-raw">({value > 0 ? "+" : ""}{value})</span>
-              </div>
-            {/each}
-          </div>
-        </section>
+        <div class="two-col-row">
+          <section>
+            <h3 class="section-heading">Disposition</h3>
+            <div class="axes">
+              {#each Object.entries(dispositionLabels) as [key, poles]}
+                {@const value = npc.nature.disposition[key as keyof typeof npc.nature.disposition]}
+                <div class="axis">
+                  <span class="axis-key">{formatKey(key)}</span>
+                  <span class="axis-value">{axisLabel(poles, value)}</span>
+                  <span class="axis-raw">({value > 0 ? "+" : ""}{value})</span>
+                </div>
+              {/each}
+            </div>
+          </section>
 
-        <section>
-          <h3 class="section-heading">Outlook</h3>
-          <div class="axes">
-            {#each Object.entries(outlookLabels) as [key, poles]}
-              {@const value = npc.nature.outlook[key as keyof typeof npc.nature.outlook]}
-              <div class="axis">
-                <span class="axis-key">{formatKey(key)}</span>
-                <span class="axis-value">{axisLabel(poles, value)}</span>
-                <span class="axis-raw">({value > 0 ? "+" : ""}{value})</span>
-              </div>
-            {/each}
-          </div>
-        </section>
+          <section>
+            <h3 class="section-heading">Outlook</h3>
+            <div class="axes">
+              {#each Object.entries(outlookLabels) as [key, poles]}
+                {@const value = npc.nature.outlook[key as keyof typeof npc.nature.outlook]}
+                <div class="axis">
+                  <span class="axis-key">{formatKey(key)}</span>
+                  <span class="axis-value">{axisLabel(poles, value)}</span>
+                  <span class="axis-raw">({value > 0 ? "+" : ""}{value})</span>
+                </div>
+              {/each}
+            </div>
+          </section>
+        </div>
 
         <section>
           <h3 class="section-heading">Traits</h3>
@@ -326,52 +346,35 @@
           </section>
         {/if}
       {/if}
-    </div>
+    {/if}
 
-    <div class="panel-sidebar">
-      <div class="portrait-container">
-        <img
-          src={npc?.portraitUrl ?? "/images/default-avatar.png"}
-          alt={entry.name}
-          class="portrait"
-        />
-      </div>
-      <div class="sidebar-section">
-        <button class="sidebar-section-header" onclick={() => (inventoryExpanded = !inventoryExpanded)}>
-          <span>Inventory</span>
-          <span class="chevron">{inventoryExpanded ? "▲" : "▼"}</span>
-        </button>
-        {#if inventoryExpanded}
-          <div class="sidebar-section-body">
-            {#if !npc}
-              <p class="sidebar-empty">Loading…</p>
-            {:else if !npc.inventory || npc.inventory.length === 0}
-              <p class="sidebar-empty">Nothing carried</p>
-            {:else}
-              <ul class="inventory-list">
-                {#each npc.inventory as item}
-                  <li class="inventory-item">
-                    <span class="inv-label">{inventoryItemLabel(item)}</span>
-                    <span class="inv-weight">
-                      {#if item.type === "purchased" && item.weight !== undefined}
-                        {formatWeightLbs(item.weight * item.count)}
-                      {:else}
-                        —
-                      {/if}
-                    </span>
-                    <span class="inv-count">×{item.count}</span>
-                  </li>
-                {/each}
-              </ul>
-              <div class="inventory-total">
-                <span class="inv-total-label">Carried</span>
-                <span class="inv-total-weight">{formatWeightLbs(totalWeightCarried(npc.inventory))}</span>
-              </div>
-            {/if}
-          </div>
-        {/if}
-      </div>
-    </div>
+    {#if activeTab === "inventory"}
+      {#if !npc}
+        <p class="state-message muted">Loading…</p>
+      {:else if !npc.inventory || npc.inventory.length === 0}
+        <p class="state-message muted">Nothing carried</p>
+      {:else}
+        <ul class="inventory-list">
+          {#each npc.inventory as item}
+            <li class="inventory-item">
+              <span class="inv-label">{inventoryItemLabel(item)}</span>
+              <span class="inv-weight">
+                {#if item.type === "purchased" && item.weight !== undefined}
+                  {formatWeightLbs(item.weight * item.count)}
+                {:else}
+                  —
+                {/if}
+              </span>
+              <span class="inv-count">×{item.count}</span>
+            </li>
+          {/each}
+        </ul>
+        <div class="inventory-total">
+          <span class="inv-total-label">Carried</span>
+          <span class="inv-total-weight">{formatWeightLbs(totalWeightCarried(npc.inventory))}</span>
+        </div>
+      {/if}
+    {/if}
   </div>
 </div>
 
@@ -400,6 +403,7 @@
     position: absolute;
     top: 0.75rem;
     transition: color 0.15s;
+    z-index: 1;
   }
 
   .close:hover {
@@ -407,11 +411,34 @@
   }
 
   .panel-header {
+    align-items: stretch;
     border-bottom: 1px solid #2a1e0e;
     display: flex;
+    flex-direction: row;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+
+  .header-text {
+    display: flex;
+    flex: 1;
     flex-direction: column;
     gap: 0.2rem;
+    min-width: 0;
     padding: 1.25rem 1.25rem 1rem 2.5rem;
+  }
+
+  .portrait-container {
+    flex-shrink: 0;
+    width: 240px;
+  }
+
+  .portrait {
+    display: block;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    width: 100%;
   }
 
   .career-label {
@@ -459,141 +486,53 @@
     margin-top: 0.15rem;
   }
 
+  .tab-bar {
+    border-bottom: 1px solid #2a1e0e;
+    display: flex;
+    flex-shrink: 0;
+    gap: 0;
+  }
+
+  .tab {
+    background: none;
+    border: none;
+    border-right: 1px solid #2a1e0e;
+    color: #5a4020;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    padding: 0.55rem 1.25rem;
+    text-transform: uppercase;
+    transition: color 0.15s;
+  }
+
+  .tab:hover {
+    color: #8a7060;
+  }
+
+  .tab-active {
+    color: #d4b896;
+  }
+
   .panel-content {
     display: flex;
     flex: 1;
-    min-height: 0;
-  }
-
-  .panel-left {
-    display: flex;
     flex-direction: column;
-    flex: 1;
     gap: 1.5rem;
-    min-width: 0;
+    min-height: 0;
     overflow-y: auto;
     padding: 1.25rem;
   }
 
-  .panel-sidebar {
-    border-left: 1px solid #2a1e0e;
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
-    width: 320px;
-    flex-shrink: 0;
+  .state-message {
+    padding: 0;
   }
 
-  .portrait-container {
-    border-bottom: 1px solid #2a1e0e;
-    flex-shrink: 0;
-    width: 100%;
-  }
-
-  .portrait {
-    display: block;
-    height: 320px;
-    object-fit: cover;
-    object-position: top;
-    width: 100%;
-  }
-
-  .sidebar-section {
-    border-bottom: 1px solid #1e1508;
-  }
-
-  .sidebar-section-header {
-    align-items: center;
-    background: none;
-    border: none;
-    color: #8a7060;
-    cursor: pointer;
-    display: flex;
-    font-family: inherit;
-    font-size: 0.6rem;
-    justify-content: space-between;
-    letter-spacing: 0.15em;
-    padding: 0.6rem 0.85rem;
-    text-transform: uppercase;
-    transition: color 0.15s;
-    width: 100%;
-  }
-
-  .sidebar-section-header:hover {
-    color: #d4b896;
-  }
-
-  .chevron {
-    font-size: 0.5rem;
-    opacity: 0.6;
-  }
-
-  .sidebar-section-body {
-    padding: 0.25rem 0.85rem 0.75rem;
-  }
-
-  .sidebar-empty {
-    color: #3a2e1e;
-    font-size: 0.7rem;
-    font-style: italic;
-  }
-
-  .inventory-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
-    list-style: none;
-  }
-
-  .inventory-item {
-    align-items: baseline;
-    display: flex;
-    gap: 0.5rem;
-    justify-content: space-between;
-  }
-
-  .inv-label {
-    color: #c8b08a;
-    flex: 1;
-    font-size: 0.7rem;
-    letter-spacing: 0.04em;
-  }
-
-  .inv-weight {
-    color: #6a5040;
-    font-size: 0.65rem;
-    letter-spacing: 0.04em;
-    text-align: right;
-    white-space: nowrap;
-  }
-
-  .inv-count {
-    color: #8a7060;
-    font-size: 0.65rem;
-    letter-spacing: 0.04em;
-    white-space: nowrap;
-  }
-
-  .inventory-total {
-    align-items: baseline;
-    border-top: 1px solid #1e1508;
-    display: flex;
-    justify-content: space-between;
-    margin-top: 0.5rem;
-    padding-top: 0.4rem;
-  }
-
-  .inv-total-label {
-    color: #5a4020;
-    font-size: 0.55rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
-
-  .inv-total-weight {
-    color: #c8b08a;
-    font-size: 0.7rem;
-    letter-spacing: 0.04em;
+  .two-col-row {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: 1fr 1fr;
   }
 
   section {
@@ -621,7 +560,7 @@
     align-items: center;
     display: grid;
     gap: 0.5rem;
-    grid-template-columns: 60px 1fr auto;
+    grid-template-columns: 70px 1fr auto;
   }
 
   .vital-label {
@@ -633,9 +572,9 @@
   .vital-desc {
     font-size: 0.65rem;
     letter-spacing: 0.05em;
+    min-width: 64px;
     text-align: right;
     text-transform: uppercase;
-    min-width: 72px;
   }
 
   .severity-good {
@@ -688,7 +627,7 @@
     align-items: center;
     display: grid;
     gap: 0.5rem;
-    grid-template-columns: 80px 1fr 24px;
+    grid-template-columns: 72px 1fr 24px;
   }
 
   .char-label,
@@ -733,7 +672,7 @@
     color: #5a4020;
     font-size: 0.65rem;
     letter-spacing: 0.05em;
-    min-width: 80px;
+    min-width: 72px;
     text-transform: uppercase;
   }
 
@@ -816,6 +755,64 @@
     color: #8a7060;
     font-size: 0.65rem;
     font-style: italic;
+  }
+
+  .inventory-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    list-style: none;
+  }
+
+  .inventory-item {
+    align-items: baseline;
+    display: flex;
+    gap: 0.5rem;
+    justify-content: space-between;
+  }
+
+  .inv-label {
+    color: #c8b08a;
+    flex: 1;
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+  }
+
+  .inv-weight {
+    color: #6a5040;
+    font-size: 0.65rem;
+    letter-spacing: 0.04em;
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .inv-count {
+    color: #8a7060;
+    font-size: 0.65rem;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+
+  .inventory-total {
+    align-items: baseline;
+    border-top: 1px solid #1e1508;
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.5rem;
+    padding-top: 0.4rem;
+  }
+
+  .inv-total-label {
+    color: #5a4020;
+    font-size: 0.55rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .inv-total-weight {
+    color: #c8b08a;
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
   }
 
   .muted {

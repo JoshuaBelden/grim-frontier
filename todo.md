@@ -2,10 +2,9 @@
 
 ## Next
 
-- Improve npc info panel layout
 - NPCs will use tools in inventory
-- NPC skills and traits improve their chores
 - Players can create their own npc and name it
+- Players can request a new image be generated for their npc and overwrite the old one
 
 ## Bugs
 
@@ -15,6 +14,7 @@
 
 ## Systems Ideas
 
+- Characteristics, Traits, and Skills
 - NPC Loyalty
 - Audio & SFX
 - Wardrobes

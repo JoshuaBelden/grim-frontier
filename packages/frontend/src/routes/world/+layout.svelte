@@ -89,7 +89,7 @@
     {#if playerNpc}
       <button class="player-npc" onclick={openPlayerPanel}>
         <div class="pn-identity">
-          <img src="/images/default-avatar.png" alt={playerNpc.name} class="pn-portrait" />
+          <img src={playerNpc.portraitUrl ?? "/images/default-avatar.png"} alt={playerNpc.name} class="pn-portrait" />
           <div class="pn-info">
             <span class="pn-name">{playerNpc.name}</span>
             <span class="pn-status">{formatStatus(playerNpc.status)}</span>
@@ -268,8 +268,7 @@
   }
 
   .pn-portrait {
-    height: 44px;
-    width: 44px;
+    width: 60px;
     object-fit: cover;
     flex-shrink: 0;
   }
