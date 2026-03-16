@@ -318,8 +318,8 @@ export interface NpcDetailEvent {
   name: string
   health: number
   morale: number
-  hunger: number
-  fatigue: number
+  sustenance: number
+  energy: number
   lastRestedAt: InWorldDate | null
   career: Career
   status: NPCStatus
@@ -375,8 +375,8 @@ export interface CampDetailNpc {
   career: Career
   health: number
   morale: number
-  hunger: number
-  fatigue: number
+  sustenance: number
+  energy: number
   currentAction: NpcAction | null
 }
 
@@ -393,14 +393,14 @@ export interface NpcActionStoppedEvent {
   npcId: string
 }
 
-/** Broadcast when an NPC's vitals change (hunger, morale, health). */
+/** Broadcast when an NPC's vitals change. */
 export interface NpcUpdateEvent {
   type: "npcUpdate"
   npcId: string
-  hunger?: number
+  sustenance?: number
   morale?: number
   health?: number
-  fatigue?: number
+  energy?: number
 }
 
 /** Broadcast when the fire pit state changes. */

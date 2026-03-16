@@ -67,12 +67,11 @@
     })
   }
 
-  /** Returns a severity class for a vital value (higher = better for health/morale, lower = better for fatigue/hunger). */
-  function vitalSeverity(value: number, inverted: boolean): string {
-    const effective = inverted ? 10 - value : value
-    if (effective >= 7) return "good"
-    if (effective >= 4) return "warn"
-    if (effective >= 2) return "bad"
+  /** Returns a severity class for a vital value (10=best, 0=worst). */
+  function vitalSeverity(value: number): string {
+    if (value >= 7) return "good"
+    if (value >= 4) return "warn"
+    if (value >= 2) return "bad"
     return "critical"
   }
 
@@ -115,19 +114,19 @@
         <div class="pn-vitals">
           <div class="pn-vital">
             <span class="pn-vital-label">HP</span>
-            <div class="pn-bar"><div class="pn-bar-fill severity-{vitalSeverity(playerNpc.health, false)}" style="width: {playerNpc.health * 10}%"></div></div>
+            <div class="pn-bar"><div class="pn-bar-fill severity-{vitalSeverity(playerNpc.health)}" style="width: {playerNpc.health * 10}%"></div></div>
           </div>
           <div class="pn-vital">
             <span class="pn-vital-label">MR</span>
-            <div class="pn-bar"><div class="pn-bar-fill severity-{vitalSeverity(playerNpc.morale, false)}" style="width: {playerNpc.morale * 10}%"></div></div>
+            <div class="pn-bar"><div class="pn-bar-fill severity-{vitalSeverity(playerNpc.morale)}" style="width: {playerNpc.morale * 10}%"></div></div>
           </div>
           <div class="pn-vital">
-            <span class="pn-vital-label">HG</span>
-            <div class="pn-bar"><div class="pn-bar-fill severity-{vitalSeverity(playerNpc.hunger, true)}" style="width: {playerNpc.hunger * 10}%"></div></div>
+            <span class="pn-vital-label">EN</span>
+            <div class="pn-bar"><div class="pn-bar-fill severity-{vitalSeverity(playerNpc.energy)}" style="width: {playerNpc.energy * 10}%"></div></div>
           </div>
           <div class="pn-vital">
-            <span class="pn-vital-label">FT</span>
-            <div class="pn-bar"><div class="pn-bar-fill severity-{vitalSeverity(playerNpc.fatigue, true)}" style="width: {playerNpc.fatigue * 10}%"></div></div>
+            <span class="pn-vital-label">SU</span>
+            <div class="pn-bar"><div class="pn-bar-fill severity-{vitalSeverity(playerNpc.sustenance)}" style="width: {playerNpc.sustenance * 10}%"></div></div>
           </div>
         </div>
       </button>

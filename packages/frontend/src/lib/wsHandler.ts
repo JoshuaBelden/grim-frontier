@@ -163,20 +163,20 @@ const eventHandlers: Record<string, (message: ServerEvent) => void> = {
       const updated = new Map(current)
       updated.set(event.npcId, {
         ...existing,
-        ...(event.hunger !== undefined && { hunger: event.hunger }),
+        ...(event.sustenance !== undefined && { sustenance: event.sustenance }),
         ...(event.morale !== undefined && { morale: event.morale }),
         ...(event.health !== undefined && { health: event.health }),
-        ...(event.fatigue !== undefined && { fatigue: event.fatigue }),
+        ...(event.energy !== undefined && { energy: event.energy }),
       })
       return updated
     })
     campDetailStore.update(current => {
       if (!current) return current
-      const statUpdates: Partial<{ health: number; morale: number; hunger: number; fatigue: number }> = {}
+      const statUpdates: Partial<{ health: number; morale: number; sustenance: number; energy: number }> = {}
       if (event.health !== undefined) statUpdates.health = event.health
       if (event.morale !== undefined) statUpdates.morale = event.morale
-      if (event.hunger !== undefined) statUpdates.hunger = event.hunger
-      if (event.fatigue !== undefined) statUpdates.fatigue = event.fatigue
+      if (event.sustenance !== undefined) statUpdates.sustenance = event.sustenance
+      if (event.energy !== undefined) statUpdates.energy = event.energy
       if (Object.keys(statUpdates).length === 0) return current
       return {
         ...current,

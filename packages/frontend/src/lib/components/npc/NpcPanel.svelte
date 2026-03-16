@@ -82,21 +82,21 @@
     return { label: "Broken", severity: "critical" }
   }
 
-  /** Returns a description and severity class for fatigue (0=best, 10=worst). */
-  function fatigueDesc(value: number): { label: string; severity: string } {
-    if (value <= 3) return { label: "Rested", severity: "good" }
-    if (value <= 6) return { label: "Tired", severity: "warn" }
-    if (value <= 8) return { label: "Exhausted", severity: "bad" }
-    if (value === 9) return { label: "Fading", severity: "critical" }
+  /** Returns a description and severity class for energy (10=best, 0=worst). */
+  function energyDesc(value: number): { label: string; severity: string } {
+    if (value >= 7) return { label: "Rested", severity: "good" }
+    if (value >= 4) return { label: "Tired", severity: "warn" }
+    if (value >= 2) return { label: "Exhausted", severity: "bad" }
+    if (value === 1) return { label: "Fading", severity: "critical" }
     return { label: "Collapsed", severity: "critical" }
   }
 
-  /** Returns a description and severity class for hunger (0=best, 10=worst). */
-  function hungerDesc(value: number): { label: string; severity: string } {
-    if (value <= 3) return { label: "Full", severity: "good" }
-    if (value <= 6) return { label: "Peckish", severity: "warn" }
-    if (value <= 8) return { label: "Hungry", severity: "bad" }
-    if (value === 9) return { label: "Weak", severity: "critical" }
+  /** Returns a description and severity class for sustenance (10=best, 0=worst). */
+  function sustenanceDesc(value: number): { label: string; severity: string } {
+    if (value >= 7) return { label: "Full", severity: "good" }
+    if (value >= 4) return { label: "Peckish", severity: "warn" }
+    if (value >= 2) return { label: "Hungry", severity: "bad" }
+    if (value === 1) return { label: "Weak", severity: "critical" }
     return { label: "Starving", severity: "critical" }
   }
 
@@ -179,18 +179,18 @@
               <span class="vital-desc severity-text-{moraleDesc(npc.morale).severity}">{moraleDesc(npc.morale).label}</span>
             </div>
             <div class="vital">
-              <span class="vital-label">Fatigue</span>
+              <span class="vital-label">Energy</span>
               <div class="bar-track">
-                <div class="bar-fill severity-{fatigueDesc(npc.fatigue).severity}" style="width: {npc.fatigue * 10}%"></div>
+                <div class="bar-fill severity-{energyDesc(npc.energy).severity}" style="width: {npc.energy * 10}%"></div>
               </div>
-              <span class="vital-desc severity-text-{fatigueDesc(npc.fatigue).severity}">{fatigueDesc(npc.fatigue).label}</span>
+              <span class="vital-desc severity-text-{energyDesc(npc.energy).severity}">{energyDesc(npc.energy).label}</span>
             </div>
             <div class="vital">
-              <span class="vital-label">Hunger</span>
+              <span class="vital-label">Sustenance</span>
               <div class="bar-track">
-                <div class="bar-fill severity-{hungerDesc(npc.hunger).severity}" style="width: {npc.hunger * 10}%"></div>
+                <div class="bar-fill severity-{sustenanceDesc(npc.sustenance).severity}" style="width: {npc.sustenance * 10}%"></div>
               </div>
-              <span class="vital-desc severity-text-{hungerDesc(npc.hunger).severity}">{hungerDesc(npc.hunger).label}</span>
+              <span class="vital-desc severity-text-{sustenanceDesc(npc.sustenance).severity}">{sustenanceDesc(npc.sustenance).label}</span>
             </div>
           </div>
           {#if npc.lastRestedAt}

@@ -1,7 +1,7 @@
 import type { FoodStoreType, InWorldDate } from "@grim-frontier/shared"
 import { camps, npcs } from "../../models/collections.js"
 
-/** Feeds NPCs at hour 2 each day using the camp's preferred food type. Unfed NPCs gain hunger and suffer cascading penalties. */
+/** Feeds NPCs at hour 2 each day using the camp's preferred food type. Unfed NPCs lose sustenance and suffer cascading penalties. */
 export async function consumeFood(
   worldId: string,
   newDate: InWorldDate,
@@ -28,32 +28,32 @@ export async function consumeFood(
 
       if (remainingFood > 0) {
         remainingFood -= 1
-        const newHunger = Math.max(0, (npc.hunger ?? 0) - 1)
+        const newSustenance = Math.min(10, (npc.sustenance ?? 10) + 1)
         const boostsMorale = preferredFood !== "raw"
         const newMorale = boostsMorale ? Math.min(10, npc.morale + 1) : npc.morale
-        await npcs.updateOne({ _id: npc._id }, { $set: { hunger: newHunger, morale: newMorale, updatedAt: now } })
+        await npcs.updateOne({ _id: npc._id }, { $set: { sustenance: newSustenance, morale: newMorale, updatedAt: now } })
 
-        broadcast(worldId, { type: "npcUpdate", npcId, hunger: newHunger, morale: newMorale })
+        broadcast(worldId, { type: "npcUpdate", npcId, sustenance: newSustenance, morale: newMorale })
       } else {
-        const newHunger = Math.min(10, (npc.hunger ?? 0) + 1)
-        const updates: Record<string, number | Date> = { hunger: newHunger, updatedAt: now }
-        const event: Record<string, string | number> = { type: "npcUpdate", npcId, hunger: newHunger }
+        const newSustenance = Math.max(0, (npc.sustenance ?? 10) - 1)
+        const updates: Record<string, number | Date> = { sustenance: newSustenance, updatedAt: now }
+        const event: Record<string, string | number> = { type: "npcUpdate", npcId, sustenance: newSustenance }
 
-        if (newHunger >= 7 && newHunger <= 8) {
+        if (newSustenance >= 2 && newSustenance <= 3) {
           updates.morale = Math.max(0, npc.morale - 1)
           event.morale = updates.morale
-        } else if (newHunger === 9) {
+        } else if (newSustenance === 1) {
           updates.morale = Math.max(0, npc.morale - 2)
-          updates.fatigue = Math.min(10, (npc.fatigue ?? 0) + 1)
+          updates.energy = Math.max(0, (npc.energy ?? 10) - 1)
           event.morale = updates.morale
-          event.fatigue = updates.fatigue
-        } else if (newHunger === 10) {
+          event.energy = updates.energy
+        } else if (newSustenance === 0) {
           updates.health = Math.max(0, npc.health - 1)
           updates.morale = Math.max(0, npc.morale - 3)
-          updates.fatigue = Math.min(10, (npc.fatigue ?? 0) + 2)
+          updates.energy = Math.max(0, (npc.energy ?? 10) - 2)
           event.health = updates.health
           event.morale = updates.morale
-          event.fatigue = updates.fatigue
+          event.energy = updates.energy
         }
 
         await npcs.updateOne({ _id: npc._id }, { $set: updates })

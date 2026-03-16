@@ -24,8 +24,8 @@ export interface NPC {
   name: string
   health: number
   morale: number
-  hunger: number
-  fatigue: number
+  sustenance: number
+  energy: number
   lastRestedAt?: InWorldDate
   characteristics: Characteristics
   nature: Nature

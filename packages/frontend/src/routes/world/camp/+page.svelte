@@ -89,21 +89,21 @@
     return { label: "Broken", severity: "critical" }
   }
 
-  /** Returns a descriptor label and severity class for fatigue (0=best). */
-  function fatigueDesc(value: number): { label: string; severity: string } {
-    if (value <= 3) return { label: "Rested", severity: "good" }
-    if (value <= 6) return { label: "Tired", severity: "warn" }
-    if (value <= 8) return { label: "Exhausted", severity: "bad" }
-    if (value === 9) return { label: "Fading", severity: "critical" }
+  /** Returns a descriptor label and severity class for energy (10=best). */
+  function energyDesc(value: number): { label: string; severity: string } {
+    if (value >= 7) return { label: "Rested", severity: "good" }
+    if (value >= 4) return { label: "Tired", severity: "warn" }
+    if (value >= 2) return { label: "Exhausted", severity: "bad" }
+    if (value === 1) return { label: "Fading", severity: "critical" }
     return { label: "Collapsed", severity: "critical" }
   }
 
-  /** Returns a descriptor label and severity class for hunger (0=best). */
-  function hungerDesc(value: number): { label: string; severity: string } {
-    if (value <= 3) return { label: "Full", severity: "good" }
-    if (value <= 6) return { label: "Peckish", severity: "warn" }
-    if (value <= 8) return { label: "Hungry", severity: "bad" }
-    if (value === 9) return { label: "Weak", severity: "critical" }
+  /** Returns a descriptor label and severity class for sustenance (10=best). */
+  function sustenanceDesc(value: number): { label: string; severity: string } {
+    if (value >= 7) return { label: "Full", severity: "good" }
+    if (value >= 4) return { label: "Peckish", severity: "warn" }
+    if (value >= 2) return { label: "Hungry", severity: "bad" }
+    if (value === 1) return { label: "Weak", severity: "critical" }
     return { label: "Starving", severity: "critical" }
   }
 
@@ -284,8 +284,8 @@
                 <div class="npc-stats">
                   <span class="stat stat-{healthDesc(npc.health).severity}">{healthDesc(npc.health).label}</span>
                   <span class="stat stat-{moraleDesc(npc.morale).severity}">{moraleDesc(npc.morale).label}</span>
-                  <span class="stat stat-{hungerDesc(npc.hunger).severity}">{hungerDesc(npc.hunger).label}</span>
-                  <span class="stat stat-{fatigueDesc(npc.fatigue).severity}">{fatigueDesc(npc.fatigue).label}</span>
+                  <span class="stat stat-{energyDesc(npc.energy).severity}">{energyDesc(npc.energy).label}</span>
+                  <span class="stat stat-{sustenanceDesc(npc.sustenance).severity}">{sustenanceDesc(npc.sustenance).label}</span>
                 </div>
               </div>
             </li>

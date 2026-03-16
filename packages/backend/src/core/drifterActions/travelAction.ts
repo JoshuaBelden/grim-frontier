@@ -8,7 +8,7 @@ export function toAbsoluteHour(date: InWorldDate): number {
 }
 
 const WALKING_SPEED_MPH = 3
-const TRAVEL_FATIGUE_COST = 2
+const TRAVEL_ENERGY_COST = 2
 
 /** NPC travels to a connected landmark. Favored by ambitious, courageous, frontier-origin NPCs. */
 export const travelAction: DrifterAction = {
@@ -24,7 +24,7 @@ export const travelAction: DrifterAction = {
     const willScore = ((npc.nature.outlook.willfulness + 5) / 10) * 15
     const ambitionScore = ((5 - npc.nature.disposition.contentment) / 10) * 15
     const courageScore = ((npc.nature.disposition.courage + 5) / 10) * 10
-    const energyScore = ((10 - npc.fatigue) / 10) * 15
+    const energyScore = ((npc.energy ?? 10) / 10) * 15
 
     return Math.max(0, base + frontierBonus + willScore + ambitionScore + courageScore + energyScore)
   },
@@ -60,7 +60,7 @@ export const travelAction: DrifterAction = {
         $set: {
           status: "travelling" as const,
           travelState,
-          fatigue: Math.min(10, npc.fatigue + TRAVEL_FATIGUE_COST),
+          energy: Math.max(0, (npc.energy ?? 10) - TRAVEL_ENERGY_COST),
           updatedAt: new Date(),
         },
         $unset: { locationId: "", locationType: "" },

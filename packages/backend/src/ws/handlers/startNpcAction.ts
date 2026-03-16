@@ -31,7 +31,7 @@ export async function handleStartNpcAction(context: HandlerContext, payload: unk
     context.send({ type: "error", command: "startNpcAction", message: "NPC already has an active action" })
     return
   }
-  if ((npc.fatigue ?? 0) >= 10 && command.actionType !== "resting") {
+  if ((npc.energy ?? 10) <= 0 && command.actionType !== "resting") {
     context.send({ type: "error", command: "startNpcAction", message: "NPC is collapsed and can only rest" })
     return
   }

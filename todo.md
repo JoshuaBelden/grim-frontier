@@ -2,7 +2,6 @@
 
 ## Next
 
-- All stats go from 0 to 10,
 - NPCs track their age
 - Improve npc info panel layout
 - NPCs will use tools in inventory

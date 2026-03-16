@@ -102,8 +102,8 @@ export async function handleRespondJoinRequest(context: HandlerContext, payload:
         career: npc.career,
         health: npc.health,
         morale: npc.morale,
-        hunger: npc.hunger,
-        fatigue: npc.fatigue,
+        sustenance: npc.sustenance ?? 10,
+        energy: npc.energy ?? 10,
         currentAction: npc.currentAction ?? null,
       })),
     })

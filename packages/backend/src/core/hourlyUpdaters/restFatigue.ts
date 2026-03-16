@@ -3,16 +3,16 @@ import { isRestingPeriod } from "@grim-frontier/shared"
 import type { WithId } from "mongodb"
 import { camps, npcs } from "../../models/collections.js"
 
-/** Fatigue threshold at which camp NPCs automatically begin resting. */
-const AUTO_REST_THRESHOLD = 8
+/** Energy threshold at which camp NPCs automatically begin resting. */
+const AUTO_REST_THRESHOLD = 2
 
 /** Converts an InWorldDate to a comparable hour count for elapsed-time checks. */
 function toTotalHours(date: InWorldDate): number {
   return ((date.year * 12 + date.month) * 30 + date.day) * 24 + date.hour
 }
 
-/** Computes fatigue recovery per hour based on NPC grit (1–10). Base 1, up to 2 at grit 10. */
-function fatigueRecoveryRate(grit: number): number {
+/** Computes energy recovery per hour based on NPC grit (1–10). Base 1, up to 2 at grit 10. */
+function energyRecoveryRate(grit: number): number {
   return 1 + (grit - 1) / 9
 }
 
@@ -31,7 +31,7 @@ function chooseGatheringAction(camp: WithId<Camp>, npcCount: number): NpcAction[
   return foodDaysSupply <= fuelDaysSupply ? "food_gathering" : "fuel_gathering"
 }
 
-/** Processes rest and fatigue each hour. Resting NPCs recover; idle NPCs accumulate fatigue or auto-assign to gathering. */
+/** Processes rest and energy each hour. Resting NPCs recover; idle NPCs drain energy or auto-assign to gathering. */
 export async function restFatigue(
   worldId: string,
   newDate: InWorldDate,
@@ -70,8 +70,8 @@ export async function restFatigue(
         continue
       }
 
-      // Auto-rest: fatigued camp NPCs stop what they're doing and begin resting
-      if (!isCurrentlyResting && npc.fatigue >= AUTO_REST_THRESHOLD) {
+      // Auto-rest: exhausted camp NPCs stop what they're doing and begin resting
+      if (!isCurrentlyResting && (npc.energy ?? 10) <= AUTO_REST_THRESHOLD) {
         if (npc.currentAction) {
           broadcast(worldId, { type: "npcActionStopped", npcId })
         }
@@ -99,21 +99,21 @@ export async function restFatigue(
       if (isCurrentlyResting) {
         const grit = npc.characteristics?.grit ?? 5
         const strength = npc.characteristics?.strength ?? 5
-        const fatigueRecovery = fatigueRecoveryRate(grit)
+        const energyRecovery = energyRecoveryRate(grit)
         const healthRecovery = healthRecoveryRate(strength)
 
-        const newFatigue = Math.max(0, (npc.fatigue ?? 0) - fatigueRecovery)
+        const newEnergy = Math.min(10, (npc.energy ?? 10) + energyRecovery)
         const newHealth = Math.min(10, npc.health + healthRecovery)
 
         // Round to one decimal to avoid floating-point drift
-        const roundedFatigue = Math.round(newFatigue * 10) / 10
+        const roundedEnergy = Math.round(newEnergy * 10) / 10
         const roundedHealth = Math.round(newHealth * 10) / 10
 
         // Auto-wake: stop resting once fully recovered; start gathering unless it's the resting period
-        const fullyRested = roundedFatigue === 0
+        const fullyRested = roundedEnergy === 10
         const gatherAction = fullyRested && !resting ? chooseGatheringAction(camp, campNpcs.length) : null
         const updates: Record<string, unknown> = {
-          fatigue: roundedFatigue,
+          energy: roundedEnergy,
           health: roundedHealth,
           lastRestedAt: newDate,
           updatedAt: now,
@@ -125,7 +125,7 @@ export async function restFatigue(
 
         await npcs.updateOne({ _id: npc._id }, { $set: updates })
 
-        broadcast(worldId, { type: "npcUpdate", npcId, fatigue: roundedFatigue, health: roundedHealth })
+        broadcast(worldId, { type: "npcUpdate", npcId, energy: roundedEnergy, health: roundedHealth })
 
         if (fullyRested && gatherAction) {
           broadcast(worldId, { type: "npcActionStarted", npcId, action: gatherAction })
@@ -139,19 +139,18 @@ export async function restFatigue(
 
       if (hoursSinceRest < AUTO_REST_THRESHOLD) continue
 
-      const currentFatigue = npc.fatigue ?? 0
-      const newFatigue = Math.min(10, currentFatigue + 1)
-      const updates: Record<string, unknown> = { fatigue: newFatigue, updatedAt: now }
-      const event: Record<string, string | number> = { type: "npcUpdate", npcId, fatigue: newFatigue }
+      const currentEnergy = npc.energy ?? 10
+      const newEnergy = Math.max(0, currentEnergy - 1)
+      const updates: Record<string, unknown> = { energy: newEnergy, updatedAt: now }
+      const event: Record<string, string | number> = { type: "npcUpdate", npcId, energy: newEnergy }
 
-      if (newFatigue >= 7 && newFatigue <= 8) {
+      if (newEnergy >= 2 && newEnergy <= 3) {
         updates.morale = Math.max(0, npc.morale - 1)
         event.morale = updates.morale as number
-      } else if (newFatigue === 9) {
+      } else if (newEnergy === 1) {
         updates.morale = Math.max(0, npc.morale - 2)
-        event.health = updates.health as number
         event.morale = updates.morale as number
-      } else if (newFatigue === 10) {
+      } else if (newEnergy === 0) {
         updates.health = Math.max(0, npc.health - 1)
         updates.morale = Math.max(0, npc.morale - 2)
         event.health = updates.health as number

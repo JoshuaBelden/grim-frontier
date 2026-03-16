@@ -2,9 +2,9 @@ import { isRestingPeriod } from "@grim-frontier/shared"
 import { npcs } from "../../models/collections.js"
 import type { DrifterAction, DrifterActionContext } from "./types.js"
 
-const REST_FATIGUE_RECOVERY = 1
+const REST_ENERGY_RECOVERY = 1
 
-/** NPC stays at the current landmark. Favored by cautious, content, fatigued, or sleepy NPCs during the resting period. */
+/** NPC stays at the current landmark. Favored by cautious, content, exhausted, or sleepy NPCs during the resting period. */
 export const stayAction: DrifterAction = {
   name: "stay",
 
@@ -12,21 +12,22 @@ export const stayAction: DrifterAction = {
     const { npc, currentDate } = context
     const base = 20
 
-    const fatigueScore = (npc.fatigue / 10) * 30
+    const exhaustionScore = ((10 - (npc.energy ?? 10)) / 10) * 30
     const lowMoraleScore = ((10 - npc.morale) / 10) * 20
     const cautionScore = ((5 - npc.nature.disposition.courage) / 10) * 15
     const contentScore = ((npc.nature.disposition.contentment + 5) / 10) * 15
     const restingPeriodScore = isRestingPeriod(currentDate.hour) ? 40 : 0
 
-    return Math.max(0, base + fatigueScore + lowMoraleScore + cautionScore + contentScore + restingPeriodScore)
+    return Math.max(0, base + exhaustionScore + lowMoraleScore + cautionScore + contentScore + restingPeriodScore)
   },
 
   async execute(context: DrifterActionContext): Promise<void> {
     const { npc } = context
-    const newFatigue = Math.max(0, npc.fatigue - REST_FATIGUE_RECOVERY)
+    const currentEnergy = npc.energy ?? 10
+    const newEnergy = Math.min(10, currentEnergy + REST_ENERGY_RECOVERY)
 
-    if (newFatigue !== npc.fatigue) {
-      await npcs.updateOne({ _id: npc._id }, { $set: { fatigue: newFatigue, updatedAt: new Date() } })
+    if (newEnergy !== currentEnergy) {
+      await npcs.updateOne({ _id: npc._id }, { $set: { energy: newEnergy, updatedAt: new Date() } })
     }
   },
 }
