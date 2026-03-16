@@ -86,6 +86,7 @@ export async function worldRoutes(app: FastifyInstance) {
       _id: npcId,
       ownerId: playerId,
       name: player.username,
+      age: Math.floor(Math.random() * 57) + 21,
       health: 10,
       morale: 10,
       sustenance: 10,

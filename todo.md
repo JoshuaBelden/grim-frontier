@@ -2,7 +2,6 @@
 
 ## Next
 
-- NPCs track their age
 - Improve npc info panel layout
 - NPCs will use tools in inventory
 - NPC skills and traits improve their chores

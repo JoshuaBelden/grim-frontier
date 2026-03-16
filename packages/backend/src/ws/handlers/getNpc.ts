@@ -53,6 +53,7 @@ export async function handleGetNpc(context: HandlerContext, payload: unknown): P
     locationName,
     travelDestination,
     name: npc.name,
+    age: npc.age ?? 30,
     health: npc.health,
     morale: npc.morale,
     sustenance: npc.sustenance ?? 10,

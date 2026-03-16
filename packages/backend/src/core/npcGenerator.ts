@@ -6,9 +6,10 @@ const client = new Anthropic()
 
 const npcItemSchema = {
   type: "object",
-  required: ["name", "portraitDescription", "career", "characteristics", "nature", "traits", "skills", "origin"],
+  required: ["name", "age", "portraitDescription", "career", "characteristics", "nature", "traits", "skills", "origin"],
   properties: {
     name: { type: "string" },
+    age: { type: "integer", minimum: 21, maximum: 77 },
     portraitDescription: {
       type: "string",
       description:
@@ -232,7 +233,8 @@ Guidelines:
 - Characteristics should match the life they've lived. A blacksmith has high strength; a detective has high wit.
 - formativeEvent must be specific and personal — not generic. Avoid phrases like "left home young" or "rode west." Name places, people, circumstances.
 - Pursuits should feel real: a secret the character keeps hidden, a near-term goal driving their movement, a long-term hope or fear.
-- portraitDescription must be a single, evocative sentence suitable as an image generation prompt — physical description only, no backstory.
+- portraitDescription must be a single, evocative sentence suitable as an image generation prompt — physical description only, no backstory. The physical description should reflect the character's age.
+- Age must be between 21 and 77. Let age inform characteristics and skills — a 25-year-old has raw potential but limited experience; a 60-year-old has deep skill but declining physical stats. Strength, nerve, and hand tend to peak in the 30s–40s; wit, grit, and presence can remain high into old age.
 - Generate diverse characters: varied careers, backgrounds, ages, dispositions, and origins (including foreign-born where appropriate).`
 
 /** Generates a pool of AI-created NPC drifters ready to insert into MongoDB. */

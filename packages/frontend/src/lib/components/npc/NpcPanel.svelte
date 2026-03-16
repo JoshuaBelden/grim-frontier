@@ -145,6 +145,7 @@
     <p class="career-label">{entry.career ? formatKey(entry.career) : "Player"}</p>
     <h2 class="name">{entry.name}</h2>
     {#if npc}
+      <span class="age">{npc.age} years old</span>
       <span class="status">{npc.status.replace(/_/g, " ")}</span>
       {#if npc.status === "travelling" && npc.travelDestination}
         <span class="location travelling">Heading to {npc.travelDestination}</span>
@@ -424,6 +425,12 @@
     font-size: 1.3rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
+  }
+
+  .age {
+    color: #8a7060;
+    font-size: 0.65rem;
+    letter-spacing: 0.06em;
   }
 
   .status {

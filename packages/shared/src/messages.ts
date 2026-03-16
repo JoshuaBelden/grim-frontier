@@ -316,6 +316,7 @@ export interface NpcDetailEvent {
   locationName: string | null
   travelDestination: string | null
   name: string
+  age: number
   health: number
   morale: number
   sustenance: number

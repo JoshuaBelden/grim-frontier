@@ -22,6 +22,7 @@ export interface NPC {
   worldId?: string
   ownerId?: string
   name: string
+  age: number
   health: number
   morale: number
   sustenance: number
