@@ -1,7 +1,6 @@
 import { emptyFoodStores, emptyFuelStores } from "@grim-frontier/shared"
 import type { FastifyInstance } from "fastify"
 import { ObjectId } from "mongodb"
-import { defaultCharacteristics, defaultNature, defaultOrigin } from "../core/character.js"
 import worldTopology from "../core/topology.js"
 import { authenticate } from "../middleware/authenticate.js"
 import { camps, npcs, players, regions, territories, towns, worlds } from "../models/collections.js"
@@ -35,12 +34,16 @@ export async function worldRoutes(app: FastifyInstance) {
     return {
       id: npc._id!.toString(),
       worldId: npc.worldId ?? null,
+      campId: npc.campId ?? null,
       locationId: npc.locationId ?? null,
       locationType: npc.locationType ?? null,
       locationName,
       name: npc.name,
+      age: npc.age,
       career: npc.career,
       status: npc.status,
+      portraitUrl: npc.portraitUrl ?? null,
+      portraitDescription: npc.portraitDescription ?? null,
       characteristics: npc.characteristics,
       nature: npc.nature,
       traits: npc.traits,
@@ -59,15 +62,30 @@ export async function worldRoutes(app: FastifyInstance) {
     }))
   })
 
-  app.post<{ Params: { id: string } }>("/worlds/:id/join", { preHandler: authenticate }, async (request, reply) => {
+  app.post<{ Params: { id: string }; Body: { npcId: string } }>(
+    "/worlds/:id/join",
+    { preHandler: authenticate },
+    async (request, reply) => {
     const { playerId } = request.user
     const worldId = request.params.id
+    const { npcId: npcIdParam } = request.body ?? {}
+
+    if (!npcIdParam) {
+      return reply.status(400).send({ error: "npcId is required" })
+    }
 
     let worldObjectId: ObjectId
     try {
       worldObjectId = new ObjectId(worldId)
     } catch {
       return reply.status(400).send({ error: "Invalid world id" })
+    }
+
+    let npcObjectId: ObjectId
+    try {
+      npcObjectId = new ObjectId(npcIdParam)
+    } catch {
+      return reply.status(400).send({ error: "Invalid NPC id" })
     }
 
     const world = await worlds.findOne({ _id: worldObjectId })
@@ -80,32 +98,19 @@ export async function worldRoutes(app: FastifyInstance) {
       return reply.status(404).send({ error: "Player not found" })
     }
 
-    const now = new Date()
-    const npcId = new ObjectId()
-    const playerNpc = {
-      _id: npcId,
-      ownerId: playerId,
-      name: player.username,
-      age: Math.floor(Math.random() * 57) + 21,
-      health: 10,
-      morale: 10,
-      sustenance: 10,
-      energy: 10,
-      characteristics: defaultCharacteristics(),
-      nature: defaultNature(),
-      traits: [],
-      career: "cowboy" as const,
-      skills: {},
-      origin: defaultOrigin(),
-      relationships: [],
-      inventory: [],
-      money: 50,
-      status: "drifting" as const,
-      createdAt: now,
-      updatedAt: now,
+    const playerNpcDoc = await npcs.findOne({ _id: npcObjectId })
+    if (!playerNpcDoc) {
+      return reply.status(404).send({ error: "NPC not found" })
     }
-    await npcs.insertOne(playerNpc)
-    await players.updateOne({ _id: new ObjectId(playerId) }, { $push: { npcIds: npcId.toString() } })
+    if (playerNpcDoc.ownerId !== playerId) {
+      return reply.status(403).send({ error: "Not your NPC" })
+    }
+    if (playerNpcDoc.worldId) {
+      return reply.status(409).send({ error: "NPC has already joined a world" })
+    }
+
+    const now = new Date()
+    const npcId = npcObjectId
 
     const region = await regions.findOne({ worldId })
     const territory = region ? await territories.findOne({ regionId: region._id!.toString() }) : null
@@ -146,7 +151,7 @@ export async function worldRoutes(app: FastifyInstance) {
     })
 
     await npcs.updateOne(
-      { _id: playerNpc._id },
+      { _id: npcId },
       {
         $set: {
           worldId,

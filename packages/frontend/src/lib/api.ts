@@ -40,9 +40,12 @@ export async function apiLogin(username: string, password: string) {
 
 /** Logs out the current player by invalidating the server-side session. */
 export async function apiLogout() {
+  const { token } = get(authStore)
+  const headers: Record<string, string> = {}
+  if (token) headers["Authorization"] = `Bearer ${token}`
   const response = await fetch(`${BASE}/auth/logout`, {
     method: "POST",
-    headers: authHeaders(),
+    headers,
   })
   if (!response.ok && response.status !== 401) {
     throw new Error("Logout failed")
@@ -68,26 +71,125 @@ export async function apiGetWorlds() {
   return handleResponse<WorldListItem[]>(response)
 }
 
-/** Joins a world by id, creating the player's starting camp and binding their NPC. */
-export async function apiJoinWorld(worldId: string) {
+/** Joins a world with a specific player-owned NPC. */
+export async function apiJoinWorld(worldId: string, npcId: string) {
   const response = await fetch(`${BASE}/worlds/${worldId}/join`, {
     method: "POST",
     headers: authHeaders(),
-    body: "{}",
+    body: JSON.stringify({ npcId }),
   })
   return handleResponse<{ campId: string; worldId: string; npcId: string }>(response)
+}
+
+/** Summary of a player-owned NPC for the character list. */
+export interface PlayerNpcSummary {
+  id: string
+  name: string
+  career: string
+  age: number
+  portraitUrl: string | null
+  worldId: string | null
+  campId: string | null
+  status: string
+}
+
+/** Payload for creating a new player character. */
+export interface CharacterCreationPayload {
+  name: string
+  age: number
+  career: string
+  portraitDescription?: string
+  characteristics: {
+    strength: number
+    hand: number
+    presence: number
+    wit: number
+    temper: number
+    grit: number
+    nerve: number
+    luck: number
+  }
+  nature: {
+    disposition: {
+      generosity: number
+      mercy: number
+      courage: number
+      contentment: number
+      honesty: number
+    }
+    outlook: {
+      idealism: number
+      willfulness: number
+      trust: number
+      humility: number
+    }
+  }
+  traits: string[]
+  skills: Partial<Record<string, number>>
+  origin: {
+    background: {
+      origin: string
+      family: string
+      formativeEvent: string
+    }
+    scars: Array<{ type: string; description: string; triggerCondition?: string }>
+  }
+}
+
+/** Creates a new player-owned NPC. */
+export async function apiCreateCharacter(data: CharacterCreationPayload) {
+  const response = await fetch(`${BASE}/characters`, {
+    method: "POST",
+    headers: authHeaders(),
+    body: JSON.stringify(data),
+  })
+  return handleResponse<{ npcId: string }>(response)
+}
+
+/** Returns summaries of all NPCs owned by the current player. */
+export async function apiListMyNpcs() {
+  const response = await fetch(`${BASE}/players/me/npcs`, { headers: authHeaders() })
+  return handleResponse<PlayerNpcSummary[]>(response)
+}
+
+/** Deletes a player-owned NPC (only allowed if not in a world). */
+export async function apiDeleteCharacter(id: string) {
+  const response = await fetch(`${BASE}/characters/${id}`, {
+    method: "DELETE",
+    headers: authHeaders(),
+  })
+  if (!response.ok && response.status !== 204) {
+    const body = await response.json().catch(() => ({ error: response.statusText }))
+    throw new Error(body.error ?? "Delete failed")
+  }
+}
+
+/** Generates (or regenerates) a portrait for a player-owned NPC. */
+export async function apiGeneratePortrait(id: string) {
+  const { token } = get(authStore)
+  const headers: Record<string, string> = {}
+  if (token) headers["Authorization"] = `Bearer ${token}`
+  const response = await fetch(`${BASE}/characters/${id}/portrait`, {
+    method: "POST",
+    headers,
+  })
+  return handleResponse<{ portraitUrl: string }>(response)
 }
 
 /** Full NPC detail including characteristics, nature, traits, skills, and origin. */
 export interface NpcDetailResponse {
   id: string
   worldId: string | null
+  campId: string | null
   locationId: string | null
   locationType: "town" | "camp" | null
   locationName: string | null
   name: string
+  age: number
   career: string
   status: string
+  portraitUrl: string | null
+  portraitDescription: string | null
   characteristics: {
     strength: number
     hand: number

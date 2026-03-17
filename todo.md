@@ -3,7 +3,6 @@
 ## Next
 
 - NPCs will use tools in inventory
-- Players can create their own npc and name it
 - Players can request a new image be generated for their npc and overwrite the old one
 
 ## Bugs

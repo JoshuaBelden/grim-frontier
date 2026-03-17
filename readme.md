@@ -90,6 +90,120 @@ To rebuild after changing a `package.json`:
 docker compose up --build
 ```
 
+## Player API Endpoints
+
+All player endpoints require a `Bearer` token from login or register.
+
+### Auth
+
+**Register:**
+```bash
+curl -X POST localhost:3000/auth/register \
+  -H 'Content-Type: application/json' \
+  -d '{"username": "outlaw", "password": "secret"}'
+# Returns: { token, playerId }
+```
+
+**Login:**
+```bash
+curl -X POST localhost:3000/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"username": "outlaw", "password": "secret"}'
+# Returns: { token, playerId }
+```
+
+**Logout:**
+```bash
+curl -X POST localhost:3000/auth/logout \
+  -H 'Authorization: Bearer <token>'
+# 204 No Content
+```
+
+**Get profile:**
+```bash
+curl localhost:3000/players/me \
+  -H 'Authorization: Bearer <token>'
+# Returns: { playerId, username, campId, npcIds }
+```
+
+### Characters
+
+Players must create a character before joining a world. Characters are immutable once saved.
+
+**Create a character:**
+```bash
+curl -X POST localhost:3000/characters \
+  -H 'Authorization: Bearer <token>' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "name": "Clay Hollis",
+    "age": 34,
+    "career": "bounty_hunter",
+    "portraitDescription": "Sharp eyes under a battered hat, a scar crossing the left jaw.",
+    "characteristics": { "strength": 5, "hand": 6, "presence": 4, "wit": 4, "temper": 3, "grit": 5, "nerve": 5, "luck": 3 },
+    "nature": {
+      "disposition": { "generosity": -1, "mercy": -2, "courage": 3, "contentment": -1, "honesty": 1 },
+      "outlook": { "idealism": -2, "willfulness": 2, "trust": -3, "humility": 0 }
+    },
+    "traits": ["dead_eye", "tracker"],
+    "skills": { "shooting": 4, "track": 4, "survive": 4 },
+    "origin": {
+      "background": { "origin": "frontier", "family": "broken", "formativeEvent": "Watched his father hang at sixteen." },
+      "scars": [{ "type": "loss", "description": "Never speaks about what happened in Cutter County." }]
+    }
+  }'
+# Returns: { npcId }
+# Constraints: characteristics sum ≤ 35, exactly 2 traits, exactly 3 skills, age 21–77
+```
+
+**List your characters:**
+```bash
+curl localhost:3000/players/me/npcs \
+  -H 'Authorization: Bearer <token>'
+# Returns: [{ id, name, career, age, portraitUrl, worldId, campId, status }]
+```
+
+**Get character detail:**
+```bash
+curl localhost:3000/npcs/<npc-id> \
+  -H 'Authorization: Bearer <token>'
+# Returns full character with characteristics, nature, traits, skills, origin
+```
+
+**Delete a character** (only if not in a world):
+```bash
+curl -X DELETE localhost:3000/characters/<npc-id> \
+  -H 'Authorization: Bearer <token>'
+# 204 No Content
+```
+
+**Generate portrait** (requires SD service; can be called again to regenerate):
+```bash
+curl -X POST localhost:3000/characters/<npc-id>/portrait \
+  -H 'Authorization: Bearer <token>'
+# Returns: { portraitUrl }
+# Requires portraitDescription to be set on the character
+```
+
+### Worlds
+
+**List active worlds:**
+```bash
+curl localhost:3000/worlds \
+  -H 'Authorization: Bearer <token>'
+# Returns: [{ id, name, inWorldDate }]
+```
+
+**Join a world** (NPC is permanently bound — cannot be removed):
+```bash
+curl -X POST localhost:3000/worlds/<world-id>/join \
+  -H 'Authorization: Bearer <token>' \
+  -H 'Content-Type: application/json' \
+  -d '{"npcId": "<npc-id>"}'
+# Returns: { campId, worldId, npcId }
+# Creates a camp and places the character in the world
+```
+
 ## Admin Endpoints
 
 No auth required — designed for `curl` during local development.

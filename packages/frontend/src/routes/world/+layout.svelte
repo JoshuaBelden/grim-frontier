@@ -155,6 +155,7 @@
     {#if playerNpc?.status === "at_camp"}
       <button class="nav-btn" onclick={() => (inventoryVisible = !inventoryVisible)}>Camp Inventory</button>
     {/if}
+    <a href="/characters" class="nav-btn">Characters</a>
   </nav>
 
   <div class="content">
@@ -397,6 +398,7 @@
     font-size: 0.7rem;
     letter-spacing: 0.12em;
     padding: 0.2rem 0;
+    text-decoration: none;
     text-transform: uppercase;
     transition: color 0.15s;
   }

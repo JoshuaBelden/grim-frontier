@@ -14,13 +14,8 @@
     }
 
     try {
-      const me = await apiGetMe()
-      if (me.worldId && me.campId) {
-        authStore.setWorld(me.worldId, me.campId)
-        goto("/world")
-      } else {
-        goto("/world/join")
-      }
+      await apiGetMe()
+      goto("/characters")
     } catch {
       authStore.clear()
     }

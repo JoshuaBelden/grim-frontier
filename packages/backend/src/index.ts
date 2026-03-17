@@ -19,6 +19,7 @@ import { redis } from "./db/redis.js"
 import { worlds } from "./models/collections.js"
 import { adminRoutes } from "./routes/admin.js"
 import { authRoutes } from "./routes/auth.js"
+import { characterRoutes } from "./routes/characters.js"
 import { worldRoutes } from "./routes/worlds.js"
 import { broadcastToWorld, registerWebSocket } from "./ws/plugin.js"
 
@@ -44,6 +45,7 @@ app.get("/health", async () => {
 })
 
 await app.register(authRoutes)
+await app.register(characterRoutes)
 await app.register(adminRoutes, { clock, broadcast: broadcastToWorld, intervalMs: GAME_HOUR_INTERVAL_MS })
 await app.register(worldRoutes)
 
